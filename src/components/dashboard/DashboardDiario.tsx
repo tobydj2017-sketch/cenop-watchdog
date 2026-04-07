@@ -26,14 +26,17 @@ const DayTick = ({ x, y, payload }: any) => {
 
 export default function DashboardDiario({ services, fuelEntries }: Props) {
   const byDay = useMemo(() => {
-    const map: Record<string, { prod: number; improd: number; solCliente: Set<number>; solBase: Set<number>; fuel: number }> = {};
+    const map: Record<string, { prod: number; improd: number; solCliente: Set<number>; solBase: Set<number>; fuel: number; detalleProd: Record<string, number>; detalleImprod: Record<string, number> }> = {};
     services.forEach((s) => {
       if (!s.fecha) return;
-      if (!map[s.fecha]) map[s.fecha] = { prod: 0, improd: 0, solCliente: new Set(), solBase: new Set(), fuel: 0 };
+      if (!map[s.fecha]) map[s.fecha] = { prod: 0, improd: 0, solCliente: new Set(), solBase: new Set(), fuel: 0, detalleProd: {}, detalleImprod: {} };
       const h = getAdjustedHours(s);
+      const esCenop = !s.cliente || s.cliente.toUpperCase().includes("CENOP");
+      const nombre = esCenop ? "CENOP (Base)" : s.cliente;
       map[s.fecha].prod += h.prod;
       map[s.fecha].improd += h.improd;
-      const esCenop = !s.cliente || s.cliente.toUpperCase().includes("CENOP");
+      if (h.prod > 0) map[s.fecha].detalleProd[nombre] = (map[s.fecha].detalleProd[nombre] || 0) + h.prod;
+      if (h.improd > 0) map[s.fecha].detalleImprod[nombre] = (map[s.fecha].detalleImprod[nombre] || 0) + h.improd;
       if (esCenop) {
         map[s.fecha].solBase.add(s.solicitud);
       } else {
