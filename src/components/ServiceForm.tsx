@@ -154,7 +154,7 @@ export default function ServiceForm({ onAdd, selectedDate }: Props) {
     </div>
   );
 
-  const SelectField = ({ label, field, options, onCustomChange }: { label: string; field: string; options: string[]; onCustomChange?: (v: string) => void }) => (
+  const SelectField = ({ label, field, options, onCustomChange, showBadges }: { label: string; field: string; options: string[]; onCustomChange?: (v: string) => void; showBadges?: boolean }) => (
     <div className="space-y-1">
       <Label className="text-xs text-muted-foreground">{label}</Label>
       <SearchableSelect
@@ -162,6 +162,7 @@ export default function ServiceForm({ onAdd, selectedDate }: Props) {
         value={(form as any)[field]}
         onChange={onCustomChange || ((v) => set(field, v))}
         placeholder={`Seleccionar...`}
+        badgeMap={showBadges ? opsBadgeMap : undefined}
       />
     </div>
   );
