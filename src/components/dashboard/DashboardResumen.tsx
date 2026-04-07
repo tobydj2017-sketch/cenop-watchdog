@@ -1,5 +1,5 @@
 import { useMemo } from "react";
-import { ServiceEntry, FuelEntry, timeToMinutes } from "@/lib/types";
+import { ServiceEntry, FuelEntry } from "@/lib/types";
 import { formatHoursMinutes } from "@/lib/formatTime";
 import {
   BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer,
