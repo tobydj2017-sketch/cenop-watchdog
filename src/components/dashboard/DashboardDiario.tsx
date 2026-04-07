@@ -14,6 +14,16 @@ interface Props {
 
 const tooltipFormatter = (value: number) => formatHoursMinutes(value);
 
+const DayTick = ({ x, y, payload }: any) => {
+  const parts = (payload.value || "").split("\n");
+  return (
+    <g transform={`translate(${x},${y})`}>
+      <text x={0} y={0} dy={12} textAnchor="middle" fontSize={10} fill="hsl(0,0%,70%)">{parts[0]}</text>
+      <text x={0} y={0} dy={24} textAnchor="middle" fontSize={8} fill="hsl(0,0%,50%)" fontStyle="italic">{parts[1] || ""}</text>
+    </g>
+  );
+};
+
 export default function DashboardDiario({ services, fuelEntries }: Props) {
   const byDay = useMemo(() => {
     const map: Record<string, { prod: number; improd: number; solCliente: Set<number>; solBase: Set<number>; fuel: number }> = {};
@@ -75,7 +85,7 @@ export default function DashboardDiario({ services, fuelEntries }: Props) {
         <ResponsiveContainer width="100%" height={320}>
           <BarChart data={byDay} margin={{ top: 20 }}>
             <CartesianGrid strokeDasharray="3 3" stroke="hsl(0,0%,30%)" />
-            <XAxis dataKey="label" tick={{ fontSize: 10 }} />
+            <XAxis dataKey="labelConDia" tick={<DayTick />} height={40} />
             <YAxis tick={{ fontSize: 11 }} allowDecimals={false} label={{ value: "Cant. Servicios", angle: -90, position: "insideLeft", style: { fontSize: 11, fill: "hsl(0,0%,60%)" } }} />
             <Tooltip content={({ active, payload, label }) => {
               if (!active || !payload?.length) return null;
@@ -105,7 +115,7 @@ export default function DashboardDiario({ services, fuelEntries }: Props) {
         <ResponsiveContainer width="100%" height={300}>
           <BarChart data={byDay}>
             <CartesianGrid strokeDasharray="3 3" stroke="hsl(0,0%,30%)" />
-            <XAxis dataKey="label" tick={{ fontSize: 10 }} />
+            <XAxis dataKey="labelConDia" tick={<DayTick />} height={40} />
             <YAxis tickFormatter={(v) => `${Math.floor(v / 60)}h`} tick={{ fontSize: 11 }} />
             <Tooltip formatter={tooltipFormatter} />
             <Legend />
@@ -121,7 +131,7 @@ export default function DashboardDiario({ services, fuelEntries }: Props) {
         <ResponsiveContainer width="100%" height={250}>
           <LineChart data={byDay}>
             <CartesianGrid strokeDasharray="3 3" stroke="hsl(0,0%,30%)" />
-            <XAxis dataKey="label" tick={{ fontSize: 10 }} />
+            <XAxis dataKey="labelConDia" tick={<DayTick />} height={40} />
             <YAxis domain={[0, 100]} tickFormatter={(v) => `${v}%`} tick={{ fontSize: 11 }} />
             <Tooltip formatter={(v: number) => `${v}%`} />
             <Line type="monotone" dataKey="eficiencia" name="Eficiencia" stroke="hsl(38, 92%, 50%)" strokeWidth={2} dot={{ r: 3 }} />
@@ -136,7 +146,7 @@ export default function DashboardDiario({ services, fuelEntries }: Props) {
           <ResponsiveContainer width="100%" height={250}>
             <AreaChart data={byDay}>
               <CartesianGrid strokeDasharray="3 3" stroke="hsl(0,0%,30%)" />
-              <XAxis dataKey="label" tick={{ fontSize: 10 }} />
+            <XAxis dataKey="labelConDia" tick={<DayTick />} height={40} />
               <YAxis tickFormatter={(v) => `$${v.toLocaleString()}`} tick={{ fontSize: 11 }} />
               <Tooltip formatter={(v: number) => `$${v.toLocaleString("es-AR")}`} />
               <Area type="monotone" dataKey="fuel" name="Combustible" fill="hsl(280, 60%, 55%)" fillOpacity={0.3} stroke="hsl(280, 60%, 55%)" strokeWidth={2} />
@@ -151,14 +161,14 @@ export default function DashboardDiario({ services, fuelEntries }: Props) {
   );
 }
 
-function DailyTable({ data }: { data: { fecha: string; label: string; prod: number; improd: number; total: number; serviciosCliente: number; serviciosBase: number; serviciosTotal: number; eficiencia: number; fuel: number }[] }) {
+function DailyTable({ data }: { data: { fecha: string; label: string; dia: string; prod: number; improd: number; total: number; serviciosCliente: number; serviciosBase: number; serviciosTotal: number; eficiencia: number; fuel: number }[] }) {
   return (
     <div className="glass-card overflow-hidden">
       <div className="overflow-x-auto max-h-[50vh] overflow-y-auto">
         <table className="w-full text-sm">
           <thead className="sticky top-0 z-10 bg-card">
             <tr className="border-b border-border">
-              {["Fecha", "Serv. Clientes", "Serv. Base", "Total", "Hs Prod.", "Hs Improd.", "Hs Total", "Eficiencia", "Combustible"].map((c) => (
+              {["Fecha", "Día", "Serv. Clientes", "Serv. Base", "Total", "Hs Prod.", "Hs Improd.", "Hs Total", "Eficiencia", "Combustible"].map((c) => (
                 <th key={c} className="px-3 py-3 text-left text-xs text-muted-foreground uppercase tracking-wider font-semibold whitespace-nowrap">{c}</th>
               ))}
             </tr>
@@ -167,6 +177,7 @@ function DailyTable({ data }: { data: { fecha: string; label: string; prod: numb
             {data.map((d) => (
               <tr key={d.fecha} className="border-b border-border/50 hover:bg-secondary/30 transition-colors">
                 <td className="px-3 py-2.5 font-semibold font-mono text-xs">{d.fecha}</td>
+                <td className="px-3 py-2.5 text-xs text-muted-foreground italic capitalize">{d.dia}</td>
                 <td className="px-3 py-2.5 font-mono text-xs text-success font-semibold">{d.serviciosCliente}</td>
                 <td className="px-3 py-2.5 font-mono text-xs text-destructive font-semibold">{d.serviciosBase}</td>
                 <td className="px-3 py-2.5 font-mono text-xs">{d.serviciosTotal}</td>
