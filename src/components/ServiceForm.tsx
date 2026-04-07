@@ -46,15 +46,21 @@ export default function ServiceForm({ onAdd, selectedDate }: Props) {
   const [peajes, setPeajes] = useState<PeajeEntry[]>([]);
 
   const allPersonalEntries = getPersonal();
-  const choferes = getPersonalByRole("chofer").map((p) => p.nombre);
-  const custodios = getPersonalByRole("custodio").map((p) => p.nombre);
   const allPersonal = getActivePersonalNames();
 
-  // Fallback: if no one has the role assigned, show all active personal
-  const choferOptions = choferes.length > 0 ? choferes : allPersonal;
-  const custodioOptions = custodios.length > 0 ? custodios : allPersonal;
+  // Badge map: show role abbreviations next to each name
+  const roleBadgeMap = useMemo(() => {
+    const map: Record<string, string> = {};
+    allPersonalEntries.forEach((p) => {
+      const tags: string[] = [];
+      if (p.roles.includes("operaciones")) tags.push("OP");
+      if (p.roles.includes("chofer")) tags.push("CH");
+      if (p.roles.includes("custodio")) tags.push("CU");
+      if (tags.length > 0) map[p.nombre] = tags.join(" ");
+    });
+    return map;
+  }, [allPersonalEntries]);
 
-  // Badge map: mark operations staff with "OP"
   const opsBadgeMap = useMemo(() => {
     const map: Record<string, string> = {};
     allPersonalEntries.forEach((p) => {
