@@ -121,9 +121,10 @@ export default function FullDashboard({ services, fuelEntries, onBack }: Props) 
           </Button>
         ))}
       </div>
+      {/* Filtros */}
+      <DashboardFilters services={services} fuelEntries={fuelEntries} onFilter={handleFilter} />
 
       {/* Resumen */}
-      {tab === "resumen" && (
         <div className="space-y-5">
           <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
             <StatCard label="Total Servicios" value={totalServicios} />
