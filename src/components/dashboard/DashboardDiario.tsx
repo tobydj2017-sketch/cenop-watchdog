@@ -45,7 +45,7 @@ export default function DashboardDiario({ services, fuelEntries }: Props) {
     });
     fuelEntries.forEach((f) => {
       if (!f.fecha) return;
-      if (!map[f.fecha]) map[f.fecha] = { prod: 0, improd: 0, solCliente: new Set(), solBase: new Set(), fuel: 0 };
+      if (!map[f.fecha]) map[f.fecha] = { prod: 0, improd: 0, solCliente: new Set(), solBase: new Set(), fuel: 0, detalleProd: {}, detalleImprod: {} };
       map[f.fecha].fuel += f.monto;
     });
     return Object.entries(map)
@@ -64,6 +64,8 @@ export default function DashboardDiario({ services, fuelEntries }: Props) {
           serviciosTotal: new Set([...v.solCliente, ...v.solBase]).size,
           eficiencia: v.prod + v.improd > 0 ? Math.round((v.prod / (v.prod + v.improd)) * 100) : 0,
           fuel: v.fuel,
+          detalleProd: Object.entries(v.detalleProd).sort((a, b) => b[1] - a[1]),
+          detalleImprod: Object.entries(v.detalleImprod).sort((a, b) => b[1] - a[1]),
         };
       })
       .sort((a, b) => a.fecha.localeCompare(b.fecha));
