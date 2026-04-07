@@ -16,28 +16,35 @@ const tooltipFormatter = (value: number) => formatHoursMinutes(value);
 
 export default function DashboardDiario({ services, fuelEntries }: Props) {
   const byDay = useMemo(() => {
-    const map: Record<string, { prod: number; improd: number; solicitudes: Set<number>; fuel: number }> = {};
+    const map: Record<string, { prod: number; improd: number; solCliente: Set<number>; solBase: Set<number>; fuel: number }> = {};
     services.forEach((s) => {
       if (!s.fecha) return;
-      if (!map[s.fecha]) map[s.fecha] = { prod: 0, improd: 0, solicitudes: new Set(), fuel: 0 };
+      if (!map[s.fecha]) map[s.fecha] = { prod: 0, improd: 0, solCliente: new Set(), solBase: new Set(), fuel: 0 };
       const h = getAdjustedHours(s);
       map[s.fecha].prod += h.prod;
       map[s.fecha].improd += h.improd;
-      map[s.fecha].solicitudes.add(s.solicitud);
+      const esCenop = !s.cliente || s.cliente.toUpperCase().includes("CENOP");
+      if (esCenop) {
+        map[s.fecha].solBase.add(s.solicitud);
+      } else {
+        map[s.fecha].solCliente.add(s.solicitud);
+      }
     });
     fuelEntries.forEach((f) => {
       if (!f.fecha) return;
-      if (!map[f.fecha]) map[f.fecha] = { prod: 0, improd: 0, solicitudes: new Set(), fuel: 0 };
+      if (!map[f.fecha]) map[f.fecha] = { prod: 0, improd: 0, solCliente: new Set(), solBase: new Set(), fuel: 0 };
       map[f.fecha].fuel += f.monto;
     });
     return Object.entries(map)
       .map(([fecha, v]) => ({
         fecha,
-        label: `${fecha.slice(8, 10)}/${fecha.slice(5, 7)}`, // DD/MM
+        label: `${fecha.slice(8, 10)}/${fecha.slice(5, 7)}`,
         prod: v.prod,
         improd: v.improd,
         total: v.prod + v.improd,
-        servicios: v.solicitudes.size,
+        serviciosCliente: v.solCliente.size,
+        serviciosBase: v.solBase.size,
+        serviciosTotal: new Set([...v.solCliente, ...v.solBase]).size,
         eficiencia: v.prod + v.improd > 0 ? Math.round((v.prod / (v.prod + v.improd)) * 100) : 0,
         fuel: v.fuel,
       }))
