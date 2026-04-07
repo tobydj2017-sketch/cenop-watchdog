@@ -17,23 +17,25 @@ const tooltipFormatter = (value: number) => formatHoursMinutes(value);
 export default function DashboardRendimiento({ services }: Props) {
   // Top/bottom performers
   const byPerson = useMemo(() => {
-    const map: Record<string, { prod: number; improd: number; servicios: number }> = {};
+    const map: Record<string, { prod: number; improd: number; solicitudes: Set<number> }> = {};
     services.forEach((s) => {
       [s.chofer, s.custodio].forEach((name) => {
         if (!name) return;
-        if (!map[name]) map[name] = { prod: 0, improd: 0, servicios: 0 };
+        if (!map[name]) map[name] = { prod: 0, improd: 0, solicitudes: new Set() };
         map[name].prod += timeToMinutes(s.horasProductivas);
         map[name].improd += timeToMinutes(s.horasImproductivas);
-        map[name].servicios += 1;
+        map[name].solicitudes.add(s.solicitud);
       });
     });
     return Object.entries(map)
       .map(([nombre, v]) => ({
         nombre,
-        ...v,
+        prod: v.prod,
+        improd: v.improd,
+        servicios: v.solicitudes.size,
         total: v.prod + v.improd,
         eficiencia: v.prod + v.improd > 0 ? Math.round((v.prod / (v.prod + v.improd)) * 100) : 0,
-        promProdPorServ: v.servicios > 0 ? Math.round(v.prod / v.servicios) : 0,
+        promProdPorServ: v.solicitudes.size > 0 ? Math.round(v.prod / v.solicitudes.size) : 0,
       }))
       .filter((p) => p.servicios >= 2)
       .sort((a, b) => b.eficiencia - a.eficiencia);
@@ -41,18 +43,20 @@ export default function DashboardRendimiento({ services }: Props) {
 
   // By vehicle efficiency
   const byMovil = useMemo(() => {
-    const map: Record<string, { prod: number; improd: number; servicios: number }> = {};
+    const map: Record<string, { prod: number; improd: number; solicitudes: Set<number> }> = {};
     services.forEach((s) => {
       if (!s.movil) return;
-      if (!map[s.movil]) map[s.movil] = { prod: 0, improd: 0, servicios: 0 };
+      if (!map[s.movil]) map[s.movil] = { prod: 0, improd: 0, solicitudes: new Set() };
       map[s.movil].prod += timeToMinutes(s.horasProductivas);
       map[s.movil].improd += timeToMinutes(s.horasImproductivas);
-      map[s.movil].servicios += 1;
+      map[s.movil].solicitudes.add(s.solicitud);
     });
     return Object.entries(map)
       .map(([patente, v]) => ({
         patente,
-        ...v,
+        prod: v.prod,
+        improd: v.improd,
+        servicios: v.solicitudes.size,
         total: v.prod + v.improd,
         eficiencia: v.prod + v.improd > 0 ? Math.round((v.prod / (v.prod + v.improd)) * 100) : 0,
       }))
