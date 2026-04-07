@@ -48,8 +48,9 @@ export default function DashboardRendimiento({ services }: Props) {
     services.forEach((s) => {
       if (!s.movil) return;
       if (!map[s.movil]) map[s.movil] = { prod: 0, improd: 0, solicitudes: new Set() };
-      map[s.movil].prod += timeToMinutes(s.horasProductivas);
-      map[s.movil].improd += timeToMinutes(s.horasImproductivas);
+      const h = getAdjustedHours(s);
+      map[s.movil].prod += h.prod;
+      map[s.movil].improd += h.improd;
       map[s.movil].solicitudes.add(s.solicitud);
     });
     return Object.entries(map)
