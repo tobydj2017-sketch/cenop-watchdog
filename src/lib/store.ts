@@ -1,4 +1,4 @@
-import { ServiceEntry, FuelEntry } from "./types";
+import { ServiceEntry, FuelEntry, isCountableServiceEntry } from "./types";
 import { DECEMBER_2025_DATA } from "./seedData";
 
 const SERVICES_KEY = "cenop_services";
@@ -18,11 +18,12 @@ function ensureSeed() {
 export function getServices(): ServiceEntry[] {
   ensureSeed();
   const data = localStorage.getItem(SERVICES_KEY);
-  return data ? JSON.parse(data) : [];
+  const parsed: ServiceEntry[] = data ? JSON.parse(data) : [];
+  return parsed.filter(isCountableServiceEntry);
 }
 
 export function saveServices(entries: ServiceEntry[]) {
-  localStorage.setItem(SERVICES_KEY, JSON.stringify(entries));
+  localStorage.setItem(SERVICES_KEY, JSON.stringify(entries.filter(isCountableServiceEntry)));
 }
 
 export function addService(entry: ServiceEntry) {

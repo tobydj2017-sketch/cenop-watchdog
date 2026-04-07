@@ -1,5 +1,5 @@
 import { useMemo, useState } from "react";
-import { ServiceEntry, getAdjustedHours } from "@/lib/types";
+import { ServiceEntry, getAdjustedHours, getServiceKey, normalizeClientName } from "@/lib/types";
 import { formatHoursMinutes } from "@/lib/formatTime";
 import { StatCard } from "./DashboardResumen";
 import { ChevronDown, ChevronUp, User } from "lucide-react";
@@ -43,11 +43,10 @@ export default function DashboardRendimiento({ services }: Props) {
   const [compareSelection, setCompareSelection] = useState<Set<string>>(new Set());
 
   const byPerson = useMemo((): PersonData[] => {
-    // Per person: aggregate totals, per-client breakdown, per-day breakdown
     const personMap: Record<string, {
-      prod: number; improd: number; solicitudes: Set<number>;
-      clienteMap: Record<string, { prod: number; improd: number; solicitudes: Set<number> }>;
-      dayMap: Record<string, { prod: number; improd: number; solicitudes: Set<number>; clientes: Set<string> }>;
+      prod: number; improd: number; solicitudes: Set<string>;
+      clienteMap: Record<string, { prod: number; improd: number; solicitudes: Set<string> }>;
+      dayMap: Record<string, { prod: number; improd: number; solicitudes: Set<string>; clientes: Set<string> }>;
     }> = {};
 
     services.forEach((s) => {
@@ -59,23 +58,23 @@ export default function DashboardRendimiento({ services }: Props) {
         };
         const p = personMap[name];
         const h = getAdjustedHours(s);
+        const serviceKey = getServiceKey(s);
+        const cli = normalizeClientName(s.cliente);
+
         p.prod += h.prod;
         p.improd += h.improd;
-        p.solicitudes.add(s.solicitud);
+        p.solicitudes.add(serviceKey);
 
-        // By client
-        const cli = s.cliente || "CENOP";
         if (!p.clienteMap[cli]) p.clienteMap[cli] = { prod: 0, improd: 0, solicitudes: new Set() };
         p.clienteMap[cli].prod += h.prod;
         p.clienteMap[cli].improd += h.improd;
-        p.clienteMap[cli].solicitudes.add(s.solicitud);
+        p.clienteMap[cli].solicitudes.add(serviceKey);
 
-        // By day
         if (s.fecha) {
           if (!p.dayMap[s.fecha]) p.dayMap[s.fecha] = { prod: 0, improd: 0, solicitudes: new Set(), clientes: new Set() };
           p.dayMap[s.fecha].prod += h.prod;
           p.dayMap[s.fecha].improd += h.improd;
-          p.dayMap[s.fecha].solicitudes.add(s.solicitud);
+          p.dayMap[s.fecha].solicitudes.add(serviceKey);
           p.dayMap[s.fecha].clientes.add(cli);
         }
       });

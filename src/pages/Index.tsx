@@ -1,4 +1,4 @@
-import { useState, useCallback } from "react";
+import { useState, useCallback, useMemo } from "react";
 import { Shield, CalendarDays, BarChart3, ClipboardList } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
@@ -8,7 +8,7 @@ import ServiceTable from "@/components/ServiceTable";
 import FuelForm from "@/components/FuelForm";
 import FuelTable from "@/components/FuelTable";
 import FullDashboard from "@/components/FullDashboard";
-import { ServiceEntry, FuelEntry } from "@/lib/types";
+import { ServiceEntry, FuelEntry, isCountableServiceEntry } from "@/lib/types";
 import {
   getServices, saveServices, addService, deleteService,
   getFuelEntries, addFuelEntry, deleteFuelEntry,
@@ -42,7 +42,11 @@ export default function Index() {
     setFuelEntries(getFuelEntries());
   }, []);
 
-  const dayServices = services.filter((s) => s.fecha === selectedDate);
+  const cleanServices = useMemo(
+    () => services.filter(isCountableServiceEntry),
+    [services],
+  );
+  const dayServices = cleanServices.filter((s) => s.fecha === selectedDate);
   const dayFuel = fuelEntries.filter((f) => f.fecha === selectedDate);
 
   return (
@@ -106,13 +110,13 @@ export default function Index() {
       <main className="container max-w-7xl mx-auto px-4 py-6 space-y-5">
         {showDashboard ? (
           <FullDashboard
-            services={services}
+            services={cleanServices}
             fuelEntries={fuelEntries}
             onBack={() => setShowDashboard(false)}
           />
         ) : (
           <>
-            <DashboardStats services={services} fuelEntries={fuelEntries} selectedDate={selectedDate} />
+            <DashboardStats services={cleanServices} fuelEntries={fuelEntries} selectedDate={selectedDate} />
 
             <div className="grid lg:grid-cols-2 gap-4">
               <ServiceForm onAdd={handleAddService} selectedDate={selectedDate} />

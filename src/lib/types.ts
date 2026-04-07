@@ -64,13 +64,53 @@ export function timeToMinutes(t: string): number {
   return (parts[0] || 0) * 60 + (parts[1] || 0);
 }
 
-/** Returns adjusted prod/improd minutes for a service entry.
- *  If client is "CENOP" or empty (permanencia en base), all hours become improductive. */
+export function normalizeClientName(cliente?: string): string {
+  const normalized = cliente?.trim().toUpperCase();
+  return normalized || "CENOP";
+}
+
+export function isBaseServiceEntry(service: Pick<ServiceEntry, "cliente">): boolean {
+  return normalizeClientName(service.cliente) === "CENOP";
+}
+
+export function isCountableServiceEntry(service: ServiceEntry): boolean {
+  return [
+    service.horaSolicitud,
+    service.cliente,
+    service.lugarSalida,
+    service.destino,
+    service.chofer,
+    service.citaChofer,
+    service.custodio,
+    service.citaCustodio,
+    service.movil,
+    service.celular,
+    service.salidaCenop,
+    service.llegadaServicio,
+    service.iniciaServicio,
+    service.llegadaDestino,
+    service.finalizaServicio,
+    service.llegadaCenop,
+    service.horaFrancoChofer,
+    service.horaFrancoCustodio,
+    service.ordenCarga,
+    service.remito,
+    service.continuaOrden,
+    service.observaciones,
+  ].some((value) => {
+    const normalized = String(value ?? "").trim();
+    return normalized !== "" && normalized !== "00:00" && normalized !== "00:00:00" && normalized !== "0:00";
+  });
+}
+
+export function getServiceKey(service: Pick<ServiceEntry, "fecha" | "solicitud">): string {
+  return `${service.fecha || "sin-fecha"}::${service.solicitud}`;
+}
+
 export function getAdjustedHours(s: ServiceEntry): { prod: number; improd: number } {
   const rawProd = timeToMinutes(s.horasProductivas);
   const rawImprod = timeToMinutes(s.horasImproductivas);
-  const isCenop = !s.cliente || s.cliente.toUpperCase() === "CENOP";
-  if (isCenop) {
+  if (isBaseServiceEntry(s)) {
     return { prod: 0, improd: rawProd + rawImprod };
   }
   return { prod: rawProd, improd: rawImprod };
