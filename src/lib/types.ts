@@ -1,3 +1,5 @@
+import { getPersonal } from "./personalStore";
+
 export interface PeajeEntry {
   id: string;
   ubicacion: string;
@@ -128,10 +130,22 @@ export function getServiceKey(service: Pick<ServiceEntry, "fecha" | "solicitud">
   return `${service.fecha || "sin-fecha"}::${service.solicitud}`;
 }
 
+function isPlayero(nombre: string): boolean {
+  if (!nombre) return false;
+  const personal = getPersonal();
+  const person = personal.find((p) => p.nombre === nombre);
+  return !!person && person.roles.includes("playero");
+}
+
 export function getAdjustedHours(s: ServiceEntry): { prod: number; improd: number } {
   const rawProd = timeToMinutes(s.horasProductivas);
   const rawImprod = timeToMinutes(s.horasImproductivas);
   if (isBaseServiceEntry(s)) {
+    // Playeros work at CENOP — their base hours are productive
+    const workerName = s.chofer || s.custodio;
+    if (isPlayero(workerName)) {
+      return { prod: rawProd, improd: rawImprod };
+    }
     return { prod: 0, improd: rawProd + rawImprod };
   }
   return { prod: rawProd, improd: rawImprod };

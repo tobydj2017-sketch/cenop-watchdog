@@ -1,4 +1,5 @@
 import { ServiceEntry, timeToMinutes, normalizeClientName, isBaseServiceEntry } from "./types";
+import { getPersonal } from "./personalStore";
 
 export interface ServiceSegment {
   label: string;
@@ -40,6 +41,12 @@ function seg(label: string, start: string, end: string, type: "productivo" | "im
 
 export function getServiceSegments(s: ServiceEntry): ServiceTimeline {
   const isBase = isBaseServiceEntry(s);
+  const workerName = s.chofer || s.custodio;
+  const personal = getPersonal();
+  const person = personal.find((p) => p.nombre === workerName);
+  const esPlayero = !!person && person.roles.includes("playero");
+  // Playeros at CENOP: their time is productive
+  const treatBaseAsImprod = isBase && !esPlayero;
   const segments: ServiceSegment[] = [];
 
   // For chofer: citaChofer → salidaCenop (en base)
@@ -64,11 +71,11 @@ export function getServiceSegments(s: ServiceEntry): ServiceTimeline {
   // iniciaServicio → finalizaServicio (servicio activo)
   if (s.iniciaServicio && s.finalizaServicio) {
     const r = seg(
-      isBase ? "Permanencia Base" : "Servicio Activo",
+      treatBaseAsImprod ? "Permanencia Base" : (isBase ? "Trabajo en Base" : "Servicio Activo"),
       s.iniciaServicio,
       s.finalizaServicio,
-      isBase ? "improductivo" : "productivo",
-      isBase ? SEGMENT_COLORS.base : SEGMENT_COLORS.servicio
+      treatBaseAsImprod ? "improductivo" : "productivo",
+      treatBaseAsImprod ? SEGMENT_COLORS.base : SEGMENT_COLORS.servicio
     );
     if (r) segments.push(r);
   }
