@@ -62,7 +62,7 @@ export default function ServiceTable({ services, onDelete }: Props) {
             </tr>
           </thead>
           <tbody>
-            {services.map((s) => {
+            {services.filter((s) => s.chofer || s.custodio).map((s) => {
               const colorIdx = solicitudColorMap.get(s.solicitud) ?? 0;
               const rowColor = SERVICE_COLORS[colorIdx];
               const badgeColor = SERVICE_BADGE_COLORS[colorIdx];
