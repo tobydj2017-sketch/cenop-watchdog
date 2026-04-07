@@ -161,13 +161,15 @@ export default function DashboardJornada({ services }: Props) {
     p.clientes.some(c => c.toLowerCase().includes(search.toLowerCase()))
   );
 
-  // Global KPIs
-  const avgProdPct = filtered.length > 0
-    ? Math.round(filtered.reduce((a, p) => a + (p.totalMinutes > 0 ? (p.totalProd / p.totalMinutes) * 100 : 0), 0) / filtered.length)
-    : 0;
-  const avgTraslado = filtered.length > 0 ? Math.round(filtered.reduce((a, p) => a + p.totalTraslado, 0) / filtered.length) : 0;
-  const avgBase = filtered.length > 0 ? Math.round(filtered.reduce((a, p) => a + p.totalBase, 0) / filtered.length) : 0;
-  const avgServicio = filtered.length > 0 ? Math.round(filtered.reduce((a, p) => a + p.totalServicio, 0) / filtered.length) : 0;
+  // Global KPIs — totals, not averages
+  const totalProdAll = filtered.reduce((a, p) => a + p.totalProd, 0);
+  const totalImprodAll = filtered.reduce((a, p) => a + p.totalImprod, 0);
+  const totalMinutesAll = filtered.reduce((a, p) => a + p.totalMinutes, 0);
+  const totalTraslado = filtered.reduce((a, p) => a + p.totalTraslado, 0);
+  const totalBase = filtered.reduce((a, p) => a + p.totalBase, 0);
+  const totalServicio = filtered.reduce((a, p) => a + p.totalServicio, 0);
+  const totalEspera = filtered.reduce((a, p) => a + p.totalEspera, 0);
+  const eficPct = totalMinutesAll > 0 ? Math.round((totalProdAll / totalMinutesAll) * 100) : 0;
 
   return (
     <div className="space-y-5">
@@ -195,10 +197,16 @@ export default function DashboardJornada({ services }: Props) {
 
       {/* KPIs */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-        <StatCard label="Efic. Productiva Prom." value={`${avgProdPct}%`} />
-        <StatCard label="Prom. Servicio Activo" value={formatHoursMinutes(avgServicio)} />
-        <StatCard label="Prom. Traslado" value={formatHoursMinutes(avgTraslado)} />
-        <StatCard label="Prom. En Base" value={formatHoursMinutes(avgBase)} />
+        <StatCard label="Eficiencia Productiva" value={`${eficPct}%`} />
+        <StatCard label="Total Productivo" value={formatHoursMinutes(totalProdAll)} />
+        <StatCard label="Total Improductivo" value={formatHoursMinutes(totalImprodAll)} />
+        <StatCard label="Total Jornada" value={formatHoursMinutes(totalMinutesAll)} />
+      </div>
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+        <StatCard label="Total Servicio Activo" value={formatHoursMinutes(totalServicio)} />
+        <StatCard label="Total Espera" value={formatHoursMinutes(totalEspera)} />
+        <StatCard label="Total Traslado" value={formatHoursMinutes(totalTraslado)} />
+        <StatCard label="Total En Base" value={formatHoursMinutes(totalBase)} />
       </div>
 
       {/* Search */}
