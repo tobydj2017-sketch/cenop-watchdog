@@ -1,5 +1,5 @@
 import { useState, useCallback } from "react";
-import { Shield, CalendarDays, BarChart3 } from "lucide-react";
+import { Shield, CalendarDays, BarChart3, ClipboardList } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import DashboardStats from "@/components/DashboardStats";
@@ -59,18 +59,9 @@ export default function Index() {
               <p className="text-xs text-muted-foreground">AM Seguridad — Control Operativo</p>
             </div>
           </div>
-          <div className="flex items-center gap-3">
-            <Button
-              variant={showDashboard ? "default" : "secondary"}
-              size="sm"
-              onClick={() => setShowDashboard(!showDashboard)}
-              className="gap-2"
-            >
-              <BarChart3 className="w-4 h-4" />
-              {showDashboard ? "Volver a Carga" : "Panel de Análisis"}
-            </Button>
+          <div className="flex items-center gap-2">
             {!showDashboard && (
-              <div className="flex items-center gap-2">
+              <div className="flex items-center gap-2 mr-2">
                 <CalendarDays className="w-4 h-4 text-muted-foreground" />
                 <Input
                   type="date"
@@ -81,6 +72,33 @@ export default function Index() {
               </div>
             )}
           </div>
+        </div>
+        {/* Navegación principal */}
+        <div className="container max-w-7xl mx-auto px-4">
+          <nav className="flex gap-1 -mb-px">
+            <button
+              onClick={() => setShowDashboard(false)}
+              className={`flex items-center gap-2 px-4 py-2.5 text-sm font-semibold border-b-2 transition-colors ${
+                !showDashboard
+                  ? "border-primary text-primary"
+                  : "border-transparent text-muted-foreground hover:text-foreground hover:border-border"
+              }`}
+            >
+              <ClipboardList className="w-4 h-4" />
+              Carga de Datos
+            </button>
+            <button
+              onClick={() => setShowDashboard(true)}
+              className={`flex items-center gap-2 px-4 py-2.5 text-sm font-semibold border-b-2 transition-colors ${
+                showDashboard
+                  ? "border-primary text-primary"
+                  : "border-transparent text-muted-foreground hover:text-foreground hover:border-border"
+              }`}
+            >
+              <BarChart3 className="w-4 h-4" />
+              Panel de Análisis
+            </button>
+          </nav>
         </div>
       </header>
 
