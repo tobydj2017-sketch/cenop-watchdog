@@ -1,10 +1,11 @@
-import { useState } from "react";
+import { useState, useRef } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { ServiceEntry, generateId, calcTimeDiff, timeToMinutes, minutesToTime } from "@/lib/types";
 import { MOVILES, PERSONAL, CLIENTES, MOVIL_TELEFONO } from "@/lib/cenopData";
 import SearchableSelect from "@/components/SearchableSelect";
+import TimeInput from "@/components/TimeInput";
 import { Plus } from "lucide-react";
 
 interface Props {
@@ -41,6 +42,7 @@ const defaultEntry = {
 export default function ServiceForm({ onAdd, selectedDate }: Props) {
   const [form, setForm] = useState(defaultEntry);
   const [open, setOpen] = useState(false);
+  const timeFieldsRef = useRef<HTMLDivElement>(null);
 
   const set = (field: string, value: string | number) =>
     setForm((prev) => ({ ...prev, [field]: value }));
@@ -90,16 +92,36 @@ export default function ServiceForm({ onAdd, selectedDate }: Props) {
     );
   }
 
+
+  const focusNextTimeInput = (currentField: string) => {
+    const timeFields = ["horaSolicitud", "citaChofer", "citaCustodio", "salidaCenop", "llegadaServicio", "iniciaServicio", "llegadaDestino", "finalizaServicio", "llegadaCenop", "horaFrancoChofer", "horaFrancoCustodio"];
+    const idx = timeFields.indexOf(currentField);
+    if (idx < 0 || idx >= timeFields.length - 1) return;
+    const nextField = timeFields[idx + 1];
+    const nextInput = document.querySelector(`[data-timefield="${nextField}"]`) as HTMLInputElement;
+    nextInput?.focus();
+  };
+
   const Field = ({ label, field, type = "text", placeholder = "" }: { label: string; field: string; type?: string; placeholder?: string }) => (
     <div className="space-y-1">
       <Label className="text-xs text-muted-foreground">{label}</Label>
-      <Input
-        type={type}
-        value={(form as any)[field]}
-        onChange={(e) => set(field, type === "number" ? Number(e.target.value) : e.target.value)}
-        placeholder={placeholder}
-        className="h-9 text-sm"
-      />
+      {type === "time" ? (
+        <div data-timefield={field}>
+          <TimeInput
+            value={(form as any)[field]}
+            onChange={(v) => set(field, v)}
+            onComplete={() => focusNextTimeInput(field)}
+          />
+        </div>
+      ) : (
+        <Input
+          type={type}
+          value={(form as any)[field]}
+          onChange={(e) => set(field, type === "number" ? Number(e.target.value) : e.target.value)}
+          placeholder={placeholder}
+          className="h-9 text-sm"
+        />
+      )}
     </div>
   );
 
