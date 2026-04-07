@@ -51,7 +51,7 @@ export function getServiceSegments(s: ServiceEntry): ServiceTimeline {
 
   // salidaCenop → llegadaServicio (traslado ida)
   if (s.salidaCenop && s.llegadaServicio) {
-    const r = seg("Traslado Ida", s.salidaCenop, s.llegadaServicio, "improductivo", SEGMENT_COLORS.traslado);
+    const r = seg("Traslado Ida", s.salidaCenop, s.llegadaServicio, "productivo", SEGMENT_COLORS.traslado);
     if (r) segments.push(r);
   }
 
@@ -75,7 +75,7 @@ export function getServiceSegments(s: ServiceEntry): ServiceTimeline {
 
   // finalizaServicio → llegadaCenop (traslado vuelta)
   if (s.finalizaServicio && s.llegadaCenop) {
-    const r = seg("Traslado Vuelta", s.finalizaServicio, s.llegadaCenop, "improductivo", SEGMENT_COLORS.vuelta);
+    const r = seg("Traslado Vuelta", s.finalizaServicio, s.llegadaCenop, "productivo", SEGMENT_COLORS.vuelta);
     if (r) segments.push(r);
   }
 
@@ -105,8 +105,8 @@ export function getServiceSegments(s: ServiceEntry): ServiceTimeline {
 
 export const SEGMENT_LEGEND = [
   { label: "En Base", color: SEGMENT_COLORS.base, type: "improductivo" as const },
-  { label: "Traslado Ida", color: SEGMENT_COLORS.traslado, type: "improductivo" as const },
+  { label: "Traslado Ida", color: SEGMENT_COLORS.traslado, type: "productivo" as const },
   { label: "Espera", color: SEGMENT_COLORS.espera, type: "productivo" as const },
   { label: "Servicio Activo", color: SEGMENT_COLORS.servicio, type: "productivo" as const },
-  { label: "Traslado Vuelta", color: SEGMENT_COLORS.vuelta, type: "improductivo" as const },
+  { label: "Traslado Vuelta", color: SEGMENT_COLORS.vuelta, type: "productivo" as const },
 ];
