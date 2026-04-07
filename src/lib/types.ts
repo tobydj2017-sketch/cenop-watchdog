@@ -4,6 +4,13 @@ export interface PeajeEntry {
   monto: number;
 }
 
+export interface ComisionEntry {
+  id: string;
+  descripcion: string;
+  monto: number;
+  hora: string;
+}
+
 export interface ServiceEntry {
   id: string;
   solicitud: number;
@@ -36,6 +43,7 @@ export interface ServiceEntry {
   horasTotales: string;
   fecha: string;
   peajes?: PeajeEntry[];
+  comisiones?: ComisionEntry[];
   choferEsOperaciones?: boolean;
   custodioEsOperaciones?: boolean;
 }

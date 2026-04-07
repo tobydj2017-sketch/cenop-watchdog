@@ -2,12 +2,12 @@ import { useState, useRef, useMemo } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { ServiceEntry, PeajeEntry, generateId, calcTimeDiff, timeToMinutes, minutesToTime } from "@/lib/types";
+import { ServiceEntry, PeajeEntry, ComisionEntry, generateId, calcTimeDiff, timeToMinutes, minutesToTime } from "@/lib/types";
 import { MOVILES, CLIENTES, MOVIL_TELEFONO } from "@/lib/cenopData";
 import { getPersonal, getActivePersonalNames } from "@/lib/personalStore";
 import SearchableSelect from "@/components/SearchableSelect";
 import TimeInput from "@/components/TimeInput";
-import { Plus, Trash2, CircleDollarSign } from "lucide-react";
+import { Plus, Trash2, CircleDollarSign, Briefcase } from "lucide-react";
 
 interface Props {
   onAdd: (entry: ServiceEntry) => void;
@@ -44,6 +44,7 @@ export default function ServiceForm({ onAdd, selectedDate }: Props) {
   const [form, setForm] = useState(defaultEntry);
   const [open, setOpen] = useState(false);
   const [peajes, setPeajes] = useState<PeajeEntry[]>([]);
+  const [comisiones, setComisiones] = useState<ComisionEntry[]>([]);
 
   const allPersonalEntries = getPersonal();
   const allPersonal = getActivePersonalNames();
@@ -96,6 +97,22 @@ export default function ServiceForm({ onAdd, selectedDate }: Props) {
   };
 
   const totalPeajes = peajes.reduce((sum, p) => sum + (p.monto || 0), 0);
+  const totalComisiones = comisiones.reduce((sum, c) => sum + (c.monto || 0), 0);
+
+  // Comisiones
+  const addComision = () => {
+    setComisiones((prev) => [...prev, { id: generateId(), descripcion: "", monto: 0, hora: "" }]);
+  };
+
+  const updateComision = (id: string, field: keyof Omit<ComisionEntry, "id">, value: string | number) => {
+    setComisiones((prev) =>
+      prev.map((c) => (c.id === id ? { ...c, [field]: value } : c))
+    );
+  };
+
+  const removeComision = (id: string) => {
+    setComisiones((prev) => prev.filter((c) => c.id !== id));
+  };
 
   const calculateHours = () => {
     const prod = calcTimeDiff(form.iniciaServicio, form.finalizaServicio);
@@ -122,11 +139,13 @@ export default function ServiceForm({ onAdd, selectedDate }: Props) {
       id: generateId(),
       fecha: selectedDate,
       peajes: peajes.length > 0 ? peajes : undefined,
+      comisiones: comisiones.length > 0 ? comisiones : undefined,
       choferEsOperaciones: !!opsBadgeMap[form.chofer],
       custodioEsOperaciones: !!opsBadgeMap[form.custodio],
     });
     setForm(defaultEntry);
     setPeajes([]);
+    setComisiones([]);
     setOpen(false);
   };
 
@@ -288,6 +307,57 @@ export default function ServiceForm({ onAdd, selectedDate }: Props) {
               />
             </div>
             <Button type="button" variant="ghost" size="icon" className="h-9 w-9 text-destructive" onClick={() => removePeaje(peaje.id)}>
+              <Trash2 className="w-3.5 h-3.5" />
+            </Button>
+          </div>
+        ))}
+      </div>
+
+      {/* Comisiones */}
+      <div className="border-t border-border pt-3">
+        <div className="flex items-center justify-between mb-2">
+          <p className="text-xs text-muted-foreground uppercase tracking-wider">Comisiones (Productivas)</p>
+          <div className="flex items-center gap-3">
+            {comisiones.length > 0 && (
+              <span className="text-xs font-semibold text-primary">
+                Total: ${totalComisiones.toLocaleString("es-AR")}
+              </span>
+            )}
+            <Button type="button" variant="outline" size="sm" onClick={addComision} className="h-7 gap-1 text-xs">
+              <Briefcase className="w-3.5 h-3.5" /> Agregar Comisión
+            </Button>
+          </div>
+        </div>
+        {comisiones.map((comision, idx) => (
+          <div key={comision.id} className="flex items-end gap-2 mb-2">
+            <div className="flex-1 space-y-1">
+              <Label className="text-xs text-muted-foreground">Descripción #{idx + 1}</Label>
+              <Input
+                value={comision.descripcion}
+                onChange={(e) => updateComision(comision.id, "descripcion", e.target.value)}
+                placeholder="Ej: Comisión de entrega"
+                className="h-9 text-sm"
+              />
+            </div>
+            <div className="w-32 space-y-1">
+              <Label className="text-xs text-muted-foreground">Hora</Label>
+              <div data-timefield={`comision-${comision.id}`}>
+                <TimeInput
+                  value={comision.hora}
+                  onChange={(v) => updateComision(comision.id, "hora", v)}
+                />
+              </div>
+            </div>
+            <div className="w-32 space-y-1">
+              <Label className="text-xs text-muted-foreground">Monto ($)</Label>
+              <Input
+                type="number"
+                value={comision.monto || ""}
+                onChange={(e) => updateComision(comision.id, "monto", Number(e.target.value))}
+                className="h-9 text-sm"
+              />
+            </div>
+            <Button type="button" variant="ghost" size="icon" className="h-9 w-9 text-destructive" onClick={() => removeComision(comision.id)}>
               <Trash2 className="w-3.5 h-3.5" />
             </Button>
           </div>
