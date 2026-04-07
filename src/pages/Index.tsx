@@ -1,5 +1,5 @@
 import { useState, useCallback, useMemo } from "react";
-import { Shield, CalendarDays, BarChart3, ClipboardList } from "lucide-react";
+import { Shield, CalendarDays, BarChart3, ClipboardList, Users } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import DashboardStats from "@/components/DashboardStats";
@@ -8,6 +8,7 @@ import ServiceTable from "@/components/ServiceTable";
 import FuelForm from "@/components/FuelForm";
 import FuelTable from "@/components/FuelTable";
 import FullDashboard from "@/components/FullDashboard";
+import PersonalManager from "@/components/PersonalManager";
 import { ServiceEntry, FuelEntry, isCountableServiceEntry } from "@/lib/types";
 import {
   getServices, saveServices, addService, deleteService,
@@ -20,7 +21,7 @@ export default function Index() {
   const [services, setServices] = useState<ServiceEntry[]>(getServices);
   const [fuelEntries, setFuelEntries] = useState<FuelEntry[]>(getFuelEntries);
   const [selectedDate, setSelectedDate] = useState(today);
-  const [showDashboard, setShowDashboard] = useState(false);
+  const [activeTab, setActiveTab] = useState<"carga" | "dashboard" | "personal">("carga");
 
   const handleAddService = useCallback((entry: ServiceEntry) => {
     addService(entry);
@@ -64,7 +65,7 @@ export default function Index() {
             </div>
           </div>
           <div className="flex items-center gap-2">
-            {!showDashboard && (
+            {activeTab === "carga" && (
               <div className="flex items-center gap-2 mr-2">
                 <CalendarDays className="w-4 h-4 text-muted-foreground" />
                 <Input
@@ -80,40 +81,38 @@ export default function Index() {
         {/* Navegación principal */}
         <div className="container max-w-7xl mx-auto px-4">
           <nav className="flex gap-1 -mb-px">
-            <button
-              onClick={() => setShowDashboard(false)}
-              className={`flex items-center gap-2 px-4 py-2.5 text-sm font-semibold border-b-2 transition-colors ${
-                !showDashboard
-                  ? "border-primary text-primary"
-                  : "border-transparent text-muted-foreground hover:text-foreground hover:border-border"
-              }`}
-            >
-              <ClipboardList className="w-4 h-4" />
-              Carga de Datos
-            </button>
-            <button
-              onClick={() => setShowDashboard(true)}
-              className={`flex items-center gap-2 px-4 py-2.5 text-sm font-semibold border-b-2 transition-colors ${
-                showDashboard
-                  ? "border-primary text-primary"
-                  : "border-transparent text-muted-foreground hover:text-foreground hover:border-border"
-              }`}
-            >
-              <BarChart3 className="w-4 h-4" />
-              Panel de Análisis
-            </button>
+            {([
+              { key: "carga", label: "Carga de Datos", icon: ClipboardList },
+              { key: "dashboard", label: "Panel de Análisis", icon: BarChart3 },
+              { key: "personal", label: "Personal", icon: Users },
+            ] as const).map(({ key, label, icon: Icon }) => (
+              <button
+                key={key}
+                onClick={() => setActiveTab(key)}
+                className={`flex items-center gap-2 px-4 py-2.5 text-sm font-semibold border-b-2 transition-colors ${
+                  activeTab === key
+                    ? "border-primary text-primary"
+                    : "border-transparent text-muted-foreground hover:text-foreground hover:border-border"
+                }`}
+              >
+                <Icon className="w-4 h-4" />
+                {label}
+              </button>
+            ))}
           </nav>
         </div>
       </header>
 
       {/* Principal */}
       <main className="container max-w-7xl mx-auto px-4 py-6 space-y-5">
-        {showDashboard ? (
+        {activeTab === "dashboard" ? (
           <FullDashboard
             services={cleanServices}
             fuelEntries={fuelEntries}
-            onBack={() => setShowDashboard(false)}
+            onBack={() => setActiveTab("carga")}
           />
+        ) : activeTab === "personal" ? (
+          <PersonalManager />
         ) : (
           <>
             <DashboardStats services={cleanServices} fuelEntries={fuelEntries} selectedDate={selectedDate} />
