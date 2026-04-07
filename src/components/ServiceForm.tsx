@@ -134,7 +134,10 @@ export default function ServiceForm({ onAdd, selectedDate }: Props) {
       <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
         <Field label="Destino" field="destino" />
         <SelectField label="Móvil" field="movil" options={MOVILES} onCustomChange={setMovil} />
-        <Field label="Patente/Celular" field="celular" />
+        <div className="space-y-1">
+          <Label className="text-xs text-muted-foreground">Celular</Label>
+          <Input value={form.celular} readOnly className="h-9 text-sm bg-muted/50" />
+        </div>
         <Field label="Orden de Carga" field="ordenCarga" />
       </div>
 
