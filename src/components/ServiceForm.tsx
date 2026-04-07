@@ -4,7 +4,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { ServiceEntry, PeajeEntry, generateId, calcTimeDiff, timeToMinutes, minutesToTime } from "@/lib/types";
 import { MOVILES, CLIENTES, MOVIL_TELEFONO } from "@/lib/cenopData";
-import { getPersonalByRole, getActivePersonalNames, getPersonal } from "@/lib/personalStore";
+import { getPersonal, getActivePersonalNames } from "@/lib/personalStore";
 import SearchableSelect from "@/components/SearchableSelect";
 import TimeInput from "@/components/TimeInput";
 import { Plus, Trash2, CircleDollarSign } from "lucide-react";
@@ -46,15 +46,21 @@ export default function ServiceForm({ onAdd, selectedDate }: Props) {
   const [peajes, setPeajes] = useState<PeajeEntry[]>([]);
 
   const allPersonalEntries = getPersonal();
-  const choferes = getPersonalByRole("chofer").map((p) => p.nombre);
-  const custodios = getPersonalByRole("custodio").map((p) => p.nombre);
   const allPersonal = getActivePersonalNames();
 
-  // Fallback: if no one has the role assigned, show all active personal
-  const choferOptions = choferes.length > 0 ? choferes : allPersonal;
-  const custodioOptions = custodios.length > 0 ? custodios : allPersonal;
+  // Badge map: show role abbreviations next to each name
+  const roleBadgeMap = useMemo(() => {
+    const map: Record<string, string> = {};
+    allPersonalEntries.forEach((p) => {
+      const tags: string[] = [];
+      if (p.roles.includes("operaciones")) tags.push("OP");
+      if (p.roles.includes("chofer")) tags.push("CH");
+      if (p.roles.includes("custodio")) tags.push("CU");
+      if (tags.length > 0) map[p.nombre] = tags.join(" ");
+    });
+    return map;
+  }, [allPersonalEntries]);
 
-  // Badge map: mark operations staff with "OP"
   const opsBadgeMap = useMemo(() => {
     const map: Record<string, string> = {};
     allPersonalEntries.forEach((p) => {
@@ -211,7 +217,7 @@ export default function ServiceForm({ onAdd, selectedDate }: Props) {
               <span className="px-1.5 py-0.5 rounded text-[10px] font-bold bg-purple-500/20 text-purple-400 border border-purple-500/30">OP</span>
             )}
           </Label>
-          <SearchableSelect options={choferOptions} value={form.chofer} onChange={(v) => set("chofer", v)} placeholder="Seleccionar..." badgeMap={opsBadgeMap} />
+          <SearchableSelect options={allPersonal} value={form.chofer} onChange={(v) => set("chofer", v)} placeholder="Seleccionar..." badgeMap={roleBadgeMap} />
         </div>
         <Field label="Cita Chofer" field="citaChofer" type="time" />
         <div className="space-y-1">
@@ -221,7 +227,7 @@ export default function ServiceForm({ onAdd, selectedDate }: Props) {
               <span className="px-1.5 py-0.5 rounded text-[10px] font-bold bg-purple-500/20 text-purple-400 border border-purple-500/30">OP</span>
             )}
           </Label>
-          <SearchableSelect options={custodioOptions} value={form.custodio} onChange={(v) => set("custodio", v)} placeholder="Seleccionar..." badgeMap={opsBadgeMap} />
+          <SearchableSelect options={allPersonal} value={form.custodio} onChange={(v) => set("custodio", v)} placeholder="Seleccionar..." badgeMap={roleBadgeMap} />
         </div>
         <Field label="Cita Custodio" field="citaCustodio" type="time" />
       </div>
