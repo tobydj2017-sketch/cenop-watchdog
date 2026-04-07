@@ -1,6 +1,18 @@
 import { ServiceEntry, timeToMinutes, normalizeClientName, isBaseServiceEntry } from "./types";
 import { getPersonal } from "./personalStore";
 
+function isPlayeroSegment(s: ServiceEntry): boolean {
+  if (!isBaseServiceEntry(s)) return false;
+  const workerName = s.chofer || s.custodio;
+  if (workerName) {
+    const personal = getPersonal();
+    const person = personal.find((p) => p.nombre === workerName);
+    if (person && person.roles.includes("playero")) return true;
+  }
+  const totalMin = timeToMinutes(s.horasProductivas) + timeToMinutes(s.horasImproductivas);
+  return totalMin >= 480;
+}
+
 export interface ServiceSegment {
   label: string;
   start: string;
@@ -41,11 +53,7 @@ function seg(label: string, start: string, end: string, type: "productivo" | "im
 
 export function getServiceSegments(s: ServiceEntry): ServiceTimeline {
   const isBase = isBaseServiceEntry(s);
-  const workerName = s.chofer || s.custodio;
-  const personal = getPersonal();
-  const person = personal.find((p) => p.nombre === workerName);
-  const esPlayero = !!person && person.roles.includes("playero");
-  // Playeros at CENOP: their time is productive
+  const esPlayero = isPlayeroSegment(s);
   const treatBaseAsImprod = isBase && !esPlayero;
   const segments: ServiceSegment[] = [];
 
