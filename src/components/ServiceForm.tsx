@@ -4,7 +4,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { ServiceEntry, PeajeEntry, generateId, calcTimeDiff, timeToMinutes, minutesToTime } from "@/lib/types";
 import { MOVILES, CLIENTES, MOVIL_TELEFONO } from "@/lib/cenopData";
-import { getPersonalByRole, getActivePersonalNames } from "@/lib/personalStore";
+import { getPersonalByRole, getActivePersonalNames, getPersonal } from "@/lib/personalStore";
 import SearchableSelect from "@/components/SearchableSelect";
 import TimeInput from "@/components/TimeInput";
 import { Plus, Trash2, CircleDollarSign } from "lucide-react";
@@ -45,6 +45,7 @@ export default function ServiceForm({ onAdd, selectedDate }: Props) {
   const [open, setOpen] = useState(false);
   const [peajes, setPeajes] = useState<PeajeEntry[]>([]);
 
+  const allPersonalEntries = getPersonal();
   const choferes = getPersonalByRole("chofer").map((p) => p.nombre);
   const custodios = getPersonalByRole("custodio").map((p) => p.nombre);
   const allPersonal = getActivePersonalNames();
@@ -52,6 +53,15 @@ export default function ServiceForm({ onAdd, selectedDate }: Props) {
   // Fallback: if no one has the role assigned, show all active personal
   const choferOptions = choferes.length > 0 ? choferes : allPersonal;
   const custodioOptions = custodios.length > 0 ? custodios : allPersonal;
+
+  // Badge map: mark operations staff with "OP"
+  const opsBadgeMap = useMemo(() => {
+    const map: Record<string, string> = {};
+    allPersonalEntries.forEach((p) => {
+      if (p.roles.includes("operaciones")) map[p.nombre] = "OP";
+    });
+    return map;
+  }, [allPersonalEntries]);
 
   const set = (field: string, value: string | number) =>
     setForm((prev) => ({ ...prev, [field]: value }));
