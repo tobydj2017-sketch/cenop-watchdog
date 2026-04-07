@@ -4,6 +4,7 @@ import { formatHoursMinutes } from "@/lib/formatTime";
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, PieChart, Pie, Cell, Legend } from "recharts";
 import { Users, Truck, Building2, CalendarDays, ArrowLeft } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import DashboardFilters from "@/components/DashboardFilters";
 
 interface Props {
   services: ServiceEntry[];
@@ -22,11 +23,17 @@ type Tab = "resumen" | "personal" | "moviles" | "clientes";
 
 export default function FullDashboard({ services, fuelEntries, onBack }: Props) {
   const [tab, setTab] = useState<Tab>("resumen");
+  const [filteredServices, setFilteredServices] = useState<ServiceEntry[]>(services);
+  const [filteredFuel, setFilteredFuel] = useState<FuelEntry[]>(fuelEntries);
 
+  const handleFilter = (s: ServiceEntry[], f: FuelEntry[]) => {
+    setFilteredServices(s);
+    setFilteredFuel(f);
+  };
   // Aggregate by person (chofer + custodio combined as "personal")
   const byPerson = useMemo(() => {
     const map: Record<string, { prod: number; improd: number; servicios: number }> = {};
-    services.forEach((s) => {
+    filteredServices.forEach((s) => {
       const name = s.chofer || s.custodio;
       if (!name) return;
       if (!map[name]) map[name] = { prod: 0, improd: 0, servicios: 0 };
@@ -37,12 +44,12 @@ export default function FullDashboard({ services, fuelEntries, onBack }: Props) 
     return Object.entries(map)
       .map(([nombre, v]) => ({ nombre, ...v, total: v.prod + v.improd }))
       .sort((a, b) => b.total - a.total);
-  }, [services]);
+  }, [filteredServices]);
 
   // Aggregate by vehicle
   const byMovil = useMemo(() => {
     const map: Record<string, { prod: number; improd: number; servicios: number }> = {};
-    services.forEach((s) => {
+    filteredServices.forEach((s) => {
       if (!s.movil) return;
       if (!map[s.movil]) map[s.movil] = { prod: 0, improd: 0, servicios: 0 };
       map[s.movil].prod += timeToMinutes(s.horasProductivas);
@@ -52,12 +59,12 @@ export default function FullDashboard({ services, fuelEntries, onBack }: Props) 
     return Object.entries(map)
       .map(([patente, v]) => ({ patente, ...v, total: v.prod + v.improd }))
       .sort((a, b) => b.total - a.total);
-  }, [services]);
+  }, [filteredServices]);
 
   // Aggregate by client
   const byCliente = useMemo(() => {
     const map: Record<string, { prod: number; improd: number; servicios: number }> = {};
-    services.forEach((s) => {
+    filteredServices.forEach((s) => {
       if (!s.cliente) return;
       if (!map[s.cliente]) map[s.cliente] = { prod: 0, improd: 0, servicios: 0 };
       map[s.cliente].prod += timeToMinutes(s.horasProductivas);
@@ -67,14 +74,14 @@ export default function FullDashboard({ services, fuelEntries, onBack }: Props) 
     return Object.entries(map)
       .map(([cliente, v]) => ({ cliente, ...v, total: v.prod + v.improd }))
       .sort((a, b) => b.total - a.total);
-  }, [services]);
+  }, [filteredServices]);
 
   // Summary stats
-  const totalProd = services.reduce((a, s) => a + timeToMinutes(s.horasProductivas), 0);
-  const totalImprod = services.reduce((a, s) => a + timeToMinutes(s.horasImproductivas), 0);
-  const totalServicios = services.length;
-  const uniqueDays = new Set(services.map((s) => s.fecha)).size;
-  const totalFuel = fuelEntries.reduce((a, f) => a + f.monto, 0);
+  const totalProd = filteredServices.reduce((a, s) => a + timeToMinutes(s.horasProductivas), 0);
+  const totalImprod = filteredServices.reduce((a, s) => a + timeToMinutes(s.horasImproductivas), 0);
+  const totalServicios = filteredServices.length;
+  const uniqueDays = new Set(filteredServices.map((s) => s.fecha)).size;
+  const totalFuel = filteredFuel.reduce((a, f) => a + f.monto, 0);
 
   const pieData = [
     { name: "Productivas", value: totalProd },
@@ -114,6 +121,8 @@ export default function FullDashboard({ services, fuelEntries, onBack }: Props) 
           </Button>
         ))}
       </div>
+      {/* Filtros */}
+      <DashboardFilters services={services} fuelEntries={fuelEntries} onFilter={handleFilter} />
 
       {/* Resumen */}
       {tab === "resumen" && (
