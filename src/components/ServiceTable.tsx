@@ -48,7 +48,7 @@ export default function ServiceTable({ services, onDelete }: Props) {
 
   return (
     <div className="glass-card overflow-hidden">
-      <div className="overflow-x-auto">
+      <div className="overflow-x-auto max-h-[70vh] overflow-y-auto">
         <table className="w-full text-sm">
           <thead>
             <tr className="border-b border-border">
