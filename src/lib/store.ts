@@ -3,7 +3,7 @@ import { DECEMBER_2025_DATA } from "./seedData";
 
 const SERVICES_KEY = "cenop_services";
 const FUEL_KEY = "cenop_fuel";
-const SEED_KEY = "cenop_seeded_v1";
+const SEED_KEY = "cenop_seeded_v2";
 
 function ensureSeed() {
   if (!localStorage.getItem(SEED_KEY)) {

@@ -1,6 +1,7 @@
 import { ServiceEntry } from "@/lib/types";
 import { Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { cleanTime } from "@/lib/formatTime";
 
 interface Props {
   services: ServiceEntry[];
@@ -40,11 +41,11 @@ export default function ServiceTable({ services, onDelete }: Props) {
                 <td className="px-3 py-2.5">{s.chofer || "—"}</td>
                 <td className="px-3 py-2.5">{s.custodio || "—"}</td>
                 <td className="px-3 py-2.5 font-mono text-xs">{s.movil}</td>
-                <td className="px-3 py-2.5 font-mono text-xs">{s.salidaCenop}</td>
-                <td className="px-3 py-2.5 font-mono text-xs">{s.finalizaServicio}</td>
-                <td className="px-3 py-2.5 font-mono text-xs text-success font-semibold">{s.horasProductivas}</td>
-                <td className="px-3 py-2.5 font-mono text-xs text-destructive font-semibold">{s.horasImproductivas}</td>
-                <td className="px-3 py-2.5 font-mono text-xs font-semibold">{s.horasTotales}</td>
+                <td className="px-3 py-2.5 font-mono text-xs">{cleanTime(s.salidaCenop)}</td>
+                <td className="px-3 py-2.5 font-mono text-xs">{cleanTime(s.finalizaServicio)}</td>
+                <td className="px-3 py-2.5 font-mono text-xs text-success font-semibold">{cleanTime(s.horasProductivas)}</td>
+                <td className="px-3 py-2.5 font-mono text-xs text-destructive font-semibold">{cleanTime(s.horasImproductivas)}</td>
+                <td className="px-3 py-2.5 font-mono text-xs font-semibold">{cleanTime(s.horasTotales)}</td>
                 <td className="px-3 py-2.5">
                   <Button variant="ghost" size="sm" onClick={() => onDelete(s.id)} className="h-7 w-7 p-0 text-muted-foreground hover:text-destructive">
                     <Trash2 className="w-3.5 h-3.5" />
