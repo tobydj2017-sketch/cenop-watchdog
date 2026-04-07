@@ -6,6 +6,7 @@ import { Badge } from "@/components/ui/badge";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Checkbox } from "@/components/ui/checkbox";
 import { ServiceEntry, FuelEntry } from "@/lib/types";
+import { getPersonal } from "@/lib/personalStore";
 
 interface Props {
   services: ServiceEntry[];
@@ -22,6 +23,12 @@ export default function DashboardFilters({ services, fuelEntries, onFilter }: Pr
   const [searchPersonal, setSearchPersonal] = useState("");
   const [searchMovil, setSearchMovil] = useState("");
   const [searchCliente, setSearchCliente] = useState("");
+  const [tipoPersonal, setTipoPersonal] = useState<"todos" | "cenop" | "operaciones">("todos");
+
+  const opsNames = useMemo(() => {
+    const personal = getPersonal();
+    return new Set(personal.filter((p) => p.roles.includes("operaciones")).map((p) => p.nombre));
+  }, []);
 
   const allPersonal = useMemo(() => {
     const set = new Set<string>();
@@ -44,9 +51,9 @@ export default function DashboardFilters({ services, fuelEntries, onFilter }: Pr
     return Array.from(set).sort();
   }, [services]);
 
-  const hasFilters = selectedPersonal.length > 0 || selectedMoviles.length > 0 || selectedClientes.length > 0 || fechaDesde || fechaHasta;
+  const hasFilters = selectedPersonal.length > 0 || selectedMoviles.length > 0 || selectedClientes.length > 0 || fechaDesde || fechaHasta || tipoPersonal !== "todos";
 
-  const totalSelected = selectedPersonal.length + selectedMoviles.length + selectedClientes.length + (fechaDesde ? 1 : 0) + (fechaHasta ? 1 : 0);
+  const totalSelected = selectedPersonal.length + selectedMoviles.length + selectedClientes.length + (fechaDesde ? 1 : 0) + (fechaHasta ? 1 : 0) + (tipoPersonal !== "todos" ? 1 : 0);
 
   const applyFilters = () => {
     let filtered = [...services];
