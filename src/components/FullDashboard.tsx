@@ -77,11 +77,11 @@ export default function FullDashboard({ services, fuelEntries, onBack }: Props) 
   }, [filteredServices]);
 
   // Summary stats
-  const totalProd = services.reduce((a, s) => a + timeToMinutes(s.horasProductivas), 0);
-  const totalImprod = services.reduce((a, s) => a + timeToMinutes(s.horasImproductivas), 0);
-  const totalServicios = services.length;
-  const uniqueDays = new Set(services.map((s) => s.fecha)).size;
-  const totalFuel = fuelEntries.reduce((a, f) => a + f.monto, 0);
+  const totalProd = filteredServices.reduce((a, s) => a + timeToMinutes(s.horasProductivas), 0);
+  const totalImprod = filteredServices.reduce((a, s) => a + timeToMinutes(s.horasImproductivas), 0);
+  const totalServicios = filteredServices.length;
+  const uniqueDays = new Set(filteredServices.map((s) => s.fecha)).size;
+  const totalFuel = filteredFuel.reduce((a, f) => a + f.monto, 0);
 
   const pieData = [
     { name: "Productivas", value: totalProd },
