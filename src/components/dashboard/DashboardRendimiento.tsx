@@ -1,5 +1,5 @@
 import { useMemo } from "react";
-import { ServiceEntry, timeToMinutes } from "@/lib/types";
+import { ServiceEntry, getAdjustedHours } from "@/lib/types";
 import { formatHoursMinutes } from "@/lib/formatTime";
 import {
   BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer,
@@ -22,8 +22,9 @@ export default function DashboardRendimiento({ services }: Props) {
       [s.chofer, s.custodio].forEach((name) => {
         if (!name) return;
         if (!map[name]) map[name] = { prod: 0, improd: 0, solicitudes: new Set() };
-        map[name].prod += timeToMinutes(s.horasProductivas);
-        map[name].improd += timeToMinutes(s.horasImproductivas);
+        const h = getAdjustedHours(s);
+        map[name].prod += h.prod;
+        map[name].improd += h.improd;
         map[name].solicitudes.add(s.solicitud);
       });
     });
@@ -47,8 +48,9 @@ export default function DashboardRendimiento({ services }: Props) {
     services.forEach((s) => {
       if (!s.movil) return;
       if (!map[s.movil]) map[s.movil] = { prod: 0, improd: 0, solicitudes: new Set() };
-      map[s.movil].prod += timeToMinutes(s.horasProductivas);
-      map[s.movil].improd += timeToMinutes(s.horasImproductivas);
+      const h = getAdjustedHours(s);
+      map[s.movil].prod += h.prod;
+      map[s.movil].improd += h.improd;
       map[s.movil].solicitudes.add(s.solicitud);
     });
     return Object.entries(map)

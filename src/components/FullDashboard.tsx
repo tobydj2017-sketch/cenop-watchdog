@@ -1,5 +1,5 @@
 import { useState, useMemo } from "react";
-import { ServiceEntry, FuelEntry, timeToMinutes } from "@/lib/types";
+import { ServiceEntry, FuelEntry, getAdjustedHours } from "@/lib/types";
 import { formatHoursMinutes } from "@/lib/formatTime";
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, PieChart, Pie, Cell, Legend } from "recharts";
 import { Users, Truck, Building2, CalendarDays, ArrowLeft, TrendingUp, LayoutDashboard } from "lucide-react";
@@ -36,17 +36,19 @@ export default function FullDashboard({ services, fuelEntries, onBack }: Props) 
   };
 
   const byPerson = useMemo(() => {
-    const map: Record<string, { prod: number; improd: number; solicitudes: Set<number> }> = {};
+    const map: Record<string, { prod: number; improd: number; solicitudes: Set<number>; clientes: Set<string> }> = {};
     filteredServices.forEach((s) => {
       const name = s.chofer || s.custodio;
       if (!name) return;
-      if (!map[name]) map[name] = { prod: 0, improd: 0, solicitudes: new Set() };
-      map[name].prod += timeToMinutes(s.horasProductivas);
-      map[name].improd += timeToMinutes(s.horasImproductivas);
+      if (!map[name]) map[name] = { prod: 0, improd: 0, solicitudes: new Set(), clientes: new Set() };
+      const h = getAdjustedHours(s);
+      map[name].prod += h.prod;
+      map[name].improd += h.improd;
       map[name].solicitudes.add(s.solicitud);
+      if (s.cliente) map[name].clientes.add(s.cliente);
     });
     return Object.entries(map)
-      .map(([nombre, v]) => ({ nombre, prod: v.prod, improd: v.improd, servicios: v.solicitudes.size, total: v.prod + v.improd }))
+      .map(([nombre, v]) => ({ nombre, prod: v.prod, improd: v.improd, servicios: v.solicitudes.size, total: v.prod + v.improd, clientes: [...v.clientes].join(", ") }))
       .sort((a, b) => b.total - a.total);
   }, [filteredServices]);
 
@@ -55,8 +57,9 @@ export default function FullDashboard({ services, fuelEntries, onBack }: Props) 
     filteredServices.forEach((s) => {
       if (!s.movil) return;
       if (!map[s.movil]) map[s.movil] = { prod: 0, improd: 0, solicitudes: new Set() };
-      map[s.movil].prod += timeToMinutes(s.horasProductivas);
-      map[s.movil].improd += timeToMinutes(s.horasImproductivas);
+      const h = getAdjustedHours(s);
+      map[s.movil].prod += h.prod;
+      map[s.movil].improd += h.improd;
       map[s.movil].solicitudes.add(s.solicitud);
     });
     return Object.entries(map)
@@ -69,8 +72,9 @@ export default function FullDashboard({ services, fuelEntries, onBack }: Props) 
     filteredServices.forEach((s) => {
       if (!s.cliente) return;
       if (!map[s.cliente]) map[s.cliente] = { prod: 0, improd: 0, solicitudes: new Set() };
-      map[s.cliente].prod += timeToMinutes(s.horasProductivas);
-      map[s.cliente].improd += timeToMinutes(s.horasImproductivas);
+      const h = getAdjustedHours(s);
+      map[s.cliente].prod += h.prod;
+      map[s.cliente].improd += h.improd;
       map[s.cliente].solicitudes.add(s.solicitud);
     });
     return Object.entries(map)
@@ -78,8 +82,8 @@ export default function FullDashboard({ services, fuelEntries, onBack }: Props) 
       .sort((a, b) => b.total - a.total);
   }, [filteredServices]);
 
-  const totalProd = filteredServices.reduce((a, s) => a + timeToMinutes(s.horasProductivas), 0);
-  const totalImprod = filteredServices.reduce((a, s) => a + timeToMinutes(s.horasImproductivas), 0);
+  const totalProd = filteredServices.reduce((a, s) => a + getAdjustedHours(s).prod, 0);
+  const totalImprod = filteredServices.reduce((a, s) => a + getAdjustedHours(s).improd, 0);
   const totalServicios = new Set(filteredServices.map((s) => s.solicitud)).size;
   const uniqueDays = new Set(filteredServices.map((s) => s.fecha)).size;
   const totalFuel = filteredFuel.reduce((a, f) => a + f.monto, 0);
@@ -160,9 +164,9 @@ export default function FullDashboard({ services, fuelEntries, onBack }: Props) 
             </ResponsiveContainer>
           </div>
           <DataTable
-            columns={["Personal", "Servicios", "Hs Prod.", "Hs Improd.", "Hs Total", "Eficiencia"]}
+            columns={["Personal", "Clientes", "Servicios", "Hs Prod.", "Hs Improd.", "Hs Total", "Eficiencia"]}
             rows={byPerson.map((p) => [
-              p.nombre, p.servicios, formatHoursMinutes(p.prod), formatHoursMinutes(p.improd),
+              p.nombre, p.clientes || "CENOP", p.servicios, formatHoursMinutes(p.prod), formatHoursMinutes(p.improd),
               formatHoursMinutes(p.total), p.total > 0 ? `${Math.round((p.prod / p.total) * 100)}%` : "—",
             ])}
           />
