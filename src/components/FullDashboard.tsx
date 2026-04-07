@@ -80,7 +80,7 @@ export default function FullDashboard({ services, fuelEntries, onBack }: Props) 
 
   const totalProd = filteredServices.reduce((a, s) => a + timeToMinutes(s.horasProductivas), 0);
   const totalImprod = filteredServices.reduce((a, s) => a + timeToMinutes(s.horasImproductivas), 0);
-  const totalServicios = filteredServices.length;
+  const totalServicios = new Set(filteredServices.map((s) => s.solicitud)).size;
   const uniqueDays = new Set(filteredServices.map((s) => s.fecha)).size;
   const totalFuel = filteredFuel.reduce((a, f) => a + f.monto, 0);
 
