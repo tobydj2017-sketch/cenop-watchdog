@@ -4,6 +4,7 @@ import { formatHoursMinutes } from "@/lib/formatTime";
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, PieChart, Pie, Cell, Legend } from "recharts";
 import { Users, Truck, Building2, CalendarDays, ArrowLeft } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import DashboardFilters from "@/components/DashboardFilters";
 
 interface Props {
   services: ServiceEntry[];
