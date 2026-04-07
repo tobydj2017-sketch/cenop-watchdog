@@ -2,12 +2,12 @@ import { useState, useRef, useMemo } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { ServiceEntry, PeajeEntry, generateId, calcTimeDiff, timeToMinutes, minutesToTime } from "@/lib/types";
+import { ServiceEntry, PeajeEntry, ComisionEntry, generateId, calcTimeDiff, timeToMinutes, minutesToTime } from "@/lib/types";
 import { MOVILES, CLIENTES, MOVIL_TELEFONO } from "@/lib/cenopData";
 import { getPersonal, getActivePersonalNames } from "@/lib/personalStore";
 import SearchableSelect from "@/components/SearchableSelect";
 import TimeInput from "@/components/TimeInput";
-import { Plus, Trash2, CircleDollarSign } from "lucide-react";
+import { Plus, Trash2, CircleDollarSign, Briefcase } from "lucide-react";
 
 interface Props {
   onAdd: (entry: ServiceEntry) => void;
@@ -44,6 +44,7 @@ export default function ServiceForm({ onAdd, selectedDate }: Props) {
   const [form, setForm] = useState(defaultEntry);
   const [open, setOpen] = useState(false);
   const [peajes, setPeajes] = useState<PeajeEntry[]>([]);
+  const [comisiones, setComisiones] = useState<ComisionEntry[]>([]);
 
   const allPersonalEntries = getPersonal();
   const allPersonal = getActivePersonalNames();
@@ -96,6 +97,22 @@ export default function ServiceForm({ onAdd, selectedDate }: Props) {
   };
 
   const totalPeajes = peajes.reduce((sum, p) => sum + (p.monto || 0), 0);
+  const totalComisiones = comisiones.reduce((sum, c) => sum + (c.monto || 0), 0);
+
+  // Comisiones
+  const addComision = () => {
+    setComisiones((prev) => [...prev, { id: generateId(), descripcion: "", monto: 0, hora: "" }]);
+  };
+
+  const updateComision = (id: string, field: keyof Omit<ComisionEntry, "id">, value: string | number) => {
+    setComisiones((prev) =>
+      prev.map((c) => (c.id === id ? { ...c, [field]: value } : c))
+    );
+  };
+
+  const removeComision = (id: string) => {
+    setComisiones((prev) => prev.filter((c) => c.id !== id));
+  };
 
   const calculateHours = () => {
     const prod = calcTimeDiff(form.iniciaServicio, form.finalizaServicio);
