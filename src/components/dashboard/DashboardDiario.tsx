@@ -3,7 +3,7 @@ import { ServiceEntry, FuelEntry, timeToMinutes } from "@/lib/types";
 import { formatHoursMinutes } from "@/lib/formatTime";
 import {
   BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer,
-  LineChart, Line, CartesianGrid, Legend, AreaChart, Area,
+  LineChart, Line, CartesianGrid, Legend, AreaChart, Area, LabelList,
 } from "recharts";
 import { StatCard } from "./DashboardResumen";
 
