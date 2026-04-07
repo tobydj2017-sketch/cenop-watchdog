@@ -42,6 +42,7 @@ const defaultEntry = {
 export default function ServiceForm({ onAdd, selectedDate }: Props) {
   const [form, setForm] = useState(defaultEntry);
   const [open, setOpen] = useState(false);
+  const timeFieldsRef = useRef<HTMLDivElement>(null);
 
   const set = (field: string, value: string | number) =>
     setForm((prev) => ({ ...prev, [field]: value }));
