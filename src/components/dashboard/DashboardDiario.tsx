@@ -53,7 +53,7 @@ export default function DashboardDiario({ services, fuelEntries }: Props) {
 
   const bestDay = byDay.reduce((best, d) => d.eficiencia > (best?.eficiencia || 0) ? d : best, byDay[0]);
   const worstDay = byDay.reduce((worst, d) => d.eficiencia < (worst?.eficiencia || 100) ? d : worst, byDay[0]);
-  const maxServDay = byDay.reduce((max, d) => d.servicios > (max?.servicios || 0) ? d : max, byDay[0]);
+  const maxServDay = byDay.reduce((max, d) => d.serviciosCliente > (max?.serviciosCliente || 0) ? d : max, byDay[0]);
 
   return (
     <div className="space-y-5">
@@ -62,12 +62,11 @@ export default function DashboardDiario({ services, fuelEntries }: Props) {
         <StatCard label="Días con Datos" value={byDay.length} />
         <StatCard label="Mejor Eficiencia" value={bestDay ? `${bestDay.eficiencia}% (${bestDay.label})` : "—"} className="text-success" />
         <StatCard label="Peor Eficiencia" value={worstDay ? `${worstDay.eficiencia}% (${worstDay.label})` : "—"} className="text-destructive" />
-        <StatCard label="Día con Más Servicios" value={maxServDay ? `${maxServDay.servicios} (${maxServDay.label})` : "—"} />
+        <StatCard label="Día con Más Servicios" value={maxServDay ? `${maxServDay.serviciosCliente} (${maxServDay.label})` : "—"} />
       </div>
 
-      {/* Servicios por día */}
       <div className="glass-card p-5">
-        <h3 className="text-sm font-semibold text-muted-foreground mb-4 uppercase tracking-wider">Cantidad de Servicios por Día</h3>
+        <h3 className="text-sm font-semibold text-muted-foreground mb-4 uppercase tracking-wider">Servicios por Día (Clientes vs Base)</h3>
         <ResponsiveContainer width="100%" height={320}>
           <BarChart data={byDay} margin={{ top: 20 }}>
             <CartesianGrid strokeDasharray="3 3" stroke="hsl(0,0%,30%)" />
@@ -78,12 +77,18 @@ export default function DashboardDiario({ services, fuelEntries }: Props) {
               return (
                 <div className="rounded-md border border-border bg-card p-2 shadow-lg text-xs">
                   <p className="font-semibold mb-1">{label}</p>
-                  <p>Servicios realizados: <span className="font-bold">{payload[0].value}</span></p>
+                  <p>Servicios a clientes: <span className="font-bold text-success">{payload[0]?.value}</span></p>
+                  <p>Servicios en base (CENOP): <span className="font-bold text-destructive">{payload[1]?.value}</span></p>
+                  <p>Total: <span className="font-bold">{Number(payload[0]?.value || 0) + Number(payload[1]?.value || 0)}</span></p>
                 </div>
               );
             }} />
-            <Bar dataKey="servicios" name="Servicios" fill="hsl(200, 70%, 50%)" radius={[3, 3, 0, 0]}>
-              <LabelList dataKey="servicios" position="top" style={{ fontSize: 10, fill: "hsl(0,0%,70%)" }} />
+            <Legend />
+            <Bar dataKey="serviciosCliente" name="Clientes" fill="hsl(142, 70%, 45%)" stackId="a" radius={[0, 0, 0, 0]}>
+              <LabelList dataKey="serviciosCliente" position="center" style={{ fontSize: 10, fill: "white", fontWeight: 600 }} formatter={(v: number) => v > 0 ? v : ""} />
+            </Bar>
+            <Bar dataKey="serviciosBase" name="Base (CENOP)" fill="hsl(0, 72%, 50%)" stackId="a" radius={[3, 3, 0, 0]}>
+              <LabelList dataKey="serviciosBase" position="center" style={{ fontSize: 10, fill: "white", fontWeight: 600 }} formatter={(v: number) => v > 0 ? v : ""} />
             </Bar>
           </BarChart>
         </ResponsiveContainer>
@@ -141,14 +146,14 @@ export default function DashboardDiario({ services, fuelEntries }: Props) {
   );
 }
 
-function DailyTable({ data }: { data: { fecha: string; label: string; prod: number; improd: number; total: number; servicios: number; eficiencia: number; fuel: number }[] }) {
+function DailyTable({ data }: { data: { fecha: string; label: string; prod: number; improd: number; total: number; serviciosCliente: number; serviciosBase: number; serviciosTotal: number; eficiencia: number; fuel: number }[] }) {
   return (
     <div className="glass-card overflow-hidden">
       <div className="overflow-x-auto max-h-[50vh] overflow-y-auto">
         <table className="w-full text-sm">
           <thead className="sticky top-0 z-10 bg-card">
             <tr className="border-b border-border">
-              {["Fecha", "Servicios", "Hs Prod.", "Hs Improd.", "Hs Total", "Eficiencia", "Combustible"].map((c) => (
+              {["Fecha", "Serv. Clientes", "Serv. Base", "Total", "Hs Prod.", "Hs Improd.", "Hs Total", "Eficiencia", "Combustible"].map((c) => (
                 <th key={c} className="px-3 py-3 text-left text-xs text-muted-foreground uppercase tracking-wider font-semibold whitespace-nowrap">{c}</th>
               ))}
             </tr>
@@ -157,7 +162,9 @@ function DailyTable({ data }: { data: { fecha: string; label: string; prod: numb
             {data.map((d) => (
               <tr key={d.fecha} className="border-b border-border/50 hover:bg-secondary/30 transition-colors">
                 <td className="px-3 py-2.5 font-semibold font-mono text-xs">{d.fecha}</td>
-                <td className="px-3 py-2.5 font-mono text-xs">{d.servicios}</td>
+                <td className="px-3 py-2.5 font-mono text-xs text-success font-semibold">{d.serviciosCliente}</td>
+                <td className="px-3 py-2.5 font-mono text-xs text-destructive font-semibold">{d.serviciosBase}</td>
+                <td className="px-3 py-2.5 font-mono text-xs">{d.serviciosTotal}</td>
                 <td className="px-3 py-2.5 font-mono text-xs text-success font-semibold">{formatHoursMinutes(d.prod)}</td>
                 <td className="px-3 py-2.5 font-mono text-xs text-destructive font-semibold">{formatHoursMinutes(d.improd)}</td>
                 <td className="px-3 py-2.5 font-mono text-xs">{formatHoursMinutes(d.total)}</td>
