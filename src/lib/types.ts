@@ -1,3 +1,9 @@
+export interface PeajeEntry {
+  id: string;
+  ubicacion: string;
+  monto: number;
+}
+
 export interface ServiceEntry {
   id: string;
   solicitud: number;
@@ -29,6 +35,7 @@ export interface ServiceEntry {
   horasImproductivas: string;
   horasTotales: string;
   fecha: string;
+  peajes?: PeajeEntry[];
 }
 
 export interface FuelEntry {
