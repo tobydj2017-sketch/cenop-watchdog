@@ -92,7 +92,6 @@ export default function ServiceForm({ onAdd, selectedDate }: Props) {
     );
   }
 
-  const timeFieldsRef = useRef<HTMLDivElement>(null);
 
   const focusNextTimeInput = (currentField: string) => {
     const timeFields = ["horaSolicitud", "citaChofer", "citaCustodio", "salidaCenop", "llegadaServicio", "iniciaServicio", "llegadaDestino", "finalizaServicio", "llegadaCenop", "horaFrancoChofer", "horaFrancoCustodio"];
