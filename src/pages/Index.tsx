@@ -1,5 +1,5 @@
 import { useState, useCallback } from "react";
-import { Shield, CalendarDays, BarChart3 } from "lucide-react";
+import { Shield, CalendarDays, BarChart3, ClipboardList } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import DashboardStats from "@/components/DashboardStats";
