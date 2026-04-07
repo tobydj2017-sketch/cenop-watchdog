@@ -217,7 +217,7 @@ export default function ServiceForm({ onAdd, selectedDate }: Props) {
               <span className="px-1.5 py-0.5 rounded text-[10px] font-bold bg-purple-500/20 text-purple-400 border border-purple-500/30">OP</span>
             )}
           </Label>
-          <SearchableSelect options={choferOptions} value={form.chofer} onChange={(v) => set("chofer", v)} placeholder="Seleccionar..." badgeMap={opsBadgeMap} />
+          <SearchableSelect options={allPersonal} value={form.chofer} onChange={(v) => set("chofer", v)} placeholder="Seleccionar..." badgeMap={roleBadgeMap} />
         </div>
         <Field label="Cita Chofer" field="citaChofer" type="time" />
         <div className="space-y-1">
@@ -227,7 +227,7 @@ export default function ServiceForm({ onAdd, selectedDate }: Props) {
               <span className="px-1.5 py-0.5 rounded text-[10px] font-bold bg-purple-500/20 text-purple-400 border border-purple-500/30">OP</span>
             )}
           </Label>
-          <SearchableSelect options={custodioOptions} value={form.custodio} onChange={(v) => set("custodio", v)} placeholder="Seleccionar..." badgeMap={opsBadgeMap} />
+          <SearchableSelect options={allPersonal} value={form.custodio} onChange={(v) => set("custodio", v)} placeholder="Seleccionar..." badgeMap={roleBadgeMap} />
         </div>
         <Field label="Cita Custodio" field="citaCustodio" type="time" />
       </div>
