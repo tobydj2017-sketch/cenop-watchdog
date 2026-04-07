@@ -8,8 +8,14 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Input } from "@/components/ui/input";
 import {
   BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer,
-  CartesianGrid, Legend,
+  CartesianGrid, Legend, PieChart, Pie, Cell, LineChart, Line,
 } from "recharts";
+
+const PIE_COLORS = [
+  "hsl(142, 70%, 45%)", "hsl(200, 70%, 50%)", "hsl(38, 92%, 50%)",
+  "hsl(280, 60%, 55%)", "hsl(0, 72%, 50%)", "hsl(160, 60%, 40%)",
+  "hsl(320, 60%, 50%)", "hsl(60, 70%, 45%)",
+];
 
 interface Props {
   services: ServiceEntry[];
