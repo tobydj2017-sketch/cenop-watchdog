@@ -309,7 +309,7 @@ export default function DashboardRendimiento({ services }: Props) {
                               <ResponsiveContainer width="100%" height={220}>
                                 <BarChart data={p.diaDetalle}>
                                   <CartesianGrid strokeDasharray="3 3" stroke="hsl(0,0%,25%)" />
-                                  <XAxis dataKey="label" tick={{ fontSize: 9 }} />
+                                  <XAxis dataKey="labelConDia" tick={<DayTick />} height={35} />
                                   <YAxis tickFormatter={(v) => `${Math.floor(v / 60)}h`} tick={{ fontSize: 10 }} />
                                   <Tooltip formatter={tooltipFormatter} />
                                   <Legend wrapperStyle={{ fontSize: 10 }} />
