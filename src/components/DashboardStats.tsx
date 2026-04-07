@@ -1,5 +1,6 @@
 import { Shield, Clock, TrendingUp, TrendingDown, Truck, Fuel } from "lucide-react";
 import { ServiceEntry, FuelEntry, timeToMinutes } from "@/lib/types";
+import { formatHoursMinutes } from "@/lib/formatTime";
 
 interface Props {
   services: ServiceEntry[];
@@ -16,16 +17,10 @@ export default function DashboardStats({ services, fuelEntries, selectedDate }: 
   const totalFuel = dayFuel.reduce((acc, f) => acc + f.monto, 0);
   const uniqueMoviles = new Set(dayServices.map((s) => s.movil).filter(Boolean)).size;
 
-  const formatHours = (min: number) => {
-    const h = Math.floor(min / 60);
-    const m = min % 60;
-    return `${h}h ${m.toString().padStart(2, "0")}m`;
-  };
-
   const stats = [
     { label: "Servicios", value: dayServices.length, icon: Shield, color: "text-primary" },
-    { label: "Hs Productivas", value: formatHours(totalProd), icon: TrendingUp, color: "text-success" },
-    { label: "Hs Improductivas", value: formatHours(totalImprod), icon: TrendingDown, color: "text-destructive" },
+    { label: "Hs Productivas", value: formatHoursMinutes(totalProd), icon: TrendingUp, color: "text-success" },
+    { label: "Hs Improductivas", value: formatHoursMinutes(totalImprod), icon: TrendingDown, color: "text-destructive" },
     { label: "Móviles", value: uniqueMoviles, icon: Truck, color: "text-primary" },
     { label: "Combustible", value: `$${totalFuel.toLocaleString("es-AR")}`, icon: Fuel, color: "text-warning" },
     { label: "Eficiencia", value: totalProd + totalImprod > 0 ? `${Math.round((totalProd / (totalProd + totalImprod)) * 100)}%` : "—", icon: Clock, color: "text-primary" },
