@@ -47,6 +47,10 @@ export interface FuelEntry {
   chofer: string;
   monto: number;
   litros: number;
+  precioPorLitro: number;
+  kilometraje: string;
+  numeroRemito: string;
+  lugarCarga: string;
   estacion: string;
   ticketImage?: string;
   observaciones: string;
