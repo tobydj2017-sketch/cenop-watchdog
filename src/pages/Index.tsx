@@ -1,16 +1,85 @@
-// Update this page (the content is just a fallback if you fail to update the page)
+import { useState, useCallback } from "react";
+import { Shield, CalendarDays } from "lucide-react";
+import { Input } from "@/components/ui/input";
+import DashboardStats from "@/components/DashboardStats";
+import ServiceForm from "@/components/ServiceForm";
+import ServiceTable from "@/components/ServiceTable";
+import FuelForm from "@/components/FuelForm";
+import FuelTable from "@/components/FuelTable";
+import { ServiceEntry, FuelEntry } from "@/lib/types";
+import {
+  getServices, saveServices, addService, deleteService,
+  getFuelEntries, addFuelEntry, deleteFuelEntry,
+} from "@/lib/store";
 
-// IMPORTANT: Fully REPLACE this with your own code
-const PlaceholderIndex = () => {
-  // PLACEHOLDER: Replace this entire return statement with the user's app.
-  // The inline background color is intentionally not part of the design system.
+const today = new Date().toISOString().split("T")[0];
+
+export default function Index() {
+  const [services, setServices] = useState<ServiceEntry[]>(getServices);
+  const [fuelEntries, setFuelEntries] = useState<FuelEntry[]>(getFuelEntries);
+  const [selectedDate, setSelectedDate] = useState(today);
+
+  const handleAddService = useCallback((entry: ServiceEntry) => {
+    addService(entry);
+    setServices(getServices());
+  }, []);
+
+  const handleDeleteService = useCallback((id: string) => {
+    deleteService(id);
+    setServices(getServices());
+  }, []);
+
+  const handleAddFuel = useCallback((entry: FuelEntry) => {
+    addFuelEntry(entry);
+    setFuelEntries(getFuelEntries());
+  }, []);
+
+  const handleDeleteFuel = useCallback((id: string) => {
+    deleteFuelEntry(id);
+    setFuelEntries(getFuelEntries());
+  }, []);
+
+  const dayServices = services.filter((s) => s.fecha === selectedDate);
+  const dayFuel = fuelEntries.filter((f) => f.fecha === selectedDate);
+
   return (
-    <div className="flex min-h-screen items-center justify-center" style={{ backgroundColor: '#fcfbf8' }}>
-      <img data-lovable-blank-page-placeholder="REMOVE_THIS" src="/placeholder.svg" alt="Your app will live here!" />
+    <div className="min-h-screen bg-background">
+      {/* Header */}
+      <header className="border-b border-border bg-card/50 backdrop-blur-sm sticky top-0 z-40">
+        <div className="container max-w-7xl mx-auto px-4 py-3 flex items-center justify-between">
+          <div className="flex items-center gap-3">
+            <div className="w-9 h-9 rounded-lg bg-primary/10 flex items-center justify-center glow-amber">
+              <Shield className="w-5 h-5 text-primary" />
+            </div>
+            <div>
+              <h1 className="text-base font-bold tracking-tight">CENOP</h1>
+              <p className="text-xs text-muted-foreground">AM Seguridad — Control Operativo</p>
+            </div>
+          </div>
+          <div className="flex items-center gap-2">
+            <CalendarDays className="w-4 h-4 text-muted-foreground" />
+            <Input
+              type="date"
+              value={selectedDate}
+              onChange={(e) => setSelectedDate(e.target.value)}
+              className="h-9 w-40 text-sm font-mono"
+            />
+          </div>
+        </div>
+      </header>
+
+      {/* Main */}
+      <main className="container max-w-7xl mx-auto px-4 py-6 space-y-5">
+        <DashboardStats services={services} fuelEntries={fuelEntries} selectedDate={selectedDate} />
+
+        <div className="grid lg:grid-cols-2 gap-4">
+          <ServiceForm onAdd={handleAddService} selectedDate={selectedDate} />
+          <FuelForm onAdd={handleAddFuel} selectedDate={selectedDate} />
+        </div>
+
+        <ServiceTable services={dayServices} onDelete={handleDeleteService} />
+        <FuelTable entries={dayFuel} onDelete={handleDeleteFuel} />
+      </main>
     </div>
   );
-};
-
-const Index = PlaceholderIndex;
-
-export default Index;
+}
