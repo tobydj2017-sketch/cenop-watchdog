@@ -97,12 +97,10 @@ export function isCountableServiceEntry(service: ServiceEntry): boolean {
     service.remito,
     service.continuaOrden,
     service.observaciones,
-    service.horasProductivas,
-    service.horasImproductivas1,
-    service.horasImproductivas2,
-    service.horasImproductivas,
-    service.horasTotales,
-  ].some((value) => Boolean(String(value ?? "").trim()));
+  ].some((value) => {
+    const normalized = String(value ?? "").trim();
+    return normalized !== "" && normalized !== "00:00" && normalized !== "00:00:00" && normalized !== "0:00";
+  });
 }
 
 export function getServiceKey(service: Pick<ServiceEntry, "fecha" | "solicitud">): string {
