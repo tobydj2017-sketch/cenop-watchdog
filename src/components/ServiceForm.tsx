@@ -1,10 +1,10 @@
-import { useState, useRef } from "react";
+import { useState, useRef, useMemo } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { ServiceEntry, PeajeEntry, generateId, calcTimeDiff, timeToMinutes, minutesToTime } from "@/lib/types";
 import { MOVILES, CLIENTES, MOVIL_TELEFONO } from "@/lib/cenopData";
-import { getPersonalByRole, getActivePersonalNames } from "@/lib/personalStore";
+import { getPersonalByRole, getActivePersonalNames, getPersonal } from "@/lib/personalStore";
 import SearchableSelect from "@/components/SearchableSelect";
 import TimeInput from "@/components/TimeInput";
 import { Plus, Trash2, CircleDollarSign } from "lucide-react";
@@ -45,6 +45,7 @@ export default function ServiceForm({ onAdd, selectedDate }: Props) {
   const [open, setOpen] = useState(false);
   const [peajes, setPeajes] = useState<PeajeEntry[]>([]);
 
+  const allPersonalEntries = getPersonal();
   const choferes = getPersonalByRole("chofer").map((p) => p.nombre);
   const custodios = getPersonalByRole("custodio").map((p) => p.nombre);
   const allPersonal = getActivePersonalNames();
@@ -52,6 +53,15 @@ export default function ServiceForm({ onAdd, selectedDate }: Props) {
   // Fallback: if no one has the role assigned, show all active personal
   const choferOptions = choferes.length > 0 ? choferes : allPersonal;
   const custodioOptions = custodios.length > 0 ? custodios : allPersonal;
+
+  // Badge map: mark operations staff with "OP"
+  const opsBadgeMap = useMemo(() => {
+    const map: Record<string, string> = {};
+    allPersonalEntries.forEach((p) => {
+      if (p.roles.includes("operaciones")) map[p.nombre] = "OP";
+    });
+    return map;
+  }, [allPersonalEntries]);
 
   const set = (field: string, value: string | number) =>
     setForm((prev) => ({ ...prev, [field]: value }));
@@ -144,7 +154,7 @@ export default function ServiceForm({ onAdd, selectedDate }: Props) {
     </div>
   );
 
-  const SelectField = ({ label, field, options, onCustomChange }: { label: string; field: string; options: string[]; onCustomChange?: (v: string) => void }) => (
+  const SelectField = ({ label, field, options, onCustomChange, showBadges }: { label: string; field: string; options: string[]; onCustomChange?: (v: string) => void; showBadges?: boolean }) => (
     <div className="space-y-1">
       <Label className="text-xs text-muted-foreground">{label}</Label>
       <SearchableSelect
@@ -152,6 +162,7 @@ export default function ServiceForm({ onAdd, selectedDate }: Props) {
         value={(form as any)[field]}
         onChange={onCustomChange || ((v) => set(field, v))}
         placeholder={`Seleccionar...`}
+        badgeMap={showBadges ? opsBadgeMap : undefined}
       />
     </div>
   );
@@ -191,9 +202,9 @@ export default function ServiceForm({ onAdd, selectedDate }: Props) {
       </div>
 
       <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-        <SelectField label="Chofer" field="chofer" options={choferOptions} />
+        <SelectField label="Chofer" field="chofer" options={choferOptions} showBadges />
         <Field label="Cita Chofer" field="citaChofer" type="time" />
-        <SelectField label="Custodio" field="custodio" options={custodioOptions} />
+        <SelectField label="Custodio" field="custodio" options={custodioOptions} showBadges />
         <Field label="Cita Custodio" field="citaCustodio" type="time" />
       </div>
 

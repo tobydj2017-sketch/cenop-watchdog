@@ -6,6 +6,7 @@ import { Badge } from "@/components/ui/badge";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Checkbox } from "@/components/ui/checkbox";
 import { ServiceEntry, FuelEntry } from "@/lib/types";
+import { getPersonal } from "@/lib/personalStore";
 
 interface Props {
   services: ServiceEntry[];
@@ -22,6 +23,12 @@ export default function DashboardFilters({ services, fuelEntries, onFilter }: Pr
   const [searchPersonal, setSearchPersonal] = useState("");
   const [searchMovil, setSearchMovil] = useState("");
   const [searchCliente, setSearchCliente] = useState("");
+  const [tipoPersonal, setTipoPersonal] = useState<"todos" | "cenop" | "operaciones">("todos");
+
+  const opsNames = useMemo(() => {
+    const personal = getPersonal();
+    return new Set(personal.filter((p) => p.roles.includes("operaciones")).map((p) => p.nombre));
+  }, []);
 
   const allPersonal = useMemo(() => {
     const set = new Set<string>();
@@ -44,9 +51,9 @@ export default function DashboardFilters({ services, fuelEntries, onFilter }: Pr
     return Array.from(set).sort();
   }, [services]);
 
-  const hasFilters = selectedPersonal.length > 0 || selectedMoviles.length > 0 || selectedClientes.length > 0 || fechaDesde || fechaHasta;
+  const hasFilters = selectedPersonal.length > 0 || selectedMoviles.length > 0 || selectedClientes.length > 0 || fechaDesde || fechaHasta || tipoPersonal !== "todos";
 
-  const totalSelected = selectedPersonal.length + selectedMoviles.length + selectedClientes.length + (fechaDesde ? 1 : 0) + (fechaHasta ? 1 : 0);
+  const totalSelected = selectedPersonal.length + selectedMoviles.length + selectedClientes.length + (fechaDesde ? 1 : 0) + (fechaHasta ? 1 : 0) + (tipoPersonal !== "todos" ? 1 : 0);
 
   const applyFilters = () => {
     let filtered = [...services];
@@ -60,6 +67,11 @@ export default function DashboardFilters({ services, fuelEntries, onFilter }: Pr
     }
     if (selectedClientes.length > 0) {
       filtered = filtered.filter((s) => selectedClientes.includes(s.cliente));
+    }
+    if (tipoPersonal === "operaciones") {
+      filtered = filtered.filter((s) => opsNames.has(s.chofer) || opsNames.has(s.custodio));
+    } else if (tipoPersonal === "cenop") {
+      filtered = filtered.filter((s) => !opsNames.has(s.chofer) && !opsNames.has(s.custodio));
     }
 
     let filteredFuel = [...fuelEntries];
@@ -84,6 +96,7 @@ export default function DashboardFilters({ services, fuelEntries, onFilter }: Pr
     setSearchPersonal("");
     setSearchMovil("");
     setSearchCliente("");
+    setTipoPersonal("todos");
     onFilter(services, fuelEntries);
   };
 
@@ -113,7 +126,31 @@ export default function DashboardFilters({ services, fuelEntries, onFilter }: Pr
         </div>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-3">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-6 gap-3">
+        {/* Tipo Personal */}
+        <div className="space-y-1">
+          <label className="text-xs text-muted-foreground font-medium">Tipo Personal</label>
+          <div className="flex h-8 rounded-md border border-input overflow-hidden">
+            {([
+              { key: "todos", label: "Todos" },
+              { key: "cenop", label: "CENOP" },
+              { key: "operaciones", label: "OP" },
+            ] as const).map(({ key, label }) => (
+              <button
+                key={key}
+                type="button"
+                onClick={() => setTipoPersonal(key)}
+                className={`flex-1 text-xs font-medium transition-colors ${
+                  tipoPersonal === key
+                    ? "bg-primary text-primary-foreground"
+                    : "bg-background hover:bg-muted"
+                }`}
+              >
+                {label}
+              </button>
+            ))}
+          </div>
+        </div>
         {/* Fecha Desde */}
         <div className="space-y-1">
           <label className="text-xs text-muted-foreground font-medium flex items-center gap-1">
