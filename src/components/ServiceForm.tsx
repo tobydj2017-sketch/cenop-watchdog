@@ -2,11 +2,12 @@ import { useState, useRef } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { ServiceEntry, generateId, calcTimeDiff, timeToMinutes, minutesToTime } from "@/lib/types";
-import { MOVILES, PERSONAL, CLIENTES, MOVIL_TELEFONO } from "@/lib/cenopData";
+import { ServiceEntry, PeajeEntry, generateId, calcTimeDiff, timeToMinutes, minutesToTime } from "@/lib/types";
+import { MOVILES, CLIENTES, MOVIL_TELEFONO } from "@/lib/cenopData";
+import { getPersonalByRole, getActivePersonalNames } from "@/lib/personalStore";
 import SearchableSelect from "@/components/SearchableSelect";
 import TimeInput from "@/components/TimeInput";
-import { Plus } from "lucide-react";
+import { Plus, Trash2, CircleDollarSign } from "lucide-react";
 
 interface Props {
   onAdd: (entry: ServiceEntry) => void;
@@ -42,7 +43,15 @@ const defaultEntry = {
 export default function ServiceForm({ onAdd, selectedDate }: Props) {
   const [form, setForm] = useState(defaultEntry);
   const [open, setOpen] = useState(false);
-  const timeFieldsRef = useRef<HTMLDivElement>(null);
+  const [peajes, setPeajes] = useState<PeajeEntry[]>([]);
+
+  const choferes = getPersonalByRole("chofer").map((p) => p.nombre);
+  const custodios = getPersonalByRole("custodio").map((p) => p.nombre);
+  const allPersonal = getActivePersonalNames();
+
+  // Fallback: if no one has the role assigned, show all active personal
+  const choferOptions = choferes.length > 0 ? choferes : allPersonal;
+  const custodioOptions = custodios.length > 0 ? custodios : allPersonal;
 
   const set = (field: string, value: string | number) =>
     setForm((prev) => ({ ...prev, [field]: value }));
@@ -54,6 +63,23 @@ export default function ServiceForm({ onAdd, selectedDate }: Props) {
       celular: MOVIL_TELEFONO[value] || prev.celular,
     }));
   };
+
+  // Peajes
+  const addPeaje = () => {
+    setPeajes((prev) => [...prev, { id: generateId(), ubicacion: "", monto: 0 }]);
+  };
+
+  const updatePeaje = (id: string, field: keyof Omit<PeajeEntry, "id">, value: string | number) => {
+    setPeajes((prev) =>
+      prev.map((p) => (p.id === id ? { ...p, [field]: value } : p))
+    );
+  };
+
+  const removePeaje = (id: string) => {
+    setPeajes((prev) => prev.filter((p) => p.id !== id));
+  };
+
+  const totalPeajes = peajes.reduce((sum, p) => sum + (p.monto || 0), 0);
 
   const calculateHours = () => {
     const prod = calcTimeDiff(form.iniciaServicio, form.finalizaServicio);
@@ -79,8 +105,10 @@ export default function ServiceForm({ onAdd, selectedDate }: Props) {
       ...hours,
       id: generateId(),
       fecha: selectedDate,
+      peajes: peajes.length > 0 ? peajes : undefined,
     });
     setForm(defaultEntry);
+    setPeajes([]);
     setOpen(false);
   };
 
@@ -136,7 +164,6 @@ export default function ServiceForm({ onAdd, selectedDate }: Props) {
     );
   }
 
-
   return (
     <form onSubmit={handleSubmit} className="glass-card p-5 space-y-4">
       <div className="flex items-center justify-between">
@@ -164,9 +191,9 @@ export default function ServiceForm({ onAdd, selectedDate }: Props) {
       </div>
 
       <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-        <SelectField label="Chofer" field="chofer" options={PERSONAL} />
+        <SelectField label="Chofer" field="chofer" options={choferOptions} />
         <Field label="Cita Chofer" field="citaChofer" type="time" />
-        <SelectField label="Custodio" field="custodio" options={PERSONAL} />
+        <SelectField label="Custodio" field="custodio" options={custodioOptions} />
         <Field label="Cita Custodio" field="citaCustodio" type="time" />
       </div>
 
@@ -188,6 +215,48 @@ export default function ServiceForm({ onAdd, selectedDate }: Props) {
         <Field label="N° Remito" field="remito" />
         <Field label="Continúa Orden N°" field="continuaOrden" />
         <Field label="Observaciones" field="observaciones" />
+      </div>
+
+      {/* Peajes */}
+      <div className="border-t border-border pt-3">
+        <div className="flex items-center justify-between mb-2">
+          <p className="text-xs text-muted-foreground uppercase tracking-wider">Peajes</p>
+          <div className="flex items-center gap-3">
+            {peajes.length > 0 && (
+              <span className="text-xs font-semibold text-primary">
+                Total: ${totalPeajes.toLocaleString("es-AR")}
+              </span>
+            )}
+            <Button type="button" variant="outline" size="sm" onClick={addPeaje} className="h-7 gap-1 text-xs">
+              <CircleDollarSign className="w-3.5 h-3.5" /> Agregar Peaje
+            </Button>
+          </div>
+        </div>
+        {peajes.map((peaje, idx) => (
+          <div key={peaje.id} className="flex items-end gap-2 mb-2">
+            <div className="flex-1 space-y-1">
+              <Label className="text-xs text-muted-foreground">Ubicación #{idx + 1}</Label>
+              <Input
+                value={peaje.ubicacion}
+                onChange={(e) => updatePeaje(peaje.id, "ubicacion", e.target.value)}
+                placeholder="Ej: Peaje Dock Sud"
+                className="h-9 text-sm"
+              />
+            </div>
+            <div className="w-32 space-y-1">
+              <Label className="text-xs text-muted-foreground">Monto ($)</Label>
+              <Input
+                type="number"
+                value={peaje.monto || ""}
+                onChange={(e) => updatePeaje(peaje.id, "monto", Number(e.target.value))}
+                className="h-9 text-sm"
+              />
+            </div>
+            <Button type="button" variant="ghost" size="icon" className="h-9 w-9 text-destructive" onClick={() => removePeaje(peaje.id)}>
+              <Trash2 className="w-3.5 h-3.5" />
+            </Button>
+          </div>
+        ))}
       </div>
 
       <Button type="submit" className="w-full gap-2">

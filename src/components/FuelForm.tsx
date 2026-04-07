@@ -3,7 +3,8 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { FuelEntry, generateId } from "@/lib/types";
-import { MOVILES, PERSONAL } from "@/lib/cenopData";
+import { MOVILES } from "@/lib/cenopData";
+import { getPersonalByRole, getActivePersonalNames } from "@/lib/personalStore";
 import SearchableSelect from "@/components/SearchableSelect";
 import { Camera, Plus, Upload } from "lucide-react";
 
@@ -14,6 +15,10 @@ interface Props {
 
 export default function FuelForm({ onAdd, selectedDate }: Props) {
   const [open, setOpen] = useState(false);
+
+  const choferes = getPersonalByRole("chofer").map((p) => p.nombre);
+  const allPersonal = getActivePersonalNames();
+  const choferOptions = choferes.length > 0 ? choferes : allPersonal;
   const [monto, setMonto] = useState("");
   const [litros, setLitros] = useState("");
   const [movil, setMovil] = useState("");
@@ -78,7 +83,7 @@ export default function FuelForm({ onAdd, selectedDate }: Props) {
         </div>
         <div className="space-y-1">
           <Label className="text-xs text-muted-foreground">Chofer</Label>
-          <SearchableSelect options={PERSONAL} value={chofer} onChange={setChofer} placeholder="Seleccionar..." />
+          <SearchableSelect options={choferOptions} value={chofer} onChange={setChofer} placeholder="Seleccionar..." />
         </div>
         <div className="space-y-1">
           <Label className="text-xs text-muted-foreground">Estación</Label>
