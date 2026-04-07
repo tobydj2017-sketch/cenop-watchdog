@@ -43,7 +43,7 @@ interface PersonData {
   promProdPorServ: number;
   clientes: string[];
   clienteDetalle: { cliente: string; prod: number; improd: number; servicios: number }[];
-  diaDetalle: { fecha: string; label: string; prod: number; improd: number; servicios: number; clientes: string[] }[];
+  diaDetalle: { fecha: string; label: string; dia: string; labelConDia: string; prod: number; improd: number; servicios: number; clientes: string[] }[];
 }
 
 export default function DashboardRendimiento({ services }: Props) {
