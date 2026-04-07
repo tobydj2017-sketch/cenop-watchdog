@@ -1,5 +1,6 @@
 import { useMemo, useState } from "react";
 import { ServiceEntry, getAdjustedHours, getServiceKey, normalizeClientName } from "@/lib/types";
+import { getServiceSegments, SEGMENT_LEGEND } from "@/lib/serviceSegments";
 import { formatHoursMinutes, getDayAbbr } from "@/lib/formatTime";
 import { StatCard } from "./DashboardResumen";
 import { ChevronDown, ChevronUp, User } from "lucide-react";
@@ -336,6 +337,55 @@ export default function DashboardRendimiento({ services }: Props) {
                               </LineChart>
                             </ResponsiveContainer>
                           </div>
+
+                          {/* Jornada segments summary */}
+                          {(() => {
+                            const personServices = services.filter(s => s.chofer === p.nombre || s.custodio === p.nombre);
+                            const segTotals = { base: 0, traslado: 0, espera: 0, servicio: 0 };
+                            personServices.forEach(s => {
+                              const tl = getServiceSegments(s);
+                              tl.segments.forEach(seg => {
+                                if (seg.label.includes("Base") || seg.label.includes("Permanencia")) segTotals.base += seg.minutes;
+                                else if (seg.label.includes("Traslado")) segTotals.traslado += seg.minutes;
+                                else if (seg.label.includes("Espera")) segTotals.espera += seg.minutes;
+                                else if (seg.label.includes("Servicio")) segTotals.servicio += seg.minutes;
+                              });
+                            });
+                            const segTotal = segTotals.base + segTotals.traslado + segTotals.espera + segTotals.servicio;
+                            if (segTotal === 0) return null;
+                            const items = [
+                              { label: "En Base", min: segTotals.base, color: SEGMENT_LEGEND[0].color },
+                              { label: "Traslado", min: segTotals.traslado, color: SEGMENT_LEGEND[1].color },
+                              { label: "Espera", min: segTotals.espera, color: SEGMENT_LEGEND[2].color },
+                              { label: "Servicio Activo", min: segTotals.servicio, color: SEGMENT_LEGEND[3].color },
+                            ];
+                            return (
+                              <div className="glass-card p-4">
+                                <h4 className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-3">Composición de la Jornada</h4>
+                                <div className="flex h-7 rounded overflow-hidden mb-3">
+                                  {items.filter(x => x.min > 0).map((x, i) => (
+                                    <div
+                                      key={i}
+                                      className="h-full flex items-center justify-center text-[9px] font-mono text-white font-semibold"
+                                      style={{ width: `${(x.min / segTotal) * 100}%`, backgroundColor: x.color, minWidth: "4px" }}
+                                    >
+                                      {(x.min / segTotal) * 100 > 10 && formatHoursMinutes(x.min)}
+                                    </div>
+                                  ))}
+                                </div>
+                                <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
+                                  {items.map(x => (
+                                    <div key={x.label} className="flex items-center gap-1.5 text-xs">
+                                      <span className="w-2.5 h-2.5 rounded-sm" style={{ backgroundColor: x.color }} />
+                                      <span className="text-muted-foreground">{x.label}:</span>
+                                      <span className="font-mono font-semibold">{formatHoursMinutes(x.min)}</span>
+                                      <span className="text-muted-foreground">({segTotal > 0 ? Math.round((x.min / segTotal) * 100) : 0}%)</span>
+                                    </div>
+                                  ))}
+                                </div>
+                              </div>
+                            );
+                          })()}
 
                           {/* Per client breakdown table */}
                           <div>

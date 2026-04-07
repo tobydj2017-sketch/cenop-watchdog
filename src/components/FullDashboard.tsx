@@ -2,12 +2,13 @@ import { useState, useMemo } from "react";
 import { ServiceEntry, FuelEntry, getAdjustedHours, getServiceKey, normalizeClientName } from "@/lib/types";
 import { formatHoursMinutes } from "@/lib/formatTime";
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, PieChart, Pie, Cell, Legend } from "recharts";
-import { Users, Truck, Building2, CalendarDays, ArrowLeft, TrendingUp, LayoutDashboard } from "lucide-react";
+import { Users, Truck, Building2, CalendarDays, ArrowLeft, TrendingUp, LayoutDashboard, Clock } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import DashboardFilters from "@/components/DashboardFilters";
 import DashboardResumen from "@/components/dashboard/DashboardResumen";
 import DashboardDiario from "@/components/dashboard/DashboardDiario";
 import DashboardRendimiento from "@/components/dashboard/DashboardRendimiento";
+import DashboardJornada from "@/components/dashboard/DashboardJornada";
 import { DataTable } from "@/components/dashboard/DataTable";
 
 interface Props {
@@ -23,7 +24,7 @@ const COLORS = [
   "hsl(100, 50%, 45%)",
 ];
 
-type Tab = "resumen" | "diario" | "rendimiento" | "personal" | "moviles" | "clientes";
+type Tab = "resumen" | "diario" | "rendimiento" | "jornada" | "personal" | "moviles" | "clientes";
 
 export default function FullDashboard({ services, fuelEntries, onBack }: Props) {
   const [tab, setTab] = useState<Tab>("resumen");
@@ -94,6 +95,7 @@ export default function FullDashboard({ services, fuelEntries, onBack }: Props) 
     { id: "resumen", label: "Resumen", icon: LayoutDashboard },
     { id: "diario", label: "Día a Día", icon: CalendarDays },
     { id: "rendimiento", label: "Rendimiento", icon: TrendingUp },
+    { id: "jornada", label: "Jornada", icon: Clock },
     { id: "personal", label: "Personal", icon: Users },
     { id: "moviles", label: "Móviles", icon: Truck },
     { id: "clientes", label: "Clientes", icon: Building2 },
@@ -146,6 +148,10 @@ export default function FullDashboard({ services, fuelEntries, onBack }: Props) 
 
       {tab === "rendimiento" && (
         <DashboardRendimiento services={filteredServices} />
+      )}
+
+      {tab === "jornada" && (
+        <DashboardJornada services={filteredServices} />
       )}
 
       {tab === "personal" && (
