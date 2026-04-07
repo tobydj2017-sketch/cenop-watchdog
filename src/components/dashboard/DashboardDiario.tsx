@@ -26,14 +26,17 @@ const DayTick = ({ x, y, payload }: any) => {
 
 export default function DashboardDiario({ services, fuelEntries }: Props) {
   const byDay = useMemo(() => {
-    const map: Record<string, { prod: number; improd: number; solCliente: Set<number>; solBase: Set<number>; fuel: number }> = {};
+    const map: Record<string, { prod: number; improd: number; solCliente: Set<number>; solBase: Set<number>; fuel: number; detalleProd: Record<string, number>; detalleImprod: Record<string, number> }> = {};
     services.forEach((s) => {
       if (!s.fecha) return;
-      if (!map[s.fecha]) map[s.fecha] = { prod: 0, improd: 0, solCliente: new Set(), solBase: new Set(), fuel: 0 };
+      if (!map[s.fecha]) map[s.fecha] = { prod: 0, improd: 0, solCliente: new Set(), solBase: new Set(), fuel: 0, detalleProd: {}, detalleImprod: {} };
       const h = getAdjustedHours(s);
+      const esCenop = !s.cliente || s.cliente.toUpperCase().includes("CENOP");
+      const nombre = esCenop ? "CENOP (Base)" : s.cliente;
       map[s.fecha].prod += h.prod;
       map[s.fecha].improd += h.improd;
-      const esCenop = !s.cliente || s.cliente.toUpperCase().includes("CENOP");
+      if (h.prod > 0) map[s.fecha].detalleProd[nombre] = (map[s.fecha].detalleProd[nombre] || 0) + h.prod;
+      if (h.improd > 0) map[s.fecha].detalleImprod[nombre] = (map[s.fecha].detalleImprod[nombre] || 0) + h.improd;
       if (esCenop) {
         map[s.fecha].solBase.add(s.solicitud);
       } else {
@@ -42,7 +45,7 @@ export default function DashboardDiario({ services, fuelEntries }: Props) {
     });
     fuelEntries.forEach((f) => {
       if (!f.fecha) return;
-      if (!map[f.fecha]) map[f.fecha] = { prod: 0, improd: 0, solCliente: new Set(), solBase: new Set(), fuel: 0 };
+      if (!map[f.fecha]) map[f.fecha] = { prod: 0, improd: 0, solCliente: new Set(), solBase: new Set(), fuel: 0, detalleProd: {}, detalleImprod: {} };
       map[f.fecha].fuel += f.monto;
     });
     return Object.entries(map)
@@ -61,6 +64,8 @@ export default function DashboardDiario({ services, fuelEntries }: Props) {
           serviciosTotal: new Set([...v.solCliente, ...v.solBase]).size,
           eficiencia: v.prod + v.improd > 0 ? Math.round((v.prod / (v.prod + v.improd)) * 100) : 0,
           fuel: v.fuel,
+          detalleProd: Object.entries(v.detalleProd).sort((a, b) => b[1] - a[1]),
+          detalleImprod: Object.entries(v.detalleImprod).sort((a, b) => b[1] - a[1]),
         };
       })
       .sort((a, b) => a.fecha.localeCompare(b.fecha));
@@ -112,15 +117,45 @@ export default function DashboardDiario({ services, fuelEntries }: Props) {
       {/* Horas productivas vs improductivas por día */}
       <div className="glass-card p-5">
         <h3 className="text-sm font-semibold text-muted-foreground mb-4 uppercase tracking-wider">Horas Productivas vs Improductivas por Día</h3>
-        <ResponsiveContainer width="100%" height={300}>
-          <BarChart data={byDay}>
+        <ResponsiveContainer width="100%" height={320}>
+          <BarChart data={byDay} margin={{ top: 20 }}>
             <CartesianGrid strokeDasharray="3 3" stroke="hsl(0,0%,30%)" />
             <XAxis dataKey="labelConDia" tick={<DayTick />} height={40} />
             <YAxis tickFormatter={(v) => `${Math.floor(v / 60)}h`} tick={{ fontSize: 11 }} />
-            <Tooltip formatter={tooltipFormatter} />
+            <Tooltip content={({ active, payload }) => {
+              if (!active || !payload?.length) return null;
+              const d = payload[0]?.payload;
+              if (!d) return null;
+              return (
+                <div className="rounded-md border border-border bg-card p-2.5 shadow-lg text-xs max-w-[280px]">
+                  <p className="font-semibold mb-1.5">{d.label} ({d.dia})</p>
+                  <p className="text-success font-semibold">Hs Productivas: {formatHoursMinutes(d.prod)}</p>
+                  {d.detalleProd.length > 0 && (
+                    <div className="ml-2 mt-0.5 mb-1.5 space-y-0.5">
+                      {d.detalleProd.map(([cliente, min]: [string, number]) => (
+                        <p key={cliente} className="text-muted-foreground">• {cliente}: {formatHoursMinutes(min)}</p>
+                      ))}
+                    </div>
+                  )}
+                  <p className="text-destructive font-semibold">Hs Improductivas: {formatHoursMinutes(d.improd)}</p>
+                  {d.detalleImprod.length > 0 && (
+                    <div className="ml-2 mt-0.5 mb-1.5 space-y-0.5">
+                      {d.detalleImprod.map(([cliente, min]: [string, number]) => (
+                        <p key={cliente} className="text-muted-foreground">• {cliente}: {formatHoursMinutes(min)}</p>
+                      ))}
+                    </div>
+                  )}
+                  <p className="font-semibold mt-1 pt-1 border-t border-border">Total: {formatHoursMinutes(d.total)} — Eficiencia: {d.eficiencia}%</p>
+                </div>
+              );
+            }} />
             <Legend />
-            <Bar dataKey="prod" name="Hs Productivas" fill="hsl(142, 70%, 45%)" stackId="a" radius={[0, 0, 0, 0]} />
-            <Bar dataKey="improd" name="Hs Improductivas" fill="hsl(0, 72%, 50%)" stackId="a" radius={[3, 3, 0, 0]} />
+            <Bar dataKey="prod" name="Hs Productivas" fill="hsl(142, 70%, 45%)" stackId="a" radius={[0, 0, 0, 0]}>
+              <LabelList dataKey="prod" position="center" style={{ fontSize: 9, fill: "white", fontWeight: 600 }} formatter={(v: number) => v > 0 ? formatHoursMinutes(v) : ""} />
+            </Bar>
+            <Bar dataKey="improd" name="Hs Improductivas" fill="hsl(0, 72%, 50%)" stackId="a" radius={[3, 3, 0, 0]}>
+              <LabelList dataKey="improd" position="center" style={{ fontSize: 9, fill: "white", fontWeight: 600 }} formatter={(v: number) => v > 0 ? formatHoursMinutes(v) : ""} />
+            </Bar>
           </BarChart>
         </ResponsiveContainer>
       </div>
