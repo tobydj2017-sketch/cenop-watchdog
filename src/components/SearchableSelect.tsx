@@ -9,9 +9,10 @@ interface Props {
   onChange: (value: string) => void;
   placeholder?: string;
   className?: string;
+  badgeMap?: Record<string, string>;
 }
 
-export default function SearchableSelect({ options, value, onChange, placeholder, className }: Props) {
+export default function SearchableSelect({ options, value, onChange, placeholder, className, badgeMap }: Props) {
   const [open, setOpen] = useState(false);
   const [search, setSearch] = useState("");
   const ref = useRef<HTMLDivElement>(null);
@@ -55,7 +56,7 @@ export default function SearchableSelect({ options, value, onChange, placeholder
               <div
                 key={opt}
                 className={cn(
-                  "px-3 py-1.5 text-sm cursor-pointer hover:bg-accent hover:text-accent-foreground",
+                  "px-3 py-1.5 text-sm cursor-pointer hover:bg-accent hover:text-accent-foreground flex items-center justify-between",
                   opt === value && "bg-accent/50"
                 )}
                 onMouseDown={(e) => {
@@ -64,7 +65,12 @@ export default function SearchableSelect({ options, value, onChange, placeholder
                   setOpen(false);
                 }}
               >
-                {opt}
+                <span>{opt}</span>
+                {badgeMap?.[opt] && (
+                  <span className="ml-2 px-1.5 py-0.5 rounded text-[10px] font-bold bg-purple-500/20 text-purple-400 border border-purple-500/30">
+                    {badgeMap[opt]}
+                  </span>
+                )}
               </div>
             ))
           )}
