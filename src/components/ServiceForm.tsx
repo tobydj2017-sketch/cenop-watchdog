@@ -3,6 +3,8 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { ServiceEntry, generateId, calcTimeDiff, timeToMinutes, minutesToTime } from "@/lib/types";
+import { MOVILES, PERSONAL, CLIENTES, MOVIL_TELEFONO } from "@/lib/cenopData";
+import SearchableSelect from "@/components/SearchableSelect";
 import { Plus } from "lucide-react";
 
 interface Props {
@@ -43,12 +45,17 @@ export default function ServiceForm({ onAdd, selectedDate }: Props) {
   const set = (field: string, value: string | number) =>
     setForm((prev) => ({ ...prev, [field]: value }));
 
+  const setMovil = (value: string) => {
+    setForm((prev) => ({
+      ...prev,
+      movil: value,
+      celular: MOVIL_TELEFONO[value] || prev.celular,
+    }));
+  };
+
   const calculateHours = () => {
-    // Productivas: iniciaServicio -> finalizaServicio
     const prod = calcTimeDiff(form.iniciaServicio, form.finalizaServicio);
-    // Improductivas 1: salidaCenop -> iniciaServicio (traslado ida)
     const improd1 = calcTimeDiff(form.salidaCenop, form.iniciaServicio);
-    // Improductivas 2: finalizaServicio -> llegadaCenop o franco (tiempo post servicio)
     const endTime = form.horaFrancoChofer || form.horaFrancoCustodio || form.llegadaCenop;
     const improd2 = calcTimeDiff(form.finalizaServicio, endTime);
     const totalImprodMin = timeToMinutes(improd1) + timeToMinutes(improd2);
@@ -96,6 +103,18 @@ export default function ServiceForm({ onAdd, selectedDate }: Props) {
     </div>
   );
 
+  const SelectField = ({ label, field, options, onCustomChange }: { label: string; field: string; options: string[]; onCustomChange?: (v: string) => void }) => (
+    <div className="space-y-1">
+      <Label className="text-xs text-muted-foreground">{label}</Label>
+      <SearchableSelect
+        options={options}
+        value={(form as any)[field]}
+        onChange={onCustomChange || ((v) => set(field, v))}
+        placeholder={`Seleccionar...`}
+      />
+    </div>
+  );
+
   return (
     <form onSubmit={handleSubmit} className="glass-card p-5 space-y-4">
       <div className="flex items-center justify-between">
@@ -108,21 +127,21 @@ export default function ServiceForm({ onAdd, selectedDate }: Props) {
       <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
         <Field label="N° Solicitud" field="solicitud" type="number" />
         <Field label="Hora Solicitud" field="horaSolicitud" type="time" />
-        <Field label="Cliente" field="cliente" placeholder="Ej: SATRO" />
+        <SelectField label="Cliente" field="cliente" options={CLIENTES} />
         <Field label="Lugar de Salida" field="lugarSalida" placeholder="Ej: Villa Celina" />
       </div>
 
       <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
         <Field label="Destino" field="destino" />
-        <Field label="Móvil" field="movil" placeholder="Ej: RAM 301" />
+        <SelectField label="Móvil" field="movil" options={MOVILES} onCustomChange={setMovil} />
         <Field label="Patente/Celular" field="celular" />
         <Field label="Orden de Carga" field="ordenCarga" />
       </div>
 
       <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-        <Field label="Chofer" field="chofer" />
+        <SelectField label="Chofer" field="chofer" options={PERSONAL} />
         <Field label="Cita Chofer" field="citaChofer" type="time" />
-        <Field label="Custodio" field="custodio" />
+        <SelectField label="Custodio" field="custodio" options={PERSONAL} />
         <Field label="Cita Custodio" field="citaCustodio" type="time" />
       </div>
 
