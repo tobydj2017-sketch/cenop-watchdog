@@ -50,7 +50,7 @@ export default function ServiceTable({ services, onDelete }: Props) {
     <div className="glass-card overflow-hidden">
       <div className="overflow-x-auto max-h-[70vh] overflow-y-auto">
         <table className="w-full text-sm">
-          <thead>
+          <thead className="sticky top-0 z-10 bg-card">
             <tr className="border-b border-border">
               {["#", "Cliente", "Destino", "Chofer", "Custodio", "Móvil", "Salida", "Fin Serv.", "Hs Prod.", "Hs Improd.", "Hs Total", ""].map(
                 (h) => (
