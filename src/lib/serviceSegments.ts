@@ -55,9 +55,9 @@ export function getServiceSegments(s: ServiceEntry): ServiceTimeline {
     if (r) segments.push(r);
   }
 
-  // llegadaServicio → iniciaServicio (espera)
+  // llegadaServicio → iniciaServicio (espera en lugar de servicio = productivo)
   if (s.llegadaServicio && s.iniciaServicio) {
-    const r = seg("Espera en Origen", s.llegadaServicio, s.iniciaServicio, "improductivo", SEGMENT_COLORS.espera);
+    const r = seg("Espera en Origen", s.llegadaServicio, s.iniciaServicio, "productivo", SEGMENT_COLORS.espera);
     if (r) segments.push(r);
   }
 
@@ -106,7 +106,7 @@ export function getServiceSegments(s: ServiceEntry): ServiceTimeline {
 export const SEGMENT_LEGEND = [
   { label: "En Base", color: SEGMENT_COLORS.base, type: "improductivo" as const },
   { label: "Traslado Ida", color: SEGMENT_COLORS.traslado, type: "improductivo" as const },
-  { label: "Espera", color: SEGMENT_COLORS.espera, type: "improductivo" as const },
+  { label: "Espera", color: SEGMENT_COLORS.espera, type: "productivo" as const },
   { label: "Servicio Activo", color: SEGMENT_COLORS.servicio, type: "productivo" as const },
   { label: "Traslado Vuelta", color: SEGMENT_COLORS.vuelta, type: "improductivo" as const },
 ];
