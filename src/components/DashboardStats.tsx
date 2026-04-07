@@ -1,5 +1,5 @@
 import { Shield, Clock, TrendingUp, TrendingDown, Truck, Fuel } from "lucide-react";
-import { ServiceEntry, FuelEntry, timeToMinutes } from "@/lib/types";
+import { ServiceEntry, FuelEntry, getAdjustedHours } from "@/lib/types";
 import { formatHoursMinutes } from "@/lib/formatTime";
 
 interface Props {
@@ -12,8 +12,8 @@ export default function DashboardStats({ services, fuelEntries, selectedDate }: 
   const dayServices = services.filter((s) => s.fecha === selectedDate);
   const dayFuel = fuelEntries.filter((f) => f.fecha === selectedDate);
 
-  const totalProd = dayServices.reduce((acc, s) => acc + timeToMinutes(s.horasProductivas), 0);
-  const totalImprod = dayServices.reduce((acc, s) => acc + timeToMinutes(s.horasImproductivas), 0);
+  const totalProd = dayServices.reduce((acc, s) => acc + getAdjustedHours(s).prod, 0);
+  const totalImprod = dayServices.reduce((acc, s) => acc + getAdjustedHours(s).improd, 0);
   const totalFuel = dayFuel.reduce((acc, f) => acc + f.monto, 0);
   const uniqueMoviles = new Set(dayServices.map((s) => s.movil).filter(Boolean)).size;
 
