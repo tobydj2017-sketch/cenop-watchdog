@@ -1,9 +1,22 @@
 import { ServiceEntry, FuelEntry } from "./types";
+import { DECEMBER_2025_DATA } from "./seedData";
 
 const SERVICES_KEY = "cenop_services";
 const FUEL_KEY = "cenop_fuel";
+const SEED_KEY = "cenop_seeded_v1";
+
+function ensureSeed() {
+  if (!localStorage.getItem(SEED_KEY)) {
+    const existing = localStorage.getItem(SERVICES_KEY);
+    const current: ServiceEntry[] = existing ? JSON.parse(existing) : [];
+    const merged = [...DECEMBER_2025_DATA, ...current];
+    localStorage.setItem(SERVICES_KEY, JSON.stringify(merged));
+    localStorage.setItem(SEED_KEY, "true");
+  }
+}
 
 export function getServices(): ServiceEntry[] {
+  ensureSeed();
   const data = localStorage.getItem(SERVICES_KEY);
   return data ? JSON.parse(data) : [];
 }
