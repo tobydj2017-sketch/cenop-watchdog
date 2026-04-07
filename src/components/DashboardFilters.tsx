@@ -126,7 +126,31 @@ export default function DashboardFilters({ services, fuelEntries, onFilter }: Pr
         </div>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-3">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-6 gap-3">
+        {/* Tipo Personal */}
+        <div className="space-y-1">
+          <label className="text-xs text-muted-foreground font-medium">Tipo Personal</label>
+          <div className="flex h-8 rounded-md border border-input overflow-hidden">
+            {([
+              { key: "todos", label: "Todos" },
+              { key: "cenop", label: "CENOP" },
+              { key: "operaciones", label: "OP" },
+            ] as const).map(({ key, label }) => (
+              <button
+                key={key}
+                type="button"
+                onClick={() => setTipoPersonal(key)}
+                className={`flex-1 text-xs font-medium transition-colors ${
+                  tipoPersonal === key
+                    ? "bg-primary text-primary-foreground"
+                    : "bg-background hover:bg-muted"
+                }`}
+              >
+                {label}
+              </button>
+            ))}
+          </div>
+        </div>
         {/* Fecha Desde */}
         <div className="space-y-1">
           <label className="text-xs text-muted-foreground font-medium flex items-center gap-1">
