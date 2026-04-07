@@ -1,6 +1,6 @@
 import { useMemo, useState } from "react";
 import { ServiceEntry, getAdjustedHours, getServiceKey, normalizeClientName } from "@/lib/types";
-import { formatHoursMinutes } from "@/lib/formatTime";
+import { formatHoursMinutes, getDayAbbr } from "@/lib/formatTime";
 import { StatCard } from "./DashboardResumen";
 import { ChevronDown, ChevronUp, User } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -100,6 +100,8 @@ export default function DashboardRendimiento({ services }: Props) {
             .map(([fecha, dv]) => ({
               fecha,
               label: `${fecha.slice(8, 10)}/${fecha.slice(5, 7)}`,
+              dia: getDayAbbr(fecha),
+              labelConDia: `${fecha.slice(8, 10)}/${fecha.slice(5, 7)}\n${getDayAbbr(fecha)}`,
               prod: dv.prod,
               improd: dv.improd,
               servicios: dv.solicitudes.size,
