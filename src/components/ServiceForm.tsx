@@ -84,15 +84,6 @@ export default function ServiceForm({ onAdd, selectedDate }: Props) {
     setOpen(false);
   };
 
-  if (!open) {
-    return (
-      <Button onClick={() => setOpen(true)} className="w-full gap-2">
-        <Plus className="w-4 h-4" /> Cargar Nuevo Servicio
-      </Button>
-    );
-  }
-
-
   const focusNextTimeInput = (currentField: string) => {
     const timeFields = ["horaSolicitud", "citaChofer", "citaCustodio", "salidaCenop", "llegadaServicio", "iniciaServicio", "llegadaDestino", "finalizaServicio", "llegadaCenop", "horaFrancoChofer", "horaFrancoCustodio"];
     const idx = timeFields.indexOf(currentField);
@@ -136,6 +127,15 @@ export default function ServiceForm({ onAdd, selectedDate }: Props) {
       />
     </div>
   );
+
+  if (!open) {
+    return (
+      <Button onClick={() => setOpen(true)} className="w-full gap-2">
+        <Plus className="w-4 h-4" /> Cargar Nuevo Servicio
+      </Button>
+    );
+  }
+
 
   return (
     <form onSubmit={handleSubmit} className="glass-card p-5 space-y-4">
