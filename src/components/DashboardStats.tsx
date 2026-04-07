@@ -1,5 +1,5 @@
 import { Shield, Clock, TrendingUp, TrendingDown, Truck, Fuel } from "lucide-react";
-import { ServiceEntry, FuelEntry, getAdjustedHours } from "@/lib/types";
+import { ServiceEntry, FuelEntry, getAdjustedHours, getServiceKey } from "@/lib/types";
 import { formatHoursMinutes } from "@/lib/formatTime";
 
 interface Props {
@@ -11,6 +11,7 @@ interface Props {
 export default function DashboardStats({ services, fuelEntries, selectedDate }: Props) {
   const dayServices = services.filter((s) => s.fecha === selectedDate);
   const dayFuel = fuelEntries.filter((f) => f.fecha === selectedDate);
+  const totalServicios = new Set(dayServices.map(getServiceKey)).size;
 
   const totalProd = dayServices.reduce((acc, s) => acc + getAdjustedHours(s).prod, 0);
   const totalImprod = dayServices.reduce((acc, s) => acc + getAdjustedHours(s).improd, 0);
@@ -18,7 +19,7 @@ export default function DashboardStats({ services, fuelEntries, selectedDate }: 
   const uniqueMoviles = new Set(dayServices.map((s) => s.movil).filter(Boolean)).size;
 
   const stats = [
-    { label: "Servicios", value: dayServices.length, icon: Shield, color: "text-primary" },
+    { label: "Servicios", value: totalServicios, icon: Shield, color: "text-primary" },
     { label: "Hs Productivas", value: formatHoursMinutes(totalProd), icon: TrendingUp, color: "text-success" },
     { label: "Hs Improductivas", value: formatHoursMinutes(totalImprod), icon: TrendingDown, color: "text-destructive" },
     { label: "Móviles", value: uniqueMoviles, icon: Truck, color: "text-primary" },

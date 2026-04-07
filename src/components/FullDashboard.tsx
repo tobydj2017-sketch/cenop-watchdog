@@ -1,5 +1,5 @@
 import { useState, useMemo } from "react";
-import { ServiceEntry, FuelEntry, getAdjustedHours } from "@/lib/types";
+import { ServiceEntry, FuelEntry, getAdjustedHours, getServiceKey, normalizeClientName } from "@/lib/types";
 import { formatHoursMinutes } from "@/lib/formatTime";
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, PieChart, Pie, Cell, Legend } from "recharts";
 import { Users, Truck, Building2, CalendarDays, ArrowLeft, TrendingUp, LayoutDashboard } from "lucide-react";
@@ -36,7 +36,7 @@ export default function FullDashboard({ services, fuelEntries, onBack }: Props) 
   };
 
   const byPerson = useMemo(() => {
-    const map: Record<string, { prod: number; improd: number; solicitudes: Set<number>; clientes: Set<string> }> = {};
+    const map: Record<string, { prod: number; improd: number; solicitudes: Set<string>; clientes: Set<string> }> = {};
     filteredServices.forEach((s) => {
       const name = s.chofer || s.custodio;
       if (!name) return;
@@ -44,8 +44,8 @@ export default function FullDashboard({ services, fuelEntries, onBack }: Props) 
       const h = getAdjustedHours(s);
       map[name].prod += h.prod;
       map[name].improd += h.improd;
-      map[name].solicitudes.add(s.solicitud);
-      if (s.cliente) map[name].clientes.add(s.cliente);
+      map[name].solicitudes.add(getServiceKey(s));
+      map[name].clientes.add(normalizeClientName(s.cliente));
     });
     return Object.entries(map)
       .map(([nombre, v]) => ({ nombre, prod: v.prod, improd: v.improd, servicios: v.solicitudes.size, total: v.prod + v.improd, clientes: [...v.clientes].join(", ") }))
@@ -53,14 +53,14 @@ export default function FullDashboard({ services, fuelEntries, onBack }: Props) 
   }, [filteredServices]);
 
   const byMovil = useMemo(() => {
-    const map: Record<string, { prod: number; improd: number; solicitudes: Set<number> }> = {};
+    const map: Record<string, { prod: number; improd: number; solicitudes: Set<string> }> = {};
     filteredServices.forEach((s) => {
       if (!s.movil) return;
       if (!map[s.movil]) map[s.movil] = { prod: 0, improd: 0, solicitudes: new Set() };
       const h = getAdjustedHours(s);
       map[s.movil].prod += h.prod;
       map[s.movil].improd += h.improd;
-      map[s.movil].solicitudes.add(s.solicitud);
+      map[s.movil].solicitudes.add(getServiceKey(s));
     });
     return Object.entries(map)
       .map(([patente, v]) => ({ patente, prod: v.prod, improd: v.improd, servicios: v.solicitudes.size, total: v.prod + v.improd }))
@@ -68,14 +68,14 @@ export default function FullDashboard({ services, fuelEntries, onBack }: Props) 
   }, [filteredServices]);
 
   const byCliente = useMemo(() => {
-    const map: Record<string, { prod: number; improd: number; solicitudes: Set<number> }> = {};
+    const map: Record<string, { prod: number; improd: number; solicitudes: Set<string> }> = {};
     filteredServices.forEach((s) => {
-      if (!s.cliente) return;
-      if (!map[s.cliente]) map[s.cliente] = { prod: 0, improd: 0, solicitudes: new Set() };
+      const cliente = normalizeClientName(s.cliente);
+      if (!map[cliente]) map[cliente] = { prod: 0, improd: 0, solicitudes: new Set() };
       const h = getAdjustedHours(s);
-      map[s.cliente].prod += h.prod;
-      map[s.cliente].improd += h.improd;
-      map[s.cliente].solicitudes.add(s.solicitud);
+      map[cliente].prod += h.prod;
+      map[cliente].improd += h.improd;
+      map[cliente].solicitudes.add(getServiceKey(s));
     });
     return Object.entries(map)
       .map(([cliente, v]) => ({ cliente, prod: v.prod, improd: v.improd, servicios: v.solicitudes.size, total: v.prod + v.improd }))
@@ -84,7 +84,7 @@ export default function FullDashboard({ services, fuelEntries, onBack }: Props) 
 
   const totalProd = filteredServices.reduce((a, s) => a + getAdjustedHours(s).prod, 0);
   const totalImprod = filteredServices.reduce((a, s) => a + getAdjustedHours(s).improd, 0);
-  const totalServicios = new Set(filteredServices.map((s) => s.solicitud)).size;
+  const totalServicios = new Set(filteredServices.map(getServiceKey)).size;
   const uniqueDays = new Set(filteredServices.map((s) => s.fecha)).size;
   const totalFuel = filteredFuel.reduce((a, f) => a + f.monto, 0);
 
