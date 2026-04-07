@@ -9,25 +9,25 @@ interface Props {
 }
 
 const SERVICE_COLORS = [
-  "border-l-primary bg-primary/5",
-  "border-l-success bg-success/5",
-  "border-l-destructive bg-destructive/5",
-  "border-l-[hsl(var(--chart-transit))] bg-[hsl(var(--chart-transit))]/5",
-  "border-l-[hsl(200,70%,50%)] bg-[hsl(200,70%,50%)]/5",
-  "border-l-[hsl(280,60%,55%)] bg-[hsl(280,60%,55%)]/5",
-  "border-l-[hsl(330,70%,50%)] bg-[hsl(330,70%,50%)]/5",
-  "border-l-[hsl(170,60%,45%)] bg-[hsl(170,60%,45%)]/5",
+  "border-l-primary bg-primary/10",
+  "border-l-[hsl(210,90%,55%)] bg-[hsl(210,90%,55%)]/10",
+  "border-l-destructive bg-destructive/10",
+  "border-l-success bg-success/10",
+  "border-l-[hsl(280,80%,60%)] bg-[hsl(280,80%,60%)]/10",
+  "border-l-[hsl(180,70%,40%)] bg-[hsl(180,70%,40%)]/10",
+  "border-l-[hsl(330,80%,55%)] bg-[hsl(330,80%,55%)]/10",
+  "border-l-[hsl(60,70%,45%)] bg-[hsl(60,70%,45%)]/10",
 ];
 
 const SERVICE_BADGE_COLORS = [
-  "bg-primary/20 text-primary",
-  "bg-success/20 text-success",
-  "bg-destructive/20 text-destructive",
-  "bg-[hsl(var(--chart-transit))]/20 text-[hsl(var(--chart-transit))]",
-  "bg-[hsl(200,70%,50%)]/20 text-[hsl(200,70%,50%)]",
-  "bg-[hsl(280,60%,55%)]/20 text-[hsl(280,60%,55%)]",
-  "bg-[hsl(330,70%,50%)]/20 text-[hsl(330,70%,50%)]",
-  "bg-[hsl(170,60%,45%)]/20 text-[hsl(170,60%,45%)]",
+  "bg-primary/25 text-primary ring-2 ring-primary/40",
+  "bg-[hsl(210,90%,55%)]/25 text-[hsl(210,90%,55%)] ring-2 ring-[hsl(210,90%,55%)]/40",
+  "bg-destructive/25 text-destructive ring-2 ring-destructive/40",
+  "bg-success/25 text-success ring-2 ring-success/40",
+  "bg-[hsl(280,80%,60%)]/25 text-[hsl(280,80%,60%)] ring-2 ring-[hsl(280,80%,60%)]/40",
+  "bg-[hsl(180,70%,40%)]/25 text-[hsl(180,70%,40%)] ring-2 ring-[hsl(180,70%,40%)]/40",
+  "bg-[hsl(330,80%,55%)]/25 text-[hsl(330,80%,55%)] ring-2 ring-[hsl(330,80%,55%)]/40",
+  "bg-[hsl(60,70%,45%)]/25 text-[hsl(60,70%,45%)] ring-2 ring-[hsl(60,70%,45%)]/40",
 ];
 
 export default function ServiceTable({ services, onDelete }: Props) {
