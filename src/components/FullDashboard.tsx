@@ -164,9 +164,9 @@ export default function FullDashboard({ services, fuelEntries, onBack }: Props) 
             </ResponsiveContainer>
           </div>
           <DataTable
-            columns={["Personal", "Servicios", "Hs Prod.", "Hs Improd.", "Hs Total", "Eficiencia"]}
+            columns={["Personal", "Clientes", "Servicios", "Hs Prod.", "Hs Improd.", "Hs Total", "Eficiencia"]}
             rows={byPerson.map((p) => [
-              p.nombre, p.servicios, formatHoursMinutes(p.prod), formatHoursMinutes(p.improd),
+              p.nombre, p.clientes || "CENOP", p.servicios, formatHoursMinutes(p.prod), formatHoursMinutes(p.improd),
               formatHoursMinutes(p.total), p.total > 0 ? `${Math.round((p.prod / p.total) * 100)}%` : "—",
             ])}
           />
