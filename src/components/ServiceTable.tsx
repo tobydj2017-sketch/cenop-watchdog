@@ -68,7 +68,7 @@ export default function ServiceTable({ services, onDelete }: Props) {
               const badgeColor = SERVICE_BADGE_COLORS[colorIdx];
 
               return (
-                <tr key={s.id} className={`border-b border-border/50 border-l-4 hover:brightness-125 transition-all ${rowColor}`}>
+                <tr key={s.id} className={`border-b border-border/50 border-l-[6px] hover:brightness-130 transition-all ${rowColor}`}>
                   <td className="px-3 py-2.5">
                     <span className={`inline-flex items-center justify-center w-7 h-7 rounded-md font-mono text-xs font-bold ${badgeColor}`}>
                       {s.solicitud}
