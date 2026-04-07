@@ -202,9 +202,9 @@ export default function ServiceForm({ onAdd, selectedDate }: Props) {
       </div>
 
       <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-        <SelectField label="Chofer" field="chofer" options={choferOptions} />
+        <SelectField label="Chofer" field="chofer" options={choferOptions} showBadges />
         <Field label="Cita Chofer" field="citaChofer" type="time" />
-        <SelectField label="Custodio" field="custodio" options={custodioOptions} />
+        <SelectField label="Custodio" field="custodio" options={custodioOptions} showBadges />
         <Field label="Cita Custodio" field="citaCustodio" type="time" />
       </div>
 
