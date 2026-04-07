@@ -23,7 +23,7 @@ export default function FuelTable({ entries, onDelete }: Props) {
           <table className="w-full text-sm">
             <thead>
               <tr className="border-b border-border">
-                {["Móvil", "Chofer", "Estación", "Monto", "Litros", "Ticket", ""].map((h) => (
+                {["Móvil", "Chofer", "Km", "Litros", "Monto", "$/L", "Lugar", "Remito", "Ticket", ""].map((h) => (
                   <th key={h} className="px-3 py-2.5 text-left text-xs text-muted-foreground uppercase tracking-wider font-semibold">
                     {h}
                   </th>
@@ -31,13 +31,18 @@ export default function FuelTable({ entries, onDelete }: Props) {
               </tr>
             </thead>
             <tbody>
-              {entries.map((f) => (
+              {entries.map((f) => {
+                const precioLitro = f.litros > 0 ? (f.monto / f.litros).toFixed(2) : "—";
+                return (
                 <tr key={f.id} className="border-b border-border/50 hover:bg-secondary/30 transition-colors">
                   <td className="px-3 py-2.5 font-mono text-xs">{f.movil}</td>
                   <td className="px-3 py-2.5">{f.chofer}</td>
-                  <td className="px-3 py-2.5 text-muted-foreground">{f.estacion}</td>
-                  <td className="px-3 py-2.5 font-mono font-semibold text-warning">${f.monto.toLocaleString("es-AR")}</td>
+                  <td className="px-3 py-2.5 font-mono text-xs">{f.kilometraje || "—"}</td>
                   <td className="px-3 py-2.5 font-mono text-xs">{f.litros}L</td>
+                  <td className="px-3 py-2.5 font-mono font-semibold text-warning">${f.monto.toLocaleString("es-AR")}</td>
+                  <td className="px-3 py-2.5 font-mono text-xs text-primary font-semibold">${precioLitro}</td>
+                  <td className="px-3 py-2.5 text-muted-foreground text-xs">{f.lugarCarga || f.estacion || "—"}</td>
+                  <td className="px-3 py-2.5 font-mono text-xs">{f.numeroRemito || "—"}</td>
                   <td className="px-3 py-2.5">
                     {f.ticketImage ? (
                       <Button variant="ghost" size="sm" onClick={() => setViewImage(f.ticketImage!)} className="h-7 gap-1 text-xs">
@@ -53,7 +58,8 @@ export default function FuelTable({ entries, onDelete }: Props) {
                     </Button>
                   </td>
                 </tr>
-              ))}
+                );
+              })}
             </tbody>
           </table>
         </div>
