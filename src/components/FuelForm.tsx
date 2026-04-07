@@ -74,11 +74,11 @@ export default function FuelForm({ onAdd, selectedDate }: Props) {
       <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
         <div className="space-y-1">
           <Label className="text-xs text-muted-foreground">Móvil</Label>
-          <Input value={movil} onChange={(e) => setMovil(e.target.value)} placeholder="Ej: RAM 301" className="h-9 text-sm" />
+          <SearchableSelect options={MOVILES} value={movil} onChange={setMovil} placeholder="Seleccionar..." />
         </div>
         <div className="space-y-1">
           <Label className="text-xs text-muted-foreground">Chofer</Label>
-          <Input value={chofer} onChange={(e) => setChofer(e.target.value)} className="h-9 text-sm" />
+          <SearchableSelect options={PERSONAL} value={chofer} onChange={setChofer} placeholder="Seleccionar..." />
         </div>
         <div className="space-y-1">
           <Label className="text-xs text-muted-foreground">Estación</Label>
