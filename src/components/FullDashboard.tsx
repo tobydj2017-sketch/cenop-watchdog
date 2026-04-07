@@ -36,45 +36,45 @@ export default function FullDashboard({ services, fuelEntries, onBack }: Props) 
   };
 
   const byPerson = useMemo(() => {
-    const map: Record<string, { prod: number; improd: number; servicios: number }> = {};
+    const map: Record<string, { prod: number; improd: number; solicitudes: Set<number> }> = {};
     filteredServices.forEach((s) => {
       const name = s.chofer || s.custodio;
       if (!name) return;
-      if (!map[name]) map[name] = { prod: 0, improd: 0, servicios: 0 };
+      if (!map[name]) map[name] = { prod: 0, improd: 0, solicitudes: new Set() };
       map[name].prod += timeToMinutes(s.horasProductivas);
       map[name].improd += timeToMinutes(s.horasImproductivas);
-      map[name].servicios += 1;
+      map[name].solicitudes.add(s.solicitud);
     });
     return Object.entries(map)
-      .map(([nombre, v]) => ({ nombre, ...v, total: v.prod + v.improd }))
+      .map(([nombre, v]) => ({ nombre, prod: v.prod, improd: v.improd, servicios: v.solicitudes.size, total: v.prod + v.improd }))
       .sort((a, b) => b.total - a.total);
   }, [filteredServices]);
 
   const byMovil = useMemo(() => {
-    const map: Record<string, { prod: number; improd: number; servicios: number }> = {};
+    const map: Record<string, { prod: number; improd: number; solicitudes: Set<number> }> = {};
     filteredServices.forEach((s) => {
       if (!s.movil) return;
-      if (!map[s.movil]) map[s.movil] = { prod: 0, improd: 0, servicios: 0 };
+      if (!map[s.movil]) map[s.movil] = { prod: 0, improd: 0, solicitudes: new Set() };
       map[s.movil].prod += timeToMinutes(s.horasProductivas);
       map[s.movil].improd += timeToMinutes(s.horasImproductivas);
-      map[s.movil].servicios += 1;
+      map[s.movil].solicitudes.add(s.solicitud);
     });
     return Object.entries(map)
-      .map(([patente, v]) => ({ patente, ...v, total: v.prod + v.improd }))
+      .map(([patente, v]) => ({ patente, prod: v.prod, improd: v.improd, servicios: v.solicitudes.size, total: v.prod + v.improd }))
       .sort((a, b) => b.total - a.total);
   }, [filteredServices]);
 
   const byCliente = useMemo(() => {
-    const map: Record<string, { prod: number; improd: number; servicios: number }> = {};
+    const map: Record<string, { prod: number; improd: number; solicitudes: Set<number> }> = {};
     filteredServices.forEach((s) => {
       if (!s.cliente) return;
-      if (!map[s.cliente]) map[s.cliente] = { prod: 0, improd: 0, servicios: 0 };
+      if (!map[s.cliente]) map[s.cliente] = { prod: 0, improd: 0, solicitudes: new Set() };
       map[s.cliente].prod += timeToMinutes(s.horasProductivas);
       map[s.cliente].improd += timeToMinutes(s.horasImproductivas);
-      map[s.cliente].servicios += 1;
+      map[s.cliente].solicitudes.add(s.solicitud);
     });
     return Object.entries(map)
-      .map(([cliente, v]) => ({ cliente, ...v, total: v.prod + v.improd }))
+      .map(([cliente, v]) => ({ cliente, prod: v.prod, improd: v.improd, servicios: v.solicitudes.size, total: v.prod + v.improd }))
       .sort((a, b) => b.total - a.total);
   }, [filteredServices]);
 
