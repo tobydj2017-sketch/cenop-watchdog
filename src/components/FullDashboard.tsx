@@ -23,7 +23,13 @@ type Tab = "resumen" | "personal" | "moviles" | "clientes";
 
 export default function FullDashboard({ services, fuelEntries, onBack }: Props) {
   const [tab, setTab] = useState<Tab>("resumen");
+  const [filteredServices, setFilteredServices] = useState<ServiceEntry[]>(services);
+  const [filteredFuel, setFilteredFuel] = useState<FuelEntry[]>(fuelEntries);
 
+  const handleFilter = (s: ServiceEntry[], f: FuelEntry[]) => {
+    setFilteredServices(s);
+    setFilteredFuel(f);
+  };
   // Aggregate by person (chofer + custodio combined as "personal")
   const byPerson = useMemo(() => {
     const map: Record<string, { prod: number; improd: number; servicios: number }> = {};
