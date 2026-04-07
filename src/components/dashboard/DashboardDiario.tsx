@@ -59,15 +59,24 @@ export default function DashboardDiario({ services, fuelEntries }: Props) {
 
       {/* Servicios por día */}
       <div className="glass-card p-5">
-        <h3 className="text-sm font-semibold text-muted-foreground mb-4 uppercase tracking-wider">Servicios por Día</h3>
-        <ResponsiveContainer width="100%" height={280}>
-          <BarChart data={byDay}>
+        <h3 className="text-sm font-semibold text-muted-foreground mb-4 uppercase tracking-wider">Cantidad de Servicios por Día</h3>
+        <ResponsiveContainer width="100%" height={320}>
+          <BarChart data={byDay} margin={{ top: 20 }}>
             <CartesianGrid strokeDasharray="3 3" stroke="hsl(0,0%,30%)" />
             <XAxis dataKey="label" tick={{ fontSize: 10 }} />
-            <YAxis tick={{ fontSize: 11 }} />
-            <Tooltip />
-            <Legend />
-            <Bar dataKey="servicios" name="Servicios" fill="hsl(200, 70%, 50%)" radius={[3, 3, 0, 0]} />
+            <YAxis tick={{ fontSize: 11 }} allowDecimals={false} label={{ value: "Cant. Servicios", angle: -90, position: "insideLeft", style: { fontSize: 11, fill: "hsl(0,0%,60%)" } }} />
+            <Tooltip content={({ active, payload, label }) => {
+              if (!active || !payload?.length) return null;
+              return (
+                <div className="rounded-md border border-border bg-card p-2 shadow-lg text-xs">
+                  <p className="font-semibold mb-1">{label}</p>
+                  <p>Servicios realizados: <span className="font-bold">{payload[0].value}</span></p>
+                </div>
+              );
+            }} />
+            <Bar dataKey="servicios" name="Servicios" fill="hsl(200, 70%, 50%)" radius={[3, 3, 0, 0]}>
+              <LabelList dataKey="servicios" position="top" style={{ fontSize: 10, fill: "hsl(0,0%,70%)" }} />
+            </Bar>
           </BarChart>
         </ResponsiveContainer>
       </div>
