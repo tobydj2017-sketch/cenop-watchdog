@@ -1,5 +1,5 @@
 import { useMemo } from "react";
-import { ServiceEntry, FuelEntry, timeToMinutes } from "@/lib/types";
+import { ServiceEntry, FuelEntry, getAdjustedHours } from "@/lib/types";
 import { formatHoursMinutes } from "@/lib/formatTime";
 import {
   BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer,
@@ -20,8 +20,9 @@ export default function DashboardDiario({ services, fuelEntries }: Props) {
     services.forEach((s) => {
       if (!s.fecha) return;
       if (!map[s.fecha]) map[s.fecha] = { prod: 0, improd: 0, solicitudes: new Set(), fuel: 0 };
-      map[s.fecha].prod += timeToMinutes(s.horasProductivas);
-      map[s.fecha].improd += timeToMinutes(s.horasImproductivas);
+      const h = getAdjustedHours(s);
+      map[s.fecha].prod += h.prod;
+      map[s.fecha].improd += h.improd;
       map[s.fecha].solicitudes.add(s.solicitud);
     });
     fuelEntries.forEach((f) => {
