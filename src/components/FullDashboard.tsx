@@ -36,18 +36,19 @@ export default function FullDashboard({ services, fuelEntries, onBack }: Props) 
   };
 
   const byPerson = useMemo(() => {
-    const map: Record<string, { prod: number; improd: number; solicitudes: Set<number> }> = {};
+    const map: Record<string, { prod: number; improd: number; solicitudes: Set<number>; clientes: Set<string> }> = {};
     filteredServices.forEach((s) => {
       const name = s.chofer || s.custodio;
       if (!name) return;
-      if (!map[name]) map[name] = { prod: 0, improd: 0, solicitudes: new Set() };
+      if (!map[name]) map[name] = { prod: 0, improd: 0, solicitudes: new Set(), clientes: new Set() };
       const h = getAdjustedHours(s);
       map[name].prod += h.prod;
       map[name].improd += h.improd;
       map[name].solicitudes.add(s.solicitud);
+      if (s.cliente) map[name].clientes.add(s.cliente);
     });
     return Object.entries(map)
-      .map(([nombre, v]) => ({ nombre, prod: v.prod, improd: v.improd, servicios: v.solicitudes.size, total: v.prod + v.improd }))
+      .map(([nombre, v]) => ({ nombre, prod: v.prod, improd: v.improd, servicios: v.solicitudes.size, total: v.prod + v.improd, clientes: [...v.clientes].join(", ") }))
       .sort((a, b) => b.total - a.total);
   }, [filteredServices]);
 
