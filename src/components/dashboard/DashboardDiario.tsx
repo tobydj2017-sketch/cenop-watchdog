@@ -16,17 +16,17 @@ const tooltipFormatter = (value: number) => formatHoursMinutes(value);
 
 export default function DashboardDiario({ services, fuelEntries }: Props) {
   const byDay = useMemo(() => {
-    const map: Record<string, { prod: number; improd: number; servicios: number; fuel: number }> = {};
+    const map: Record<string, { prod: number; improd: number; solicitudes: Set<number>; fuel: number }> = {};
     services.forEach((s) => {
       if (!s.fecha) return;
-      if (!map[s.fecha]) map[s.fecha] = { prod: 0, improd: 0, servicios: 0, fuel: 0 };
+      if (!map[s.fecha]) map[s.fecha] = { prod: 0, improd: 0, solicitudes: new Set(), fuel: 0 };
       map[s.fecha].prod += timeToMinutes(s.horasProductivas);
       map[s.fecha].improd += timeToMinutes(s.horasImproductivas);
-      map[s.fecha].servicios += 1;
+      map[s.fecha].solicitudes.add(s.solicitud);
     });
     fuelEntries.forEach((f) => {
       if (!f.fecha) return;
-      if (!map[f.fecha]) map[f.fecha] = { prod: 0, improd: 0, servicios: 0, fuel: 0 };
+      if (!map[f.fecha]) map[f.fecha] = { prod: 0, improd: 0, solicitudes: new Set(), fuel: 0 };
       map[f.fecha].fuel += f.monto;
     });
     return Object.entries(map)
@@ -36,7 +36,7 @@ export default function DashboardDiario({ services, fuelEntries }: Props) {
         prod: v.prod,
         improd: v.improd,
         total: v.prod + v.improd,
-        servicios: v.servicios,
+        servicios: v.solicitudes.size,
         eficiencia: v.prod + v.improd > 0 ? Math.round((v.prod / (v.prod + v.improd)) * 100) : 0,
         fuel: v.fuel,
       }))
