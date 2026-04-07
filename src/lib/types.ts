@@ -130,22 +130,24 @@ export function getServiceKey(service: Pick<ServiceEntry, "fecha" | "solicitud">
   return `${service.fecha || "sin-fecha"}::${service.solicitud}`;
 }
 
-function isPlayero(nombre: string): boolean {
-  if (!nombre) return false;
-  const personal = getPersonal();
-  const person = personal.find((p) => p.nombre === nombre);
-  return !!person && person.roles.includes("playero");
+function isPlayeroService(s: ServiceEntry): boolean {
+  if (!isBaseServiceEntry(s)) return false;
+  // Check if worker has playero role
+  const workerName = s.chofer || s.custodio;
+  if (workerName) {
+    const personal = getPersonal();
+    const person = personal.find((p) => p.nombre === workerName);
+    if (person && person.roles.includes("playero")) return true;
+  }
+  // Any 8h+ CENOP shift = playero replacement, counts as productive
+  const totalMin = timeToMinutes(s.horasProductivas) + timeToMinutes(s.horasImproductivas);
+  return totalMin >= 480; // 8 hours
 }
 
 export function getAdjustedHours(s: ServiceEntry): { prod: number; improd: number } {
   const rawProd = timeToMinutes(s.horasProductivas);
   const rawImprod = timeToMinutes(s.horasImproductivas);
-  if (isBaseServiceEntry(s)) {
-    // Playeros work at CENOP — their base hours are productive
-    const workerName = s.chofer || s.custodio;
-    if (isPlayero(workerName)) {
-      return { prod: rawProd, improd: rawImprod };
-    }
+  if (isBaseServiceEntry(s) && !isPlayeroService(s)) {
     return { prod: 0, improd: rawProd + rawImprod };
   }
   return { prod: rawProd, improd: rawImprod };
