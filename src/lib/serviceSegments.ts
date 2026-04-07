@@ -52,6 +52,7 @@ function seg(label: string, start: string, end: string, type: "productivo" | "im
 }
 
 export function getServiceSegments(s: ServiceEntry): ServiceTimeline {
+  const isBase = isBaseServiceEntry(s);
   const esPlayero = isPlayeroSegment(s);
   const treatBaseAsImprod = isBase && !esPlayero;
   const segments: ServiceSegment[] = [];
