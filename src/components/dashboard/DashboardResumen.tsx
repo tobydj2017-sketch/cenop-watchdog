@@ -38,9 +38,7 @@ export default function DashboardResumen({ services, fuelEntries, byPerson, byMo
     { name: "Improductivas", value: totalImprod },
   ];
 
-  const avgServiciosPorDia = uniqueDays > 0 ? (totalServicios / uniqueDays).toFixed(1) : "—";
-  const avgProdPorServicio = totalServicios > 0 ? formatHoursMinutes(Math.round(totalProd / totalServicios)) : "—";
-  const avgFuelPorDia = uniqueDays > 0 ? `$${Math.round(totalFuel / uniqueDays).toLocaleString("es-AR")}` : "—";
+  const totalHoras = totalProd + totalImprod;
 
   return (
     <div className="space-y-5">
@@ -50,14 +48,12 @@ export default function DashboardResumen({ services, fuelEntries, byPerson, byMo
         <StatCard label="Días Operados" value={uniqueDays} />
         <StatCard label="Hs Productivas" value={formatHoursMinutes(totalProd)} className="text-success" />
         <StatCard label="Hs Improductivas" value={formatHoursMinutes(totalImprod)} className="text-destructive" />
-        <StatCard label="Eficiencia General" value={totalProd + totalImprod > 0 ? `${Math.round((totalProd / (totalProd + totalImprod)) * 100)}%` : "—"} />
-        <StatCard label="Prom. Servicios/Día" value={avgServiciosPorDia} />
-        <StatCard label="Prom. Prod/Servicio" value={avgProdPorServicio} />
+        <StatCard label="Eficiencia General" value={totalHoras > 0 ? `${Math.round((totalProd / totalHoras) * 100)}%` : "—"} />
+        <StatCard label="Total Horas" value={formatHoursMinutes(totalHoras)} />
         <StatCard label="Personal Activo" value={byPerson.length} />
         <StatCard label="Móviles Utilizados" value={byMovil.length} />
         <StatCard label="Clientes Atendidos" value={byCliente.length} />
         <StatCard label="Combustible Total" value={`$${totalFuel.toLocaleString("es-AR")}`} />
-        <StatCard label="Prom. Combustible/Día" value={avgFuelPorDia} />
       </div>
 
       {/* Charts row */}

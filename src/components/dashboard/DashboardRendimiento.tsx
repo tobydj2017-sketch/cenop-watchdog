@@ -129,9 +129,11 @@ export default function DashboardRendimiento({ services }: Props) {
     p.nombre.toLowerCase().includes(searchFilter.toLowerCase())
   );
 
-  const avgEff = filtered.length > 0 ? Math.round(filtered.reduce((a, p) => a + p.eficiencia, 0) / filtered.length) : 0;
-  const avgProdPerServ = filtered.length > 0 ? Math.round(filtered.reduce((a, p) => a + p.promProdPorServ, 0) / filtered.length) : 0;
+  const totalProdAll = filtered.reduce((a, p) => a + p.prod, 0);
+  const totalImprodAll = filtered.reduce((a, p) => a + p.improd, 0);
+  const totalMinutesAll = totalProdAll + totalImprodAll;
   const totalServAll = filtered.reduce((a, p) => a + p.servicios, 0);
+  const eficTotal = totalMinutesAll > 0 ? Math.round((totalProdAll / totalMinutesAll) * 100) : 0;
 
   const compareData = useMemo(() => {
     if (!compareMode || compareSelection.size === 0) return [];
@@ -155,9 +157,9 @@ export default function DashboardRendimiento({ services }: Props) {
     <div className="space-y-5">
       {/* KPIs */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-        <StatCard label="Eficiencia Prom." value={`${avgEff}%`} />
-        <StatCard label="Prom. Prod/Servicio" value={formatHoursMinutes(avgProdPerServ)} />
-        <StatCard label="Personal Total" value={filtered.length} />
+        <StatCard label="Eficiencia General" value={`${eficTotal}%`} />
+        <StatCard label="Total Productivo" value={formatHoursMinutes(totalProdAll)} />
+        <StatCard label="Total Improductivo" value={formatHoursMinutes(totalImprodAll)} />
         <StatCard label="Servicios Totales" value={totalServAll} />
       </div>
 
