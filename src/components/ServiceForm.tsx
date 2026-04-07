@@ -313,6 +313,57 @@ export default function ServiceForm({ onAdd, selectedDate }: Props) {
         ))}
       </div>
 
+      {/* Comisiones */}
+      <div className="border-t border-border pt-3">
+        <div className="flex items-center justify-between mb-2">
+          <p className="text-xs text-muted-foreground uppercase tracking-wider">Comisiones (Productivas)</p>
+          <div className="flex items-center gap-3">
+            {comisiones.length > 0 && (
+              <span className="text-xs font-semibold text-primary">
+                Total: ${totalComisiones.toLocaleString("es-AR")}
+              </span>
+            )}
+            <Button type="button" variant="outline" size="sm" onClick={addComision} className="h-7 gap-1 text-xs">
+              <Briefcase className="w-3.5 h-3.5" /> Agregar Comisión
+            </Button>
+          </div>
+        </div>
+        {comisiones.map((comision, idx) => (
+          <div key={comision.id} className="flex items-end gap-2 mb-2">
+            <div className="flex-1 space-y-1">
+              <Label className="text-xs text-muted-foreground">Descripción #{idx + 1}</Label>
+              <Input
+                value={comision.descripcion}
+                onChange={(e) => updateComision(comision.id, "descripcion", e.target.value)}
+                placeholder="Ej: Comisión de entrega"
+                className="h-9 text-sm"
+              />
+            </div>
+            <div className="w-32 space-y-1">
+              <Label className="text-xs text-muted-foreground">Hora</Label>
+              <div data-timefield={`comision-${comision.id}`}>
+                <TimeInput
+                  value={comision.hora}
+                  onChange={(v) => updateComision(comision.id, "hora", v)}
+                />
+              </div>
+            </div>
+            <div className="w-32 space-y-1">
+              <Label className="text-xs text-muted-foreground">Monto ($)</Label>
+              <Input
+                type="number"
+                value={comision.monto || ""}
+                onChange={(e) => updateComision(comision.id, "monto", Number(e.target.value))}
+                className="h-9 text-sm"
+              />
+            </div>
+            <Button type="button" variant="ghost" size="icon" className="h-9 w-9 text-destructive" onClick={() => removeComision(comision.id)}>
+              <Trash2 className="w-3.5 h-3.5" />
+            </Button>
+          </div>
+        ))}
+      </div>
+
       <Button type="submit" className="w-full gap-2">
         <Plus className="w-4 h-4" /> Guardar Servicio
       </Button>
