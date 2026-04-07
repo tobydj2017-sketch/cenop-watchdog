@@ -3,7 +3,8 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { FuelEntry, generateId } from "@/lib/types";
-import { MOVILES, PERSONAL } from "@/lib/cenopData";
+import { MOVILES } from "@/lib/cenopData";
+import { getPersonalByRole, getActivePersonalNames } from "@/lib/personalStore";
 import SearchableSelect from "@/components/SearchableSelect";
 import { Camera, Plus, Upload } from "lucide-react";
 
