@@ -12,7 +12,7 @@ import {
   getFuelEntries, addFuelEntry, deleteFuelEntry,
 } from "@/lib/store";
 
-const today = new Date().toISOString().split("T")[0];
+const today = "2025-12-01"; // Default to December 2025 to show preloaded data
 
 export default function Index() {
   const [services, setServices] = useState<ServiceEntry[]>(getServices);
