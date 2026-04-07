@@ -1,6 +1,6 @@
 import { useMemo } from "react";
 import { ServiceEntry, FuelEntry, getAdjustedHours } from "@/lib/types";
-import { formatHoursMinutes } from "@/lib/formatTime";
+import { formatHoursMinutes, getDayAbbr } from "@/lib/formatTime";
 import {
   BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer,
   LineChart, Line, CartesianGrid, Legend, AreaChart, Area, LabelList,
@@ -36,18 +36,23 @@ export default function DashboardDiario({ services, fuelEntries }: Props) {
       map[f.fecha].fuel += f.monto;
     });
     return Object.entries(map)
-      .map(([fecha, v]) => ({
-        fecha,
-        label: `${fecha.slice(8, 10)}/${fecha.slice(5, 7)}`,
-        prod: v.prod,
-        improd: v.improd,
-        total: v.prod + v.improd,
-        serviciosCliente: v.solCliente.size,
-        serviciosBase: v.solBase.size,
-        serviciosTotal: new Set([...v.solCliente, ...v.solBase]).size,
-        eficiencia: v.prod + v.improd > 0 ? Math.round((v.prod / (v.prod + v.improd)) * 100) : 0,
-        fuel: v.fuel,
-      }))
+      .map(([fecha, v]) => {
+        const dia = getDayAbbr(fecha);
+        return {
+          fecha,
+          label: `${fecha.slice(8, 10)}/${fecha.slice(5, 7)}`,
+          dia,
+          labelConDia: `${fecha.slice(8, 10)}/${fecha.slice(5, 7)}\n${dia}`,
+          prod: v.prod,
+          improd: v.improd,
+          total: v.prod + v.improd,
+          serviciosCliente: v.solCliente.size,
+          serviciosBase: v.solBase.size,
+          serviciosTotal: new Set([...v.solCliente, ...v.solBase]).size,
+          eficiencia: v.prod + v.improd > 0 ? Math.round((v.prod / (v.prod + v.improd)) * 100) : 0,
+          fuel: v.fuel,
+        };
+      })
       .sort((a, b) => a.fecha.localeCompare(b.fecha));
   }, [services, fuelEntries]);
 
