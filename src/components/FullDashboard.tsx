@@ -33,7 +33,7 @@ export default function FullDashboard({ services, fuelEntries, onBack }: Props) 
   // Aggregate by person (chofer + custodio combined as "personal")
   const byPerson = useMemo(() => {
     const map: Record<string, { prod: number; improd: number; servicios: number }> = {};
-    services.forEach((s) => {
+    filteredServices.forEach((s) => {
       const name = s.chofer || s.custodio;
       if (!name) return;
       if (!map[name]) map[name] = { prod: 0, improd: 0, servicios: 0 };
@@ -44,12 +44,12 @@ export default function FullDashboard({ services, fuelEntries, onBack }: Props) 
     return Object.entries(map)
       .map(([nombre, v]) => ({ nombre, ...v, total: v.prod + v.improd }))
       .sort((a, b) => b.total - a.total);
-  }, [services]);
+  }, [filteredServices]);
 
   // Aggregate by vehicle
   const byMovil = useMemo(() => {
     const map: Record<string, { prod: number; improd: number; servicios: number }> = {};
-    services.forEach((s) => {
+    filteredServices.forEach((s) => {
       if (!s.movil) return;
       if (!map[s.movil]) map[s.movil] = { prod: 0, improd: 0, servicios: 0 };
       map[s.movil].prod += timeToMinutes(s.horasProductivas);
@@ -59,12 +59,12 @@ export default function FullDashboard({ services, fuelEntries, onBack }: Props) 
     return Object.entries(map)
       .map(([patente, v]) => ({ patente, ...v, total: v.prod + v.improd }))
       .sort((a, b) => b.total - a.total);
-  }, [services]);
+  }, [filteredServices]);
 
   // Aggregate by client
   const byCliente = useMemo(() => {
     const map: Record<string, { prod: number; improd: number; servicios: number }> = {};
-    services.forEach((s) => {
+    filteredServices.forEach((s) => {
       if (!s.cliente) return;
       if (!map[s.cliente]) map[s.cliente] = { prod: 0, improd: 0, servicios: 0 };
       map[s.cliente].prod += timeToMinutes(s.horasProductivas);
@@ -74,7 +74,7 @@ export default function FullDashboard({ services, fuelEntries, onBack }: Props) 
     return Object.entries(map)
       .map(([cliente, v]) => ({ cliente, ...v, total: v.prod + v.improd }))
       .sort((a, b) => b.total - a.total);
-  }, [services]);
+  }, [filteredServices]);
 
   // Summary stats
   const totalProd = services.reduce((a, s) => a + timeToMinutes(s.horasProductivas), 0);
