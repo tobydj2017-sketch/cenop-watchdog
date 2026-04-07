@@ -68,6 +68,11 @@ export default function DashboardFilters({ services, fuelEntries, onFilter }: Pr
     if (selectedClientes.length > 0) {
       filtered = filtered.filter((s) => selectedClientes.includes(s.cliente));
     }
+    if (tipoPersonal === "operaciones") {
+      filtered = filtered.filter((s) => opsNames.has(s.chofer) || opsNames.has(s.custodio));
+    } else if (tipoPersonal === "cenop") {
+      filtered = filtered.filter((s) => !opsNames.has(s.chofer) && !opsNames.has(s.custodio));
+    }
 
     let filteredFuel = [...fuelEntries];
     if (fechaDesde) filteredFuel = filteredFuel.filter((f) => f.fecha >= fechaDesde);
@@ -91,6 +96,7 @@ export default function DashboardFilters({ services, fuelEntries, onFilter }: Pr
     setSearchPersonal("");
     setSearchMovil("");
     setSearchCliente("");
+    setTipoPersonal("todos");
     onFilter(services, fuelEntries);
   };
 
