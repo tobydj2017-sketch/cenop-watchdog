@@ -32,7 +32,7 @@ export default function DashboardDiario({ services, fuelEntries }: Props) {
     return Object.entries(map)
       .map(([fecha, v]) => ({
         fecha,
-        label: fecha.slice(5), // MM-DD
+        label: `${fecha.slice(8, 10)}/${fecha.slice(5, 7)}`, // DD/MM
         prod: v.prod,
         improd: v.improd,
         total: v.prod + v.improd,
