@@ -291,13 +291,12 @@ export default function DashboardJornada({ services }: Props) {
                             {/* Day totals */}
                             <div className="border-t border-border/50 pt-3">
                               <h4 className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-2">Resumen del Día</h4>
-                              <div className="grid grid-cols-2 md:grid-cols-5 gap-2">
+                              <div className="grid grid-cols-2 md:grid-cols-4 gap-2 mb-3">
                                 {[
                                   { label: "En Base", value: p.totalBase, color: SEGMENT_LEGEND[0].color },
                                   { label: "Traslado", value: p.totalTraslado, color: SEGMENT_LEGEND[1].color },
                                   { label: "Espera", value: p.totalEspera, color: SEGMENT_LEGEND[2].color },
                                   { label: "Servicio Activo", value: p.totalServicio, color: SEGMENT_LEGEND[3].color },
-                                  { label: "Total Jornada", value: p.totalMinutes, color: undefined },
                                 ].map(item => (
                                   <div key={item.label} className="rounded-md border border-border/50 p-2 text-center">
                                     <span className="text-[10px] text-muted-foreground uppercase tracking-wider block mb-0.5 flex items-center justify-center gap-1">
@@ -307,6 +306,20 @@ export default function DashboardJornada({ services }: Props) {
                                     <span className="text-sm font-bold font-mono">{formatHoursMinutes(item.value)}</span>
                                   </div>
                                 ))}
+                              </div>
+                              <div className="grid grid-cols-3 gap-2">
+                                <div className="rounded-md border border-success/30 bg-success/5 p-2 text-center">
+                                  <span className="text-[10px] text-success uppercase tracking-wider block mb-0.5 font-semibold">Total Productivo</span>
+                                  <span className="text-sm font-bold font-mono text-success">{formatHoursMinutes(p.totalProd)}</span>
+                                </div>
+                                <div className="rounded-md border border-destructive/30 bg-destructive/5 p-2 text-center">
+                                  <span className="text-[10px] text-destructive uppercase tracking-wider block mb-0.5 font-semibold">Total Improductivo</span>
+                                  <span className="text-sm font-bold font-mono text-destructive">{formatHoursMinutes(p.totalImprod)}</span>
+                                </div>
+                                <div className="rounded-md border border-border/50 p-2 text-center">
+                                  <span className="text-[10px] text-muted-foreground uppercase tracking-wider block mb-0.5 font-semibold">Total Jornada</span>
+                                  <span className="text-sm font-bold font-mono">{formatHoursMinutes(p.totalMinutes)}</span>
+                                </div>
                               </div>
                             </div>
                           </div>
