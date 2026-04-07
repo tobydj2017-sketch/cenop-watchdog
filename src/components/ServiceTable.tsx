@@ -1,7 +1,9 @@
+import { useState } from "react";
 import { ServiceEntry } from "@/lib/types";
 import { Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { cleanTime } from "@/lib/formatTime";
+import ServiceDetailView from "@/components/ServiceDetailView";
 
 interface Props {
   services: ServiceEntry[];
@@ -31,6 +33,8 @@ const SERVICE_BADGE_COLORS = [
 ];
 
 export default function ServiceTable({ services, onDelete }: Props) {
+  const [selectedSolicitud, setSelectedSolicitud] = useState<number | null>(null);
+
   if (services.length === 0) {
     return (
       <div className="glass-card p-8 text-center text-muted-foreground">
@@ -39,62 +43,83 @@ export default function ServiceTable({ services, onDelete }: Props) {
     );
   }
 
-  // Build a map: solicitud number → color index
   const uniqueSolicitudes = [...new Set(services.map((s) => s.solicitud))];
   const solicitudColorMap = new Map<number, number>();
   uniqueSolicitudes.forEach((sol, i) => {
     solicitudColorMap.set(sol, i % SERVICE_COLORS.length);
   });
 
-  return (
-    <div className="glass-card overflow-hidden">
-      <div className="overflow-x-auto max-h-[70vh] overflow-y-auto">
-        <table className="w-full text-sm">
-          <thead className="sticky top-0 z-10 bg-card">
-            <tr className="border-b border-border">
-              {["#", "Cliente", "Destino", "Chofer", "Custodio", "Móvil", "Salida", "Fin Serv.", "Hs Prod.", "Hs Improd.", "Hs Total", ""].map(
-                (h) => (
-                  <th key={h} className="px-3 py-3 text-left text-xs text-muted-foreground uppercase tracking-wider font-semibold whitespace-nowrap">
-                    {h}
-                  </th>
-                )
-              )}
-            </tr>
-          </thead>
-          <tbody>
-            {services.filter((s) => s.chofer || s.custodio).map((s) => {
-              const colorIdx = solicitudColorMap.get(s.solicitud) ?? 0;
-              const rowColor = SERVICE_COLORS[colorIdx];
-              const badgeColor = SERVICE_BADGE_COLORS[colorIdx];
+  const selectedServices = selectedSolicitud !== null
+    ? services.filter((s) => s.solicitud === selectedSolicitud)
+    : [];
 
-              return (
-                <tr key={s.id} className={`border-b border-border/50 border-l-[6px] hover:brightness-130 transition-all ${rowColor}`}>
-                  <td className="px-3 py-2.5">
-                    <span className={`inline-flex items-center justify-center w-7 h-7 rounded-md font-mono text-xs font-bold ${badgeColor}`}>
-                      {s.solicitud}
-                    </span>
-                  </td>
-                  <td className="px-3 py-2.5 font-semibold">{s.cliente}</td>
-                  <td className="px-3 py-2.5 text-muted-foreground">{s.destino}</td>
-                  <td className="px-3 py-2.5">{s.chofer || "—"}</td>
-                  <td className="px-3 py-2.5">{s.custodio || "—"}</td>
-                  <td className="px-3 py-2.5 font-mono text-xs">{s.movil}</td>
-                  <td className="px-3 py-2.5 font-mono text-xs">{cleanTime(s.salidaCenop)}</td>
-                  <td className="px-3 py-2.5 font-mono text-xs">{cleanTime(s.finalizaServicio)}</td>
-                  <td className="px-3 py-2.5 font-mono text-xs text-success font-semibold">{cleanTime(s.horasProductivas)}</td>
-                  <td className="px-3 py-2.5 font-mono text-xs text-destructive font-semibold">{cleanTime(s.horasImproductivas)}</td>
-                  <td className="px-3 py-2.5 font-mono text-xs font-semibold">{cleanTime(s.horasTotales)}</td>
-                  <td className="px-3 py-2.5">
-                    <Button variant="ghost" size="sm" onClick={() => onDelete(s.id)} className="h-7 w-7 p-0 text-muted-foreground hover:text-destructive">
-                      <Trash2 className="w-3.5 h-3.5" />
-                    </Button>
-                  </td>
-                </tr>
-              );
-            })}
-          </tbody>
-        </table>
+  return (
+    <>
+      <div className="glass-card overflow-hidden">
+        <div className="overflow-x-auto max-h-[70vh] overflow-y-auto">
+          <table className="w-full text-sm">
+            <thead className="sticky top-0 z-10 bg-card">
+              <tr className="border-b border-border">
+                {["#", "Cliente", "Destino", "Chofer", "Custodio", "Móvil", "Salida", "Fin Serv.", "Hs Prod.", "Hs Improd.", "Hs Total", ""].map(
+                  (h) => (
+                    <th key={h} className="px-3 py-3 text-left text-xs text-muted-foreground uppercase tracking-wider font-semibold whitespace-nowrap">
+                      {h}
+                    </th>
+                  )
+                )}
+              </tr>
+            </thead>
+            <tbody>
+              {services.filter((s) => s.chofer || s.custodio).map((s) => {
+                const colorIdx = solicitudColorMap.get(s.solicitud) ?? 0;
+                const rowColor = SERVICE_COLORS[colorIdx];
+                const badgeColor = SERVICE_BADGE_COLORS[colorIdx];
+
+                return (
+                  <tr
+                    key={s.id}
+                    className={`border-b border-border/50 border-l-[6px] hover:brightness-130 transition-all cursor-pointer ${rowColor}`}
+                    onClick={() => setSelectedSolicitud(s.solicitud)}
+                  >
+                    <td className="px-3 py-2.5">
+                      <span className={`inline-flex items-center justify-center w-7 h-7 rounded-md font-mono text-xs font-bold ${badgeColor}`}>
+                        {s.solicitud}
+                      </span>
+                    </td>
+                    <td className="px-3 py-2.5 font-semibold">{s.cliente}</td>
+                    <td className="px-3 py-2.5 text-muted-foreground">{s.destino}</td>
+                    <td className="px-3 py-2.5">{s.chofer || "—"}</td>
+                    <td className="px-3 py-2.5">{s.custodio || "—"}</td>
+                    <td className="px-3 py-2.5 font-mono text-xs">{s.movil}</td>
+                    <td className="px-3 py-2.5 font-mono text-xs">{cleanTime(s.salidaCenop)}</td>
+                    <td className="px-3 py-2.5 font-mono text-xs">{cleanTime(s.finalizaServicio)}</td>
+                    <td className="px-3 py-2.5 font-mono text-xs text-success font-semibold">{cleanTime(s.horasProductivas)}</td>
+                    <td className="px-3 py-2.5 font-mono text-xs text-destructive font-semibold">{cleanTime(s.horasImproductivas)}</td>
+                    <td className="px-3 py-2.5 font-mono text-xs font-semibold">{cleanTime(s.horasTotales)}</td>
+                    <td className="px-3 py-2.5">
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={(e) => { e.stopPropagation(); onDelete(s.id); }}
+                        className="h-7 w-7 p-0 text-muted-foreground hover:text-destructive"
+                      >
+                        <Trash2 className="w-3.5 h-3.5" />
+                      </Button>
+                    </td>
+                  </tr>
+                );
+              })}
+            </tbody>
+          </table>
+        </div>
       </div>
-    </div>
+
+      {selectedSolicitud !== null && selectedServices.length > 0 && (
+        <ServiceDetailView
+          services={selectedServices}
+          onClose={() => setSelectedSolicitud(null)}
+        />
+      )}
+    </>
   );
 }
