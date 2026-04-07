@@ -269,8 +269,64 @@ export default function DashboardRendimiento({ services }: Props) {
                   {expandedPerson === p.nombre && (
                     <tr key={`${p.nombre}-detail`}>
                       <td colSpan={compareMode ? 11 : 10} className="p-0">
-                        <div className="bg-secondary/10 border-y border-border/50 p-4 space-y-4">
-                          {/* Per client breakdown */}
+                        <div className="bg-secondary/10 border-y border-border/50 p-4 space-y-5">
+                          {/* Charts row */}
+                          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            {/* Pie: distribución de horas por cliente */}
+                            <div className="glass-card p-4">
+                              <h4 className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-3">Distribución de Horas por Cliente</h4>
+                              <ResponsiveContainer width="100%" height={220}>
+                                <PieChart>
+                                  <Pie
+                                    data={p.clienteDetalle.map((cd) => ({ name: cd.cliente, value: cd.prod + cd.improd }))}
+                                    cx="50%" cy="50%" outerRadius={80} innerRadius={40} dataKey="value"
+                                    label={({ name, percent }) => `${name} ${(percent * 100).toFixed(0)}%`}
+                                    labelLine={{ strokeWidth: 1 }}
+                                  >
+                                    {p.clienteDetalle.map((_, idx) => (
+                                      <Cell key={idx} fill={PIE_COLORS[idx % PIE_COLORS.length]} />
+                                    ))}
+                                  </Pie>
+                                  <Tooltip formatter={(v: number) => formatHoursMinutes(v)} />
+                                </PieChart>
+                              </ResponsiveContainer>
+                            </div>
+
+                            {/* Bar: tendencia diaria prod vs improd */}
+                            <div className="glass-card p-4">
+                              <h4 className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-3">Horas Diarias — Prod. vs Improd.</h4>
+                              <ResponsiveContainer width="100%" height={220}>
+                                <BarChart data={p.diaDetalle}>
+                                  <CartesianGrid strokeDasharray="3 3" stroke="hsl(0,0%,25%)" />
+                                  <XAxis dataKey="label" tick={{ fontSize: 9 }} />
+                                  <YAxis tickFormatter={(v) => `${Math.floor(v / 60)}h`} tick={{ fontSize: 10 }} />
+                                  <Tooltip formatter={tooltipFormatter} />
+                                  <Legend wrapperStyle={{ fontSize: 10 }} />
+                                  <Bar dataKey="prod" name="Productivas" fill="hsl(142, 70%, 45%)" stackId="a" />
+                                  <Bar dataKey="improd" name="Improductivas" fill="hsl(0, 72%, 50%)" stackId="a" radius={[2, 2, 0, 0]} />
+                                </BarChart>
+                              </ResponsiveContainer>
+                            </div>
+                          </div>
+
+                          {/* Eficiencia diaria line */}
+                          <div className="glass-card p-4">
+                            <h4 className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-3">Tendencia de Eficiencia Diaria</h4>
+                            <ResponsiveContainer width="100%" height={180}>
+                              <LineChart data={p.diaDetalle.map((dd) => ({
+                                ...dd,
+                                eficiencia: dd.prod + dd.improd > 0 ? Math.round((dd.prod / (dd.prod + dd.improd)) * 100) : 0,
+                              }))}>
+                                <CartesianGrid strokeDasharray="3 3" stroke="hsl(0,0%,25%)" />
+                                <XAxis dataKey="label" tick={{ fontSize: 9 }} />
+                                <YAxis domain={[0, 100]} tickFormatter={(v) => `${v}%`} tick={{ fontSize: 10 }} />
+                                <Tooltip formatter={(v: number) => `${v}%`} />
+                                <Line type="monotone" dataKey="eficiencia" name="Eficiencia" stroke="hsl(38, 92%, 50%)" strokeWidth={2} dot={{ r: 3 }} />
+                              </LineChart>
+                            </ResponsiveContainer>
+                          </div>
+
+                          {/* Per client breakdown table */}
                           <div>
                             <h4 className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-2">Desglose por Cliente</h4>
                             <div className="overflow-x-auto">
@@ -299,7 +355,7 @@ export default function DashboardRendimiento({ services }: Props) {
                             </div>
                           </div>
 
-                          {/* Per day breakdown */}
+                          {/* Per day breakdown table */}
                           <div>
                             <h4 className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-2">Detalle Día a Día</h4>
                             <div className="overflow-x-auto max-h-[300px] overflow-y-auto">
