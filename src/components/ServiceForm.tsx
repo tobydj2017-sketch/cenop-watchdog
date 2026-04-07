@@ -139,11 +139,13 @@ export default function ServiceForm({ onAdd, selectedDate }: Props) {
       id: generateId(),
       fecha: selectedDate,
       peajes: peajes.length > 0 ? peajes : undefined,
+      comisiones: comisiones.length > 0 ? comisiones : undefined,
       choferEsOperaciones: !!opsBadgeMap[form.chofer],
       custodioEsOperaciones: !!opsBadgeMap[form.custodio],
     });
     setForm(defaultEntry);
     setPeajes([]);
+    setComisiones([]);
     setOpen(false);
   };
 
