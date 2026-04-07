@@ -8,7 +8,7 @@ import {
   PersonalEntry, PersonalRole, ALL_ROLES, ROLE_LABELS,
   getPersonal, addPersonal, updatePersonal, deletePersonal,
 } from "@/lib/personalStore";
-import { Plus, Trash2, UserPlus, Search, Filter } from "lucide-react";
+import { Plus, Trash2, UserPlus, Search, Pencil, Check, X } from "lucide-react";
 import { toast } from "sonner";
 
 const ROLE_COLORS: Record<PersonalRole, string> = {
@@ -25,6 +25,8 @@ export default function PersonalManager() {
   const [searchTerm, setSearchTerm] = useState("");
   const [filterRole, setFilterRole] = useState<PersonalRole | "todos">("todos");
   const [showForm, setShowForm] = useState(false);
+  const [editingId, setEditingId] = useState<string | null>(null);
+  const [editName, setEditName] = useState("");
 
   const refresh = () => setPersonal(getPersonal());
 
@@ -52,6 +54,21 @@ export default function PersonalManager() {
       : [...currentRoles, role];
     updatePersonal(id, { roles: updated });
     refresh();
+  };
+
+  const startEdit = (p: PersonalEntry) => {
+    setEditingId(p.id);
+    setEditName(p.nombre);
+  };
+
+  const saveEdit = (id: string) => {
+    const name = editName.trim().toUpperCase();
+    if (!name) { toast.error("El nombre no puede estar vacío"); return; }
+    if (personal.some((p) => p.nombre === name && p.id !== id)) { toast.error("Ya existe ese nombre"); return; }
+    updatePersonal(id, { nombre: name });
+    setEditingId(null);
+    refresh();
+    toast.success("Nombre actualizado");
   };
 
   const toggleNewRole = (role: PersonalRole) => {
@@ -173,7 +190,32 @@ export default function PersonalManager() {
               ) : (
                 filtered.map((p) => (
                   <tr key={p.id} className="border-b border-border/50 hover:bg-muted/20 transition-colors">
-                    <td className="px-4 py-2.5 font-medium">{p.nombre}</td>
+                    <td className="px-4 py-2.5 font-medium">
+                      {editingId === p.id ? (
+                        <div className="flex items-center gap-1">
+                          <Input
+                            value={editName}
+                            onChange={(e) => setEditName(e.target.value)}
+                            className="h-7 text-sm w-48"
+                            autoFocus
+                            onKeyDown={(e) => {
+                              if (e.key === "Enter") saveEdit(p.id);
+                              if (e.key === "Escape") setEditingId(null);
+                            }}
+                          />
+                          <Button variant="ghost" size="icon" className="h-7 w-7 text-emerald-600" onClick={() => saveEdit(p.id)}>
+                            <Check className="w-3.5 h-3.5" />
+                          </Button>
+                          <Button variant="ghost" size="icon" className="h-7 w-7" onClick={() => setEditingId(null)}>
+                            <X className="w-3.5 h-3.5" />
+                          </Button>
+                        </div>
+                      ) : (
+                        <span className="cursor-pointer hover:text-primary" onDoubleClick={() => startEdit(p)}>
+                          {p.nombre}
+                        </span>
+                      )}
+                    </td>
                     <td className="px-4 py-2.5">
                       <div className="flex flex-wrap gap-1.5 justify-center">
                         {ALL_ROLES.map((role) => (
@@ -192,14 +234,24 @@ export default function PersonalManager() {
                       </div>
                     </td>
                     <td className="px-2 py-2.5 text-center">
-                      <Button
-                        variant="ghost"
-                        size="icon"
-                        className="h-7 w-7 text-destructive hover:text-destructive"
-                        onClick={() => handleDelete(p.id, p.nombre)}
-                      >
-                        <Trash2 className="w-3.5 h-3.5" />
-                      </Button>
+                      <div className="flex items-center justify-center gap-0.5">
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          className="h-7 w-7 text-muted-foreground hover:text-primary"
+                          onClick={() => startEdit(p)}
+                        >
+                          <Pencil className="w-3.5 h-3.5" />
+                        </Button>
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          className="h-7 w-7 text-destructive hover:text-destructive"
+                          onClick={() => handleDelete(p.id, p.nombre)}
+                        >
+                          <Trash2 className="w-3.5 h-3.5" />
+                        </Button>
+                      </div>
                     </td>
                   </tr>
                 ))
