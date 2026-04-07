@@ -73,26 +73,34 @@ export default function ServiceDetailView({ services, onClose }: Props) {
             <User className="w-3.5 h-3.5" /> Personal Asignado
           </h3>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-            {services.map((entry) => (
-              <div key={entry.id} className="rounded-md bg-secondary/30 p-3 space-y-1">
-                {entry.chofer && (
-                  <div>
-                    <span className="text-xs text-muted-foreground">Chofer</span>
-                    <p className="text-sm font-semibold">{entry.chofer}</p>
-                    {entry.citaChofer && <p className="text-xs text-muted-foreground">Cita: {cleanTime(entry.citaChofer)}</p>}
-                    {entry.horaFrancoChofer && <p className="text-xs text-muted-foreground">Franco: {cleanTime(entry.horaFrancoChofer)}</p>}
-                  </div>
-                )}
-                {entry.custodio && (
-                  <div>
-                    <span className="text-xs text-muted-foreground">Custodio</span>
-                    <p className="text-sm font-semibold">{entry.custodio}</p>
-                    {entry.citaCustodio && <p className="text-xs text-muted-foreground">Cita: {cleanTime(entry.citaCustodio)}</p>}
-                    {entry.horaFrancoCustodio && <p className="text-xs text-muted-foreground">Franco: {cleanTime(entry.horaFrancoCustodio)}</p>}
-                  </div>
-                )}
-              </div>
-            ))}
+            {(() => {
+              const choferes = new Map<string, ServiceEntry>();
+              const custodios = new Map<string, ServiceEntry>();
+              services.forEach((entry) => {
+                if (entry.chofer && !choferes.has(entry.chofer)) choferes.set(entry.chofer, entry);
+                if (entry.custodio && !custodios.has(entry.custodio)) custodios.set(entry.custodio, entry);
+              });
+              return (
+                <>
+                  {[...choferes.entries()].map(([name, entry]) => (
+                    <div key={`ch-${name}`} className="rounded-md bg-secondary/30 p-3 space-y-1">
+                      <span className="text-xs text-muted-foreground">Chofer</span>
+                      <p className="text-sm font-semibold">{name}</p>
+                      {entry.citaChofer && <p className="text-xs text-muted-foreground">Cita: {cleanTime(entry.citaChofer)}</p>}
+                      {entry.horaFrancoChofer && <p className="text-xs text-muted-foreground">Franco: {cleanTime(entry.horaFrancoChofer)}</p>}
+                    </div>
+                  ))}
+                  {[...custodios.entries()].map(([name, entry]) => (
+                    <div key={`cu-${name}`} className="rounded-md bg-secondary/30 p-3 space-y-1">
+                      <span className="text-xs text-muted-foreground">Custodio</span>
+                      <p className="text-sm font-semibold">{name}</p>
+                      {entry.citaCustodio && <p className="text-xs text-muted-foreground">Cita: {cleanTime(entry.citaCustodio)}</p>}
+                      {entry.horaFrancoCustodio && <p className="text-xs text-muted-foreground">Franco: {cleanTime(entry.horaFrancoCustodio)}</p>}
+                    </div>
+                  ))}
+                </>
+              );
+            })()}
           </div>
         </div>
 
