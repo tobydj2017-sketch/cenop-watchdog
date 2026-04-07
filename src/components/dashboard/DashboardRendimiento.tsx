@@ -23,6 +23,16 @@ interface Props {
 
 const tooltipFormatter = (value: number) => formatHoursMinutes(value);
 
+const DayTick = ({ x, y, payload }: any) => {
+  const parts = (payload.value || "").split("\n");
+  return (
+    <g transform={`translate(${x},${y})`}>
+      <text x={0} y={0} dy={12} textAnchor="middle" fontSize={9} fill="hsl(0,0%,70%)">{parts[0]}</text>
+      <text x={0} y={0} dy={23} textAnchor="middle" fontSize={7} fill="hsl(0,0%,50%)" fontStyle="italic">{parts[1] || ""}</text>
+    </g>
+  );
+};
+
 interface PersonData {
   nombre: string;
   prod: number;
@@ -319,7 +329,7 @@ export default function DashboardRendimiento({ services }: Props) {
                                 eficiencia: dd.prod + dd.improd > 0 ? Math.round((dd.prod / (dd.prod + dd.improd)) * 100) : 0,
                               }))}>
                                 <CartesianGrid strokeDasharray="3 3" stroke="hsl(0,0%,25%)" />
-                                <XAxis dataKey="label" tick={{ fontSize: 9 }} />
+                                <XAxis dataKey="labelConDia" tick={<DayTick />} height={35} />
                                 <YAxis domain={[0, 100]} tickFormatter={(v) => `${v}%`} tick={{ fontSize: 10 }} />
                                 <Tooltip formatter={(v: number) => `${v}%`} />
                                 <Line type="monotone" dataKey="eficiencia" name="Eficiencia" stroke="hsl(38, 92%, 50%)" strokeWidth={2} dot={{ r: 3 }} />
@@ -363,7 +373,7 @@ export default function DashboardRendimiento({ services }: Props) {
                               <table className="w-full text-xs">
                                 <thead className="sticky top-0 bg-card">
                                   <tr className="border-b border-border/50">
-                                    {["Fecha", "Servicios", "Clientes", "Hs Prod.", "Hs Improd.", "Eficiencia"].map((c) => (
+                                    {["Fecha", "Día", "Servicios", "Clientes", "Hs Prod.", "Hs Improd.", "Eficiencia"].map((c) => (
                                       <th key={c} className="px-2 py-1.5 text-left text-muted-foreground uppercase tracking-wider font-semibold">{c}</th>
                                     ))}
                                   </tr>
@@ -372,6 +382,7 @@ export default function DashboardRendimiento({ services }: Props) {
                                   {p.diaDetalle.map((dd) => (
                                     <tr key={dd.fecha} className="border-b border-border/30">
                                       <td className="px-2 py-1.5 font-mono">{dd.label}</td>
+                                      <td className="px-2 py-1.5 text-muted-foreground italic capitalize">{dd.dia}</td>
                                       <td className="px-2 py-1.5 font-mono">{dd.servicios}</td>
                                       <td className="px-2 py-1.5">{dd.clientes.join(", ")}</td>
                                       <td className="px-2 py-1.5 font-mono text-success">{formatHoursMinutes(dd.prod)}</td>
