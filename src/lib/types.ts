@@ -36,6 +36,8 @@ export interface ServiceEntry {
   horasTotales: string;
   fecha: string;
   peajes?: PeajeEntry[];
+  choferEsOperaciones?: boolean;
+  custodioEsOperaciones?: boolean;
 }
 
 export interface FuelEntry {
