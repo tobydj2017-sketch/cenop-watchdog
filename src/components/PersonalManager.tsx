@@ -139,10 +139,22 @@ export default function PersonalManager() {
             className="pl-9 h-9"
           />
         </div>
-        <Button onClick={() => setShowForm(!showForm)} className="gap-2">
-          <UserPlus className="w-4 h-4" />
-          Agregar Personal
-        </Button>
+        <div className="flex gap-2">
+          {hasPendingChanges && (
+            <>
+              <Button onClick={handleDiscardChanges} variant="ghost" size="sm" className="gap-1 text-xs">
+                <X className="w-3.5 h-3.5" /> Descartar
+              </Button>
+              <Button onClick={handleSaveAll} size="sm" className="gap-1 bg-emerald-600 hover:bg-emerald-700 text-white">
+                <Check className="w-3.5 h-3.5" /> Guardar Cambios ({Object.keys(pendingChanges).length})
+              </Button>
+            </>
+          )}
+          <Button onClick={() => setShowForm(!showForm)} className="gap-2">
+            <UserPlus className="w-4 h-4" />
+            Agregar Personal
+          </Button>
+        </div>
       </div>
 
       {/* Add form */}
