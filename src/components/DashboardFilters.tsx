@@ -36,8 +36,14 @@ export default function DashboardFilters({ services, fuelEntries, onFilter }: Pr
       if (s.chofer) set.add(s.chofer);
       if (s.custodio) set.add(s.custodio);
     });
-    return Array.from(set).sort();
-  }, [services]);
+    let names = Array.from(set).sort();
+    if (tipoPersonal === "operaciones") {
+      names = names.filter((n) => opsNames.has(n));
+    } else if (tipoPersonal === "cenop") {
+      names = names.filter((n) => !opsNames.has(n));
+    }
+    return names;
+  }, [services, tipoPersonal, opsNames]);
 
   const allMoviles = useMemo(() => {
     const set = new Set<string>();
