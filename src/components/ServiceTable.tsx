@@ -60,7 +60,7 @@ export default function ServiceTable({ services, onDelete }: Props) {
           <table className="w-full text-sm">
             <thead className="sticky top-0 z-10 bg-card">
               <tr className="border-b border-border">
-                {["#", "Cliente", "Destino", "Chofer", "Custodio", "Móvil", "Salida", "Fin Serv.", "Peajes", "Hs Prod.", "Hs Improd.", "Hs Total", ""].map(
+                {["#", "Cliente", "Destino", "Chofer", "Custodio", "Móvil", "Remito", "Salida", "Fin Serv.", "Peajes", "Hs Prod.", "Hs Improd.", "Hs Total", ""].map(
                   (h) => (
                     <th key={h} className="px-3 py-3 text-left text-xs text-muted-foreground uppercase tracking-wider font-semibold whitespace-nowrap">
                       {h}
@@ -91,6 +91,7 @@ export default function ServiceTable({ services, onDelete }: Props) {
                     <td className="px-3 py-2.5">{s.chofer || "—"}</td>
                     <td className="px-3 py-2.5">{s.custodio || "—"}</td>
                     <td className="px-3 py-2.5 font-mono text-xs">{s.movil}</td>
+                    <td className="px-3 py-2.5 font-mono text-xs">{s.remito || "—"}</td>
                     <td className="px-3 py-2.5 font-mono text-xs">{cleanTime(s.salidaCenop)}</td>
                     <td className="px-3 py-2.5 font-mono text-xs">{cleanTime(s.finalizaServicio)}</td>
                     <td className="px-3 py-2.5 font-mono text-xs text-primary font-semibold">
