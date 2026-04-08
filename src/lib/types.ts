@@ -52,6 +52,7 @@ export interface ServiceEntry {
   fecha: string;
   peajes?: PeajeEntry[];
   comisiones?: ComisionEntry[];
+  serviciosOperaciones?: ServicioOperacionesEntry[];
   choferEsOperaciones?: boolean;
   custodioEsOperaciones?: boolean;
 }

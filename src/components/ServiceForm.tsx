@@ -2,12 +2,12 @@ import { useState, useRef, useMemo } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { ServiceEntry, PeajeEntry, ComisionEntry, generateId, calcTimeDiff, timeToMinutes, minutesToTime } from "@/lib/types";
+import { ServiceEntry, PeajeEntry, ComisionEntry, ServicioOperacionesEntry, generateId, calcTimeDiff, timeToMinutes, minutesToTime } from "@/lib/types";
 import { MOVILES, CLIENTES, MOVIL_TELEFONO } from "@/lib/cenopData";
 import { getPersonal, getActivePersonalNames } from "@/lib/personalStore";
 import SearchableSelect from "@/components/SearchableSelect";
 import TimeInput from "@/components/TimeInput";
-import { Plus, Trash2, CircleDollarSign, Briefcase } from "lucide-react";
+import { Plus, Trash2, CircleDollarSign, Briefcase, Building2 } from "lucide-react";
 
 interface Props {
   onAdd: (entry: ServiceEntry) => void;
