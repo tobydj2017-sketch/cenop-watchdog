@@ -19,7 +19,8 @@ const ROLE_COLORS: Record<PersonalRole, string> = {
 };
 
 export default function PersonalManager() {
-  const [personal, setPersonal] = useState<PersonalEntry[]>(getPersonal);
+  const [personal, setPersonal] = useState<PersonalEntry[]>(() => getPersonal());
+  const [pendingChanges, setPendingChanges] = useState<Record<string, PersonalRole[]>>({});
   const [newName, setNewName] = useState("");
   const [newRoles, setNewRoles] = useState<PersonalRole[]>([]);
   const [searchTerm, setSearchTerm] = useState("");
@@ -27,6 +28,8 @@ export default function PersonalManager() {
   const [showForm, setShowForm] = useState(false);
   const [editingId, setEditingId] = useState<string | null>(null);
   const [editName, setEditName] = useState("");
+
+  const hasPendingChanges = Object.keys(pendingChanges).length > 0;
 
   const refresh = () => setPersonal(getPersonal());
 
@@ -44,16 +47,30 @@ export default function PersonalManager() {
 
   const handleDelete = (id: string, nombre: string) => {
     deletePersonal(id);
+    setPendingChanges((prev) => { const next = { ...prev }; delete next[id]; return next; });
     refresh();
     toast.success(`${nombre} eliminado`);
   };
 
   const toggleRole = (id: string, role: PersonalRole, currentRoles: PersonalRole[]) => {
-    const updated = currentRoles.includes(role)
-      ? currentRoles.filter((r) => r !== role)
-      : [...currentRoles, role];
-    updatePersonal(id, { roles: updated });
+    const baseRoles = pendingChanges[id] ?? currentRoles;
+    const updated = baseRoles.includes(role)
+      ? baseRoles.filter((r) => r !== role)
+      : [...baseRoles, role];
+    setPendingChanges((prev) => ({ ...prev, [id]: updated }));
+  };
+
+  const handleSaveAll = () => {
+    Object.entries(pendingChanges).forEach(([id, roles]) => {
+      updatePersonal(id, { roles });
+    });
+    setPendingChanges({});
     refresh();
+    toast.success("Cambios guardados correctamente");
+  };
+
+  const handleDiscardChanges = () => {
+    setPendingChanges({});
   };
 
   const startEdit = (p: PersonalEntry) => {
@@ -122,10 +139,22 @@ export default function PersonalManager() {
             className="pl-9 h-9"
           />
         </div>
-        <Button onClick={() => setShowForm(!showForm)} className="gap-2">
-          <UserPlus className="w-4 h-4" />
-          Agregar Personal
-        </Button>
+        <div className="flex gap-2">
+          {hasPendingChanges && (
+            <>
+              <Button onClick={handleDiscardChanges} variant="ghost" size="sm" className="gap-1 text-xs">
+                <X className="w-3.5 h-3.5" /> Descartar
+              </Button>
+              <Button onClick={handleSaveAll} size="sm" className="gap-1 bg-emerald-600 hover:bg-emerald-700 text-white">
+                <Check className="w-3.5 h-3.5" /> Guardar Cambios ({Object.keys(pendingChanges).length})
+              </Button>
+            </>
+          )}
+          <Button onClick={() => setShowForm(!showForm)} className="gap-2">
+            <UserPlus className="w-4 h-4" />
+            Agregar Personal
+          </Button>
+        </div>
       </div>
 
       {/* Add form */}
@@ -218,19 +247,24 @@ export default function PersonalManager() {
                     </td>
                     <td className="px-4 py-2.5">
                       <div className="flex flex-wrap gap-1.5 justify-center">
-                        {ALL_ROLES.map((role) => (
-                          <button
-                            key={role}
-                            onClick={() => toggleRole(p.id, role, p.roles)}
-                            className={`px-2 py-0.5 rounded-full text-xs font-medium border transition-all ${
-                              p.roles.includes(role)
-                                ? ROLE_COLORS[role]
-                                : "bg-muted/30 text-muted-foreground border-transparent opacity-40 hover:opacity-70"
-                            }`}
-                          >
-                            {ROLE_LABELS[role]}
-                          </button>
-                        ))}
+                        {ALL_ROLES.map((role) => {
+                          const effectiveRoles = pendingChanges[p.id] ?? p.roles;
+                          const isActive = effectiveRoles.includes(role);
+                          const isPending = p.id in pendingChanges;
+                          return (
+                            <button
+                              key={role}
+                              onClick={() => toggleRole(p.id, role, p.roles)}
+                              className={`px-2 py-0.5 rounded-full text-xs font-medium border transition-all ${
+                                isActive
+                                  ? ROLE_COLORS[role] + (isPending ? " ring-1 ring-primary/50" : "")
+                                  : "bg-muted/30 text-muted-foreground border-transparent opacity-40 hover:opacity-70"
+                              }`}
+                            >
+                              {ROLE_LABELS[role]}
+                            </button>
+                          );
+                        })}
                       </div>
                     </td>
                     <td className="px-2 py-2.5 text-center">
