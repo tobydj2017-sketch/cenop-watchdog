@@ -141,15 +141,19 @@ export default function PersonalManager() {
         </div>
         <div className="flex gap-2">
           {hasPendingChanges && (
-            <>
-              <Button onClick={handleDiscardChanges} variant="ghost" size="sm" className="gap-1 text-xs">
-                <X className="w-3.5 h-3.5" /> Descartar
-              </Button>
-              <Button onClick={handleSaveAll} size="sm" className="gap-1 bg-emerald-600 hover:bg-emerald-700 text-white">
-                <Check className="w-3.5 h-3.5" /> Guardar Cambios ({Object.keys(pendingChanges).length})
-              </Button>
-            </>
+            <Button onClick={handleDiscardChanges} variant="ghost" size="sm" className="gap-1 text-xs">
+              <X className="w-3.5 h-3.5" /> Descartar
+            </Button>
           )}
+          <Button
+            onClick={handleSaveAll}
+            size="sm"
+            disabled={!hasPendingChanges}
+            className="gap-1 bg-emerald-600 hover:bg-emerald-700 text-white disabled:opacity-50"
+          >
+            <Check className="w-3.5 h-3.5" />
+            {hasPendingChanges ? `Guardar Cambios (${Object.keys(pendingChanges).length})` : "Guardar Cambios"}
+          </Button>
           <Button onClick={() => setShowForm(!showForm)} className="gap-2">
             <UserPlus className="w-4 h-4" />
             Agregar Personal
