@@ -23,7 +23,7 @@ interface Props {
 
 const tooltipFormatter = (value: number) => formatHoursMinutes(value);
 
-export default function DashboardResumen({ services, fuelEntries, byPerson, byMovil, byCliente, totalProd, totalImprod, totalServicios, uniqueDays, totalFuel }: Props & {
+export default function DashboardResumen({ services, fuelEntries, byPerson, byMovil, byCliente, totalProd, totalImprod, totalServicios, uniqueDays, totalFuel, cenopEnOps }: Props & {
   byPerson: { nombre: string; prod: number; improd: number; servicios: number; total: number }[];
   byMovil: { patente: string; prod: number; improd: number; servicios: number; total: number }[];
   byCliente: { cliente: string; prod: number; improd: number; servicios: number; total: number }[];
@@ -32,6 +32,7 @@ export default function DashboardResumen({ services, fuelEntries, byPerson, byMo
   totalServicios: number;
   uniqueDays: number;
   totalFuel: number;
+  cenopEnOps: number;
 }) {
   const pieData = [
     { name: "Productivas", value: totalProd },
@@ -48,6 +49,7 @@ export default function DashboardResumen({ services, fuelEntries, byPerson, byMo
         <StatCard label="Días Operados" value={uniqueDays} />
         <StatCard label="Hs Productivas" value={formatHoursMinutes(totalProd)} className="text-success" />
         <StatCard label="Hs Improductivas" value={formatHoursMinutes(totalImprod)} className="text-destructive" />
+        <StatCard label="CENOP en Operaciones" value={formatHoursMinutes(cenopEnOps)} className="text-chart-4" />
         <StatCard label="Eficiencia General" value={totalHoras > 0 ? `${Math.round((totalProd / totalHoras) * 100)}%` : "—"} />
         <StatCard label="Total Horas" value={formatHoursMinutes(totalHoras)} />
         <StatCard label="Personal Activo" value={byPerson.length} />

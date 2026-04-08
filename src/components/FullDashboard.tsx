@@ -140,6 +140,7 @@ export default function FullDashboard({ services, fuelEntries, onBack }: Props) 
           totalServicios={totalServicios}
           uniqueDays={uniqueDays}
           totalFuel={totalFuel}
+          cenopEnOps={cenopEnOps}
         />
       )}
 
