@@ -158,3 +158,26 @@ export function minutesToTime(min: number): string {
   const m = min % 60;
   return `${h}:${m.toString().padStart(2, "0")}:00`;
 }
+
+/**
+ * Calculate productive hours of CENOP personnel (non-operaciones)
+ * working on external (non-CENOP) services.
+ */
+export function getCenopEnOperacionesMinutes(services: ServiceEntry[]): number {
+  const personal = getPersonal();
+  const opsNames = new Set(
+    personal.filter((p) => p.roles.includes("operaciones")).map((p) => p.nombre)
+  );
+
+  let totalMin = 0;
+  services.forEach((s) => {
+    if (isBaseServiceEntry(s)) return; // skip CENOP base services
+    const worker = s.chofer || s.custodio;
+    if (!worker) return;
+    // Only count if worker is NOT operaciones (i.e., is CENOP personnel)
+    if (opsNames.has(worker)) return;
+    const h = getAdjustedHours(s);
+    totalMin += h.prod;
+  });
+  return totalMin;
+}
