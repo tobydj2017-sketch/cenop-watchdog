@@ -1,5 +1,5 @@
 import { useState, useCallback, useMemo } from "react";
-import { Shield, CalendarDays, BarChart3, ClipboardList, Users, Building2 } from "lucide-react";
+import { Shield, CalendarDays, BarChart3, ClipboardList, Users, Building2, Download } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import DashboardStats from "@/components/DashboardStats";
@@ -15,6 +15,7 @@ import {
   getServices, saveServices, addService, deleteService,
   getFuelEntries, addFuelEntry, deleteFuelEntry,
 } from "@/lib/store";
+import { exportCargaDiaPDF, exportPersonalManagerPDF, exportClientManagerPDF } from "@/lib/pdfExport";
 
 const today = "2025-12-01";
 
@@ -67,15 +68,30 @@ export default function Index() {
           </div>
           <div className="flex items-center gap-2">
             {activeTab === "carga" && (
-              <div className="flex items-center gap-2 mr-2">
-                <CalendarDays className="w-4 h-4 text-muted-foreground" />
-                <Input
-                  type="date"
-                  value={selectedDate}
-                  onChange={(e) => setSelectedDate(e.target.value)}
-                  className="h-9 w-40 text-sm font-mono"
-                />
-              </div>
+              <>
+                <div className="flex items-center gap-2 mr-2">
+                  <CalendarDays className="w-4 h-4 text-muted-foreground" />
+                  <Input
+                    type="date"
+                    value={selectedDate}
+                    onChange={(e) => setSelectedDate(e.target.value)}
+                    className="h-9 w-40 text-sm font-mono"
+                  />
+                </div>
+                <Button variant="outline" size="sm" className="gap-1.5 text-xs" onClick={() => exportCargaDiaPDF(dayServices, dayFuel, selectedDate)}>
+                  <Download className="w-3.5 h-3.5" /> PDF
+                </Button>
+              </>
+            )}
+            {activeTab === "personal" && (
+              <Button variant="outline" size="sm" className="gap-1.5 text-xs" onClick={exportPersonalManagerPDF}>
+                <Download className="w-3.5 h-3.5" /> PDF
+              </Button>
+            )}
+            {activeTab === "clientes" && (
+              <Button variant="outline" size="sm" className="gap-1.5 text-xs" onClick={exportClientManagerPDF}>
+                <Download className="w-3.5 h-3.5" /> PDF
+              </Button>
             )}
           </div>
         </div>

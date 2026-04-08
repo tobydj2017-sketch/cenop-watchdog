@@ -2,7 +2,7 @@ import { useState, useMemo } from "react";
 import { ServiceEntry, FuelEntry, getAdjustedHours, getServiceKey, normalizeClientName, getCenopEnOperacionesMinutes } from "@/lib/types";
 import { formatHoursMinutes } from "@/lib/formatTime";
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, PieChart, Pie, Cell, Legend } from "recharts";
-import { Users, Truck, Building2, CalendarDays, ArrowLeft, TrendingUp, LayoutDashboard, Clock } from "lucide-react";
+import { Users, Truck, Building2, CalendarDays, ArrowLeft, TrendingUp, LayoutDashboard, Clock, Download } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import DashboardFilters from "@/components/DashboardFilters";
 import DashboardResumen from "@/components/dashboard/DashboardResumen";
@@ -10,6 +10,7 @@ import DashboardDiario from "@/components/dashboard/DashboardDiario";
 import DashboardRendimiento from "@/components/dashboard/DashboardRendimiento";
 import DashboardJornada from "@/components/dashboard/DashboardJornada";
 import { DataTable } from "@/components/dashboard/DataTable";
+import { exportResumenPDF, exportPersonalPDF, exportMovilesPDF, exportClientesPDF } from "@/lib/pdfExport";
 
 interface Props {
   services: ServiceEntry[];
@@ -104,11 +105,26 @@ export default function FullDashboard({ services, fuelEntries, onBack }: Props) 
 
   return (
     <div className="space-y-5">
-      <div className="flex items-center gap-3">
-        <Button variant="ghost" size="sm" onClick={onBack} className="gap-2">
-          <ArrowLeft className="w-4 h-4" /> Volver
+      <div className="flex items-center justify-between">
+        <div className="flex items-center gap-3">
+          <Button variant="ghost" size="sm" onClick={onBack} className="gap-2">
+            <ArrowLeft className="w-4 h-4" /> Volver
+          </Button>
+          <h2 className="section-title text-sm">Panel de Análisis Completo</h2>
+        </div>
+        <Button
+          variant="outline"
+          size="sm"
+          className="gap-1.5 text-xs"
+          onClick={() => {
+            if (tab === "resumen") exportResumenPDF(filteredServices, filteredFuel, { totalProd, totalImprod, totalServicios, uniqueDays, totalFuel, cenopEnOps }, byPerson, byMovil, byCliente);
+            else if (tab === "personal") exportPersonalPDF(byPerson);
+            else if (tab === "moviles") exportMovilesPDF(byMovil);
+            else if (tab === "clientes") exportClientesPDF(byCliente);
+          }}
+        >
+          <Download className="w-3.5 h-3.5" /> Descargar PDF
         </Button>
-        <h2 className="section-title text-sm">Panel de Análisis Completo</h2>
       </div>
 
       {/* Tabs */}
