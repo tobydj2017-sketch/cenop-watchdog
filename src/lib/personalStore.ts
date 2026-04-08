@@ -18,13 +18,19 @@ function generateId(): string {
 
 function seedPersonal() {
   if (!localStorage.getItem(SEED_PERSONAL_KEY)) {
-    const entries: PersonalEntry[] = PERSONAL.map((nombre) => ({
-      id: generateId(),
-      nombre,
-      roles: [],
-      activo: true,
-    }));
-    localStorage.setItem(PERSONAL_KEY, JSON.stringify(entries));
+    const existing: PersonalEntry[] = (() => {
+      try { return JSON.parse(localStorage.getItem(PERSONAL_KEY) || "[]"); } catch { return []; }
+    })();
+    const existingMap = new Map(existing.map((e) => [e.nombre, e]));
+    const merged: PersonalEntry[] = PERSONAL.map((nombre) => {
+      const prev = existingMap.get(nombre);
+      return prev || { id: generateId(), nombre, roles: [], activo: true };
+    });
+    // Keep any extra entries the user added that aren't in PERSONAL
+    existing.forEach((e) => {
+      if (!PERSONAL.includes(e.nombre)) merged.push(e);
+    });
+    localStorage.setItem(PERSONAL_KEY, JSON.stringify(merged));
     localStorage.setItem(SEED_PERSONAL_KEY, "true");
   }
 }
