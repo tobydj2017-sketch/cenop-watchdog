@@ -9,7 +9,13 @@ export interface PeajeEntry {
 export interface ComisionEntry {
   id: string;
   descripcion: string;
-  monto: number;
+  hora: string;
+}
+
+export interface ServicioOperacionesEntry {
+  id: string;
+  cliente: string;
+  descripcion: string;
   hora: string;
 }
 
