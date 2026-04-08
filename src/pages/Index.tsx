@@ -123,7 +123,7 @@ export default function Index() {
 
             <div className="grid lg:grid-cols-2 gap-4">
               <ServiceForm onAdd={handleAddService} selectedDate={selectedDate} />
-              <FuelForm onAdd={handleAddFuel} selectedDate={selectedDate} />
+              <FuelForm onAdd={handleAddFuel} selectedDate={selectedDate} existingEntries={fuelEntries} />
             </div>
 
             <ServiceTable services={dayServices} onDelete={handleDeleteService} />

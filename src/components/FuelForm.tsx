@@ -137,8 +137,8 @@ export default function FuelForm({ onAdd, selectedDate, existingEntries }: Props
           </div>
         </div>
         <div className="space-y-1">
-          <Label className="text-xs text-muted-foreground">N° Remito</Label>
-          <Input value={numeroRemito} onChange={(e) => setNumeroRemito(e.target.value)} className="h-9 text-sm" />
+          <Label className="text-xs text-muted-foreground">N° Remito <span className="text-destructive">*</span></Label>
+          <Input value={numeroRemito} onChange={(e) => setNumeroRemito(e.target.value)} className="h-9 text-sm" required />
         </div>
       </div>
 
