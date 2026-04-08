@@ -9,10 +9,12 @@ import { getPersonal, getActivePersonalNames } from "@/lib/personalStore";
 import SearchableSelect from "@/components/SearchableSelect";
 import TimeInput from "@/components/TimeInput";
 import { Plus, Trash2, CircleDollarSign, Briefcase, Building2 } from "lucide-react";
+import { toast } from "sonner";
 
 interface Props {
   onAdd: (entry: ServiceEntry) => void;
   selectedDate: string;
+  existingServices: ServiceEntry[];
 }
 
 const defaultEntry = {
@@ -41,7 +43,7 @@ const defaultEntry = {
   observaciones: "",
 };
 
-export default function ServiceForm({ onAdd, selectedDate }: Props) {
+export default function ServiceForm({ onAdd, selectedDate, existingServices }: Props) {
   const [form, setForm] = useState(defaultEntry);
   const [open, setOpen] = useState(false);
   const [peajes, setPeajes] = useState<PeajeEntry[]>([]);
@@ -149,6 +151,11 @@ export default function ServiceForm({ onAdd, selectedDate }: Props) {
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
+    const trimmedRemito = form.remito.trim();
+    if (trimmedRemito && existingServices.some((s) => s.remito.trim().toUpperCase() === trimmedRemito.toUpperCase())) {
+      toast.error(`Ya existe un servicio con el remito "${trimmedRemito}"`);
+      return;
+    }
     const hours = calculateHours();
     onAdd({
       ...form,
