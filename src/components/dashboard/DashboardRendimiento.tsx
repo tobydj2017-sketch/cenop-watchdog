@@ -49,6 +49,7 @@ interface PersonData {
 
 export default function DashboardRendimiento({ services }: Props) {
   const [expandedPerson, setExpandedPerson] = useState<string | null>(null);
+  const [expandedDate, setExpandedDate] = useState<string | null>(null);
   const [searchFilter, setSearchFilter] = useState("");
   const [compareMode, setCompareMode] = useState(false);
   const [compareSelection, setCompareSelection] = useState<Set<string>>(new Set());
