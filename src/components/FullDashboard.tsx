@@ -1,5 +1,5 @@
 import { useState, useMemo } from "react";
-import { ServiceEntry, FuelEntry, getAdjustedHours, getServiceKey, normalizeClientName } from "@/lib/types";
+import { ServiceEntry, FuelEntry, getAdjustedHours, getServiceKey, normalizeClientName, getCenopEnOperacionesMinutes } from "@/lib/types";
 import { formatHoursMinutes } from "@/lib/formatTime";
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, PieChart, Pie, Cell, Legend } from "recharts";
 import { Users, Truck, Building2, CalendarDays, ArrowLeft, TrendingUp, LayoutDashboard, Clock } from "lucide-react";
@@ -88,6 +88,7 @@ export default function FullDashboard({ services, fuelEntries, onBack }: Props) 
   const totalServicios = new Set(filteredServices.map(getServiceKey)).size;
   const uniqueDays = new Set(filteredServices.map((s) => s.fecha)).size;
   const totalFuel = filteredFuel.reduce((a, f) => a + f.monto, 0);
+  const cenopEnOps = getCenopEnOperacionesMinutes(filteredServices);
 
   const tooltipFormatter = (value: number) => formatHoursMinutes(value);
 
@@ -139,6 +140,7 @@ export default function FullDashboard({ services, fuelEntries, onBack }: Props) 
           totalServicios={totalServicios}
           uniqueDays={uniqueDays}
           totalFuel={totalFuel}
+          cenopEnOps={cenopEnOps}
         />
       )}
 
