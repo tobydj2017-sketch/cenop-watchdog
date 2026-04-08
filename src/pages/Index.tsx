@@ -1,5 +1,5 @@
 import { useState, useCallback, useMemo } from "react";
-import { Shield, CalendarDays, BarChart3, ClipboardList, Users } from "lucide-react";
+import { Shield, CalendarDays, BarChart3, ClipboardList, Users, Building2 } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import DashboardStats from "@/components/DashboardStats";
@@ -9,6 +9,7 @@ import FuelForm from "@/components/FuelForm";
 import FuelTable from "@/components/FuelTable";
 import FullDashboard from "@/components/FullDashboard";
 import PersonalManager from "@/components/PersonalManager";
+import ClientManager from "@/components/ClientManager";
 import { ServiceEntry, FuelEntry, isCountableServiceEntry } from "@/lib/types";
 import {
   getServices, saveServices, addService, deleteService,
@@ -21,7 +22,7 @@ export default function Index() {
   const [services, setServices] = useState<ServiceEntry[]>(getServices);
   const [fuelEntries, setFuelEntries] = useState<FuelEntry[]>(getFuelEntries);
   const [selectedDate, setSelectedDate] = useState(today);
-  const [activeTab, setActiveTab] = useState<"carga" | "dashboard" | "personal">("carga");
+  const [activeTab, setActiveTab] = useState<"carga" | "dashboard" | "personal" | "clientes">("carga");
 
   const handleAddService = useCallback((entry: ServiceEntry) => {
     addService(entry);
@@ -85,6 +86,7 @@ export default function Index() {
               { key: "carga", label: "Carga de Datos", icon: ClipboardList },
               { key: "dashboard", label: "Panel de Análisis", icon: BarChart3 },
               { key: "personal", label: "Personal", icon: Users },
+              { key: "clientes", label: "Clientes", icon: Building2 },
             ] as const).map(({ key, label, icon: Icon }) => (
               <button
                 key={key}
@@ -113,6 +115,8 @@ export default function Index() {
           />
         ) : activeTab === "personal" ? (
           <PersonalManager />
+        ) : activeTab === "clientes" ? (
+          <ClientManager />
         ) : (
           <>
             <DashboardStats services={cleanServices} fuelEntries={fuelEntries} selectedDate={selectedDate} />

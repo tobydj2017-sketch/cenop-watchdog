@@ -3,7 +3,8 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { ServiceEntry, PeajeEntry, ComisionEntry, ServicioOperacionesEntry, generateId, calcTimeDiff, timeToMinutes, minutesToTime } from "@/lib/types";
-import { MOVILES, CLIENTES, MOVIL_TELEFONO } from "@/lib/cenopData";
+import { MOVILES, MOVIL_TELEFONO } from "@/lib/cenopData";
+import { getActiveClientNames } from "@/lib/clientStore";
 import { getPersonal, getActivePersonalNames } from "@/lib/personalStore";
 import SearchableSelect from "@/components/SearchableSelect";
 import TimeInput from "@/components/TimeInput";
@@ -49,6 +50,7 @@ export default function ServiceForm({ onAdd, selectedDate }: Props) {
 
   const allPersonalEntries = getPersonal();
   const allPersonal = getActivePersonalNames();
+  const clientesList = getActiveClientNames();
 
   // Badge map: show role abbreviations next to each name
   const roleBadgeMap = useMemo(() => {
@@ -231,7 +233,7 @@ export default function ServiceForm({ onAdd, selectedDate }: Props) {
       <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
         <Field label="N° Solicitud" field="solicitud" type="number" />
         <Field label="Hora Solicitud" field="horaSolicitud" type="time" />
-        <SelectField label="Cliente" field="cliente" options={CLIENTES} />
+        <SelectField label="Cliente" field="cliente" options={clientesList} />
         <Field label="Lugar de Salida" field="lugarSalida" placeholder="Ej: Villa Celina" />
       </div>
 
@@ -378,7 +380,7 @@ export default function ServiceForm({ onAdd, selectedDate }: Props) {
             <div className="w-40 space-y-1">
               <Label className="text-xs text-muted-foreground">Cliente #{idx + 1}</Label>
               <SearchableSelect
-                options={CLIENTES}
+                options={clientesList}
                 value={sop.cliente}
                 onChange={(v) => updateServicioOp(sop.id, "cliente", v)}
                 placeholder="Cliente..."
