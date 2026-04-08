@@ -7,13 +7,15 @@ import { MOVILES } from "@/lib/cenopData";
 import { getActivePersonalNames } from "@/lib/personalStore";
 import SearchableSelect from "@/components/SearchableSelect";
 import { Camera, Plus, Upload, Fuel } from "lucide-react";
+import { toast } from "sonner";
 
 interface Props {
   onAdd: (entry: FuelEntry) => void;
   selectedDate: string;
+  existingEntries: FuelEntry[];
 }
 
-export default function FuelForm({ onAdd, selectedDate }: Props) {
+export default function FuelForm({ onAdd, selectedDate, existingEntries }: Props) {
   const [open, setOpen] = useState(false);
   const allPersonal = getActivePersonalNames();
 
@@ -44,6 +46,15 @@ export default function FuelForm({ onAdd, selectedDate }: Props) {
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
+    const trimmedRemito = numeroRemito.trim();
+    if (!trimmedRemito) {
+      toast.error("El N° de Remito es obligatorio");
+      return;
+    }
+    if (existingEntries.some((f) => f.numeroRemito.trim().toUpperCase() === trimmedRemito.toUpperCase())) {
+      toast.error(`Ya existe una carga con el remito "${trimmedRemito}"`);
+      return;
+    }
     onAdd({
       id: generateId(),
       fecha: selectedDate,
@@ -126,8 +137,8 @@ export default function FuelForm({ onAdd, selectedDate }: Props) {
           </div>
         </div>
         <div className="space-y-1">
-          <Label className="text-xs text-muted-foreground">N° Remito</Label>
-          <Input value={numeroRemito} onChange={(e) => setNumeroRemito(e.target.value)} className="h-9 text-sm" />
+          <Label className="text-xs text-muted-foreground">N° Remito <span className="text-destructive">*</span></Label>
+          <Input value={numeroRemito} onChange={(e) => setNumeroRemito(e.target.value)} className="h-9 text-sm" required />
         </div>
       </div>
 
