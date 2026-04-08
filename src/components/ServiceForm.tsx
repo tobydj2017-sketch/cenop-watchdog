@@ -2,12 +2,12 @@ import { useState, useRef, useMemo } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { ServiceEntry, PeajeEntry, ComisionEntry, generateId, calcTimeDiff, timeToMinutes, minutesToTime } from "@/lib/types";
+import { ServiceEntry, PeajeEntry, ComisionEntry, ServicioOperacionesEntry, generateId, calcTimeDiff, timeToMinutes, minutesToTime } from "@/lib/types";
 import { MOVILES, CLIENTES, MOVIL_TELEFONO } from "@/lib/cenopData";
 import { getPersonal, getActivePersonalNames } from "@/lib/personalStore";
 import SearchableSelect from "@/components/SearchableSelect";
 import TimeInput from "@/components/TimeInput";
-import { Plus, Trash2, CircleDollarSign, Briefcase } from "lucide-react";
+import { Plus, Trash2, CircleDollarSign, Briefcase, Building2 } from "lucide-react";
 
 interface Props {
   onAdd: (entry: ServiceEntry) => void;
@@ -45,6 +45,7 @@ export default function ServiceForm({ onAdd, selectedDate }: Props) {
   const [open, setOpen] = useState(false);
   const [peajes, setPeajes] = useState<PeajeEntry[]>([]);
   const [comisiones, setComisiones] = useState<ComisionEntry[]>([]);
+  const [serviciosOp, setServiciosOp] = useState<ServicioOperacionesEntry[]>([]);
 
   const allPersonalEntries = getPersonal();
   const allPersonal = getActivePersonalNames();
@@ -97,11 +98,25 @@ export default function ServiceForm({ onAdd, selectedDate }: Props) {
   };
 
   const totalPeajes = peajes.reduce((sum, p) => sum + (p.monto || 0), 0);
-  const totalComisiones = comisiones.reduce((sum, c) => sum + (c.monto || 0), 0);
+
+  // Servicios Operaciones
+  const addServicioOp = () => {
+    setServiciosOp((prev) => [...prev, { id: generateId(), cliente: "", descripcion: "", hora: "" }]);
+  };
+
+  const updateServicioOp = (id: string, field: keyof Omit<ServicioOperacionesEntry, "id">, value: string) => {
+    setServiciosOp((prev) =>
+      prev.map((s) => (s.id === id ? { ...s, [field]: value } : s))
+    );
+  };
+
+  const removeServicioOp = (id: string) => {
+    setServiciosOp((prev) => prev.filter((s) => s.id !== id));
+  };
 
   // Comisiones
   const addComision = () => {
-    setComisiones((prev) => [...prev, { id: generateId(), descripcion: "", monto: 0, hora: "" }]);
+    setComisiones((prev) => [...prev, { id: generateId(), descripcion: "", hora: "" }]);
   };
 
   const updateComision = (id: string, field: keyof Omit<ComisionEntry, "id">, value: string | number) => {
@@ -140,12 +155,14 @@ export default function ServiceForm({ onAdd, selectedDate }: Props) {
       fecha: selectedDate,
       peajes: peajes.length > 0 ? peajes : undefined,
       comisiones: comisiones.length > 0 ? comisiones : undefined,
+      serviciosOperaciones: serviciosOp.length > 0 ? serviciosOp : undefined,
       choferEsOperaciones: !!opsBadgeMap[form.chofer],
       custodioEsOperaciones: !!opsBadgeMap[form.custodio],
     });
     setForm(defaultEntry);
     setPeajes([]);
     setComisiones([]);
+    setServiciosOp([]);
     setOpen(false);
   };
 
@@ -317,16 +334,9 @@ export default function ServiceForm({ onAdd, selectedDate }: Props) {
       <div className="border-t border-border pt-3">
         <div className="flex items-center justify-between mb-2">
           <p className="text-xs text-muted-foreground uppercase tracking-wider">Comisiones (Productivas)</p>
-          <div className="flex items-center gap-3">
-            {comisiones.length > 0 && (
-              <span className="text-xs font-semibold text-primary">
-                Total: ${totalComisiones.toLocaleString("es-AR")}
-              </span>
-            )}
-            <Button type="button" variant="outline" size="sm" onClick={addComision} className="h-7 gap-1 text-xs">
-              <Briefcase className="w-3.5 h-3.5" /> Agregar Comisión
-            </Button>
-          </div>
+          <Button type="button" variant="outline" size="sm" onClick={addComision} className="h-7 gap-1 text-xs">
+            <Briefcase className="w-3.5 h-3.5" /> Agregar Comisión
+          </Button>
         </div>
         {comisiones.map((comision, idx) => (
           <div key={comision.id} className="flex items-end gap-2 mb-2">
@@ -348,16 +358,51 @@ export default function ServiceForm({ onAdd, selectedDate }: Props) {
                 />
               </div>
             </div>
-            <div className="w-32 space-y-1">
-              <Label className="text-xs text-muted-foreground">Monto ($)</Label>
+            <Button type="button" variant="ghost" size="icon" className="h-9 w-9 text-destructive" onClick={() => removeComision(comision.id)}>
+              <Trash2 className="w-3.5 h-3.5" />
+            </Button>
+          </div>
+        ))}
+      </div>
+
+      {/* Servicios Operaciones (CENOP en Operaciones) */}
+      <div className="border-t border-border pt-3">
+        <div className="flex items-center justify-between mb-2">
+          <p className="text-xs text-muted-foreground uppercase tracking-wider">Servicios Operaciones</p>
+          <Button type="button" variant="outline" size="sm" onClick={addServicioOp} className="h-7 gap-1 text-xs">
+            <Building2 className="w-3.5 h-3.5" /> Agregar Servicio OP
+          </Button>
+        </div>
+        {serviciosOp.map((sop, idx) => (
+          <div key={sop.id} className="flex items-end gap-2 mb-2">
+            <div className="w-40 space-y-1">
+              <Label className="text-xs text-muted-foreground">Cliente #{idx + 1}</Label>
+              <SearchableSelect
+                options={CLIENTES}
+                value={sop.cliente}
+                onChange={(v) => updateServicioOp(sop.id, "cliente", v)}
+                placeholder="Cliente..."
+              />
+            </div>
+            <div className="flex-1 space-y-1">
+              <Label className="text-xs text-muted-foreground">Descripción</Label>
               <Input
-                type="number"
-                value={comision.monto || ""}
-                onChange={(e) => updateComision(comision.id, "monto", Number(e.target.value))}
+                value={sop.descripcion}
+                onChange={(e) => updateServicioOp(sop.id, "descripcion", e.target.value)}
+                placeholder="Ej: Apoyo operativo"
                 className="h-9 text-sm"
               />
             </div>
-            <Button type="button" variant="ghost" size="icon" className="h-9 w-9 text-destructive" onClick={() => removeComision(comision.id)}>
+            <div className="w-32 space-y-1">
+              <Label className="text-xs text-muted-foreground">Hora</Label>
+              <div data-timefield={`sop-${sop.id}`}>
+                <TimeInput
+                  value={sop.hora}
+                  onChange={(v) => updateServicioOp(sop.id, "hora", v)}
+                />
+              </div>
+            </div>
+            <Button type="button" variant="ghost" size="icon" className="h-9 w-9 text-destructive" onClick={() => removeServicioOp(sop.id)}>
               <Trash2 className="w-3.5 h-3.5" />
             </Button>
           </div>
