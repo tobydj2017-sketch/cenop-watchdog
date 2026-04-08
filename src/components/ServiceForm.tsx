@@ -45,6 +45,7 @@ export default function ServiceForm({ onAdd, selectedDate }: Props) {
   const [open, setOpen] = useState(false);
   const [peajes, setPeajes] = useState<PeajeEntry[]>([]);
   const [comisiones, setComisiones] = useState<ComisionEntry[]>([]);
+  const [serviciosOp, setServiciosOp] = useState<ServicioOperacionesEntry[]>([]);
 
   const allPersonalEntries = getPersonal();
   const allPersonal = getActivePersonalNames();
@@ -97,7 +98,21 @@ export default function ServiceForm({ onAdd, selectedDate }: Props) {
   };
 
   const totalPeajes = peajes.reduce((sum, p) => sum + (p.monto || 0), 0);
-  const totalComisiones = comisiones.reduce((sum, c) => sum + (c.monto || 0), 0);
+
+  // Servicios Operaciones
+  const addServicioOp = () => {
+    setServiciosOp((prev) => [...prev, { id: generateId(), cliente: "", descripcion: "", hora: "" }]);
+  };
+
+  const updateServicioOp = (id: string, field: keyof Omit<ServicioOperacionesEntry, "id">, value: string) => {
+    setServiciosOp((prev) =>
+      prev.map((s) => (s.id === id ? { ...s, [field]: value } : s))
+    );
+  };
+
+  const removeServicioOp = (id: string) => {
+    setServiciosOp((prev) => prev.filter((s) => s.id !== id));
+  };
 
   // Comisiones
   const addComision = () => {
