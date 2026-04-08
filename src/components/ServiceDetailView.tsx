@@ -35,7 +35,7 @@ export default function ServiceDetailView({ services, onClose }: Props) {
             </span>
             <div>
               <h2 className="text-lg font-bold text-foreground">Servicio #{solicitud}</h2>
-              <p className="text-sm text-muted-foreground">{s.fecha} — {s.cliente}</p>
+              <p className="text-sm text-muted-foreground">{s.fecha ? s.fecha.split("-").reverse().join("/") : ""} — {s.cliente}</p>
             </div>
           </div>
           <Button variant="ghost" size="sm" onClick={onClose} className="h-8 w-8 p-0">
