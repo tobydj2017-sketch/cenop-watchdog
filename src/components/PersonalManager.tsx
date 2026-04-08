@@ -19,7 +19,8 @@ const ROLE_COLORS: Record<PersonalRole, string> = {
 };
 
 export default function PersonalManager() {
-  const [personal, setPersonal] = useState<PersonalEntry[]>(getPersonal);
+  const [personal, setPersonal] = useState<PersonalEntry[]>(() => getPersonal());
+  const [pendingChanges, setPendingChanges] = useState<Record<string, PersonalRole[]>>({});
   const [newName, setNewName] = useState("");
   const [newRoles, setNewRoles] = useState<PersonalRole[]>([]);
   const [searchTerm, setSearchTerm] = useState("");
@@ -27,6 +28,8 @@ export default function PersonalManager() {
   const [showForm, setShowForm] = useState(false);
   const [editingId, setEditingId] = useState<string | null>(null);
   const [editName, setEditName] = useState("");
+
+  const hasPendingChanges = Object.keys(pendingChanges).length > 0;
 
   const refresh = () => setPersonal(getPersonal());
 
@@ -44,16 +47,30 @@ export default function PersonalManager() {
 
   const handleDelete = (id: string, nombre: string) => {
     deletePersonal(id);
+    setPendingChanges((prev) => { const next = { ...prev }; delete next[id]; return next; });
     refresh();
     toast.success(`${nombre} eliminado`);
   };
 
   const toggleRole = (id: string, role: PersonalRole, currentRoles: PersonalRole[]) => {
-    const updated = currentRoles.includes(role)
-      ? currentRoles.filter((r) => r !== role)
-      : [...currentRoles, role];
-    updatePersonal(id, { roles: updated });
+    const baseRoles = pendingChanges[id] ?? currentRoles;
+    const updated = baseRoles.includes(role)
+      ? baseRoles.filter((r) => r !== role)
+      : [...baseRoles, role];
+    setPendingChanges((prev) => ({ ...prev, [id]: updated }));
+  };
+
+  const handleSaveAll = () => {
+    Object.entries(pendingChanges).forEach(([id, roles]) => {
+      updatePersonal(id, { roles });
+    });
+    setPendingChanges({});
     refresh();
+    toast.success("Cambios guardados correctamente");
+  };
+
+  const handleDiscardChanges = () => {
+    setPendingChanges({});
   };
 
   const startEdit = (p: PersonalEntry) => {
