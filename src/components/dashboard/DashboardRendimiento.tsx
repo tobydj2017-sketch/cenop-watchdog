@@ -422,29 +422,123 @@ export default function DashboardRendimiento({ services }: Props) {
                           {/* Per day breakdown table */}
                           <div>
                             <h4 className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-2">Detalle Día a Día</h4>
-                            <div className="overflow-x-auto max-h-[300px] overflow-y-auto">
+                            <div className="overflow-x-auto max-h-[400px] overflow-y-auto">
                               <table className="w-full text-xs">
                                 <thead className="sticky top-0 bg-card">
                                   <tr className="border-b border-border/50">
-                                    {["Fecha", "Día", "Servicios", "Clientes", "Hs Prod.", "Hs Improd.", "Eficiencia"].map((c) => (
+                                    {["Fecha", "Día", "Servicios", "Clientes", "Hs Prod.", "Hs Improd.", "Eficiencia", ""].map((c) => (
                                       <th key={c} className="px-2 py-1.5 text-left text-muted-foreground uppercase tracking-wider font-semibold">{c}</th>
                                     ))}
                                   </tr>
                                 </thead>
                                 <tbody>
-                                  {p.diaDetalle.map((dd) => (
-                                    <tr key={dd.fecha} className="border-b border-border/30">
-                                      <td className="px-2 py-1.5 font-mono">{dd.label}</td>
-                                      <td className="px-2 py-1.5 text-muted-foreground italic capitalize">{dd.dia}</td>
-                                      <td className="px-2 py-1.5 font-mono">{dd.servicios}</td>
-                                      <td className="px-2 py-1.5">{dd.clientes.join(", ")}</td>
-                                      <td className="px-2 py-1.5 font-mono text-success">{formatHoursMinutes(dd.prod)}</td>
-                                      <td className="px-2 py-1.5 font-mono text-destructive">{formatHoursMinutes(dd.improd)}</td>
-                                      <td className="px-2 py-1.5 font-mono font-semibold">
-                                        {dd.prod + dd.improd > 0 ? `${Math.round((dd.prod / (dd.prod + dd.improd)) * 100)}%` : "—"}
-                                      </td>
-                                    </tr>
-                                  ))}
+                                  {p.diaDetalle.map((dd) => {
+                                    const isDateExpanded = expandedDate === `${p.nombre}-${dd.fecha}`;
+                                    return (
+                                      <>
+                                        <tr
+                                          key={dd.fecha}
+                                          className={`border-b border-border/30 cursor-pointer hover:bg-secondary/20 transition-colors ${isDateExpanded ? "bg-secondary/20" : ""}`}
+                                          onClick={() => setExpandedDate(isDateExpanded ? null : `${p.nombre}-${dd.fecha}`)}
+                                        >
+                                          <td className="px-2 py-1.5 font-mono">{dd.label}</td>
+                                          <td className="px-2 py-1.5 text-muted-foreground italic capitalize">{dd.dia}</td>
+                                          <td className="px-2 py-1.5 font-mono">{dd.servicios}</td>
+                                          <td className="px-2 py-1.5">{dd.clientes.join(", ")}</td>
+                                          <td className="px-2 py-1.5 font-mono text-success">{formatHoursMinutes(dd.prod)}</td>
+                                          <td className="px-2 py-1.5 font-mono text-destructive">{formatHoursMinutes(dd.improd)}</td>
+                                          <td className="px-2 py-1.5 font-mono font-semibold">
+                                            {dd.prod + dd.improd > 0 ? `${Math.round((dd.prod / (dd.prod + dd.improd)) * 100)}%` : "—"}
+                                          </td>
+                                          <td className="px-2 py-1.5">
+                                            {isDateExpanded ? <ChevronUp className="w-3 h-3 text-muted-foreground" /> : <ChevronDown className="w-3 h-3 text-muted-foreground" />}
+                                          </td>
+                                        </tr>
+                                        {isDateExpanded && (() => {
+                                          const dayServices = services.filter(s =>
+                                            s.fecha === dd.fecha && (s.chofer === p.nombre || s.custodio === p.nombre)
+                                          );
+                                          const daySegTotals = { base: 0, traslado: 0, espera: 0, servicio: 0 };
+                                          const dayTimelines = dayServices.map(s => {
+                                            const tl = getServiceSegments(s);
+                                            tl.segments.forEach(seg => {
+                                              if (seg.label.includes("Base") || seg.label.includes("Permanencia")) daySegTotals.base += seg.minutes;
+                                              else if (seg.label.includes("Traslado")) daySegTotals.traslado += seg.minutes;
+                                              else if (seg.label.includes("Espera")) daySegTotals.espera += seg.minutes;
+                                              else if (seg.label.includes("Servicio") || seg.label.includes("Trabajo")) daySegTotals.servicio += seg.minutes;
+                                            });
+                                            return tl;
+                                          });
+                                          const daySegTotal = daySegTotals.base + daySegTotals.traslado + daySegTotals.espera + daySegTotals.servicio;
+                                          const segItems = [
+                                            { label: "En Base", min: daySegTotals.base, color: SEGMENT_LEGEND[0].color },
+                                            { label: "Traslado", min: daySegTotals.traslado, color: SEGMENT_LEGEND[1].color },
+                                            { label: "Espera", min: daySegTotals.espera, color: SEGMENT_LEGEND[2].color },
+                                            { label: "Servicio Activo", min: daySegTotals.servicio, color: SEGMENT_LEGEND[3].color },
+                                          ];
+                                          return (
+                                            <tr key={`${dd.fecha}-detail`}>
+                                              <td colSpan={8} className="p-0">
+                                                <div className="bg-secondary/5 border-t border-border/30 px-4 py-3 space-y-3">
+                                                  {daySegTotal > 0 && (
+                                                    <>
+                                                      <h5 className="text-[10px] font-semibold text-muted-foreground uppercase tracking-wider">
+                                                        Composición de Jornada — {dd.label} ({dd.dia})
+                                                      </h5>
+                                                      <div className="flex h-6 rounded overflow-hidden">
+                                                        {segItems.filter(x => x.min > 0).map((x, i) => (
+                                                          <div
+                                                            key={i}
+                                                            className="h-full flex items-center justify-center text-[8px] font-mono text-white font-semibold"
+                                                            style={{ width: `${(x.min / daySegTotal) * 100}%`, backgroundColor: x.color, minWidth: "3px" }}
+                                                          >
+                                                            {(x.min / daySegTotal) * 100 > 12 && formatHoursMinutes(x.min)}
+                                                          </div>
+                                                        ))}
+                                                      </div>
+                                                      <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
+                                                        {segItems.map(x => (
+                                                          <div key={x.label} className="flex items-center gap-1 text-[10px]">
+                                                            <span className="w-2 h-2 rounded-sm" style={{ backgroundColor: x.color }} />
+                                                            <span className="text-muted-foreground">{x.label}:</span>
+                                                            <span className="font-mono font-semibold">{formatHoursMinutes(x.min)}</span>
+                                                            <span className="text-muted-foreground">({daySegTotal > 0 ? Math.round((x.min / daySegTotal) * 100) : 0}%)</span>
+                                                          </div>
+                                                        ))}
+                                                      </div>
+                                                    </>
+                                                  )}
+                                                  {/* Service detail for the day */}
+                                                  <table className="w-full text-[10px] mt-2">
+                                                    <thead>
+                                                      <tr className="border-b border-border/30">
+                                                        {["Sol.", "Cliente", "Móvil", "Inicio", "Fin", "Prod.", "Improd."].map(c => (
+                                                          <th key={c} className="px-1.5 py-1 text-left text-muted-foreground uppercase tracking-wider font-semibold">{c}</th>
+                                                        ))}
+                                                      </tr>
+                                                    </thead>
+                                                    <tbody>
+                                                      {dayTimelines.map(tl => (
+                                                        <tr key={tl.solicitud} className="border-b border-border/20">
+                                                          <td className="px-1.5 py-1 font-mono">{tl.solicitud}</td>
+                                                          <td className="px-1.5 py-1 font-semibold">{tl.cliente}</td>
+                                                          <td className="px-1.5 py-1 font-mono">{tl.movil || "—"}</td>
+                                                          <td className="px-1.5 py-1 font-mono">{tl.segments[0]?.start || "—"}</td>
+                                                          <td className="px-1.5 py-1 font-mono">{tl.segments[tl.segments.length - 1]?.end || "—"}</td>
+                                                          <td className="px-1.5 py-1 font-mono text-success">{formatHoursMinutes(tl.totalProd)}</td>
+                                                          <td className="px-1.5 py-1 font-mono text-destructive">{formatHoursMinutes(tl.totalImprod)}</td>
+                                                        </tr>
+                                                      ))}
+                                                    </tbody>
+                                                  </table>
+                                                </div>
+                                              </td>
+                                            </tr>
+                                          );
+                                        })()}
+                                      </>
+                                    );
+                                  })}
                                 </tbody>
                               </table>
                             </div>
