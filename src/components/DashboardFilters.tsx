@@ -1,4 +1,4 @@
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect, useCallback } from "react";
 import { Filter, X, CalendarDays } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -61,7 +61,7 @@ export default function DashboardFilters({ services, fuelEntries, onFilter }: Pr
 
   const totalSelected = selectedPersonal.length + selectedMoviles.length + selectedClientes.length + (fechaDesde ? 1 : 0) + (fechaHasta ? 1 : 0) + (tipoPersonal !== "todos" ? 1 : 0);
 
-  const applyFilters = () => {
+  const applyFilters = useCallback(() => {
     let filtered = [...services];
     if (fechaDesde) filtered = filtered.filter((s) => s.fecha >= fechaDesde);
     if (fechaHasta) filtered = filtered.filter((s) => s.fecha <= fechaHasta);
@@ -91,7 +91,12 @@ export default function DashboardFilters({ services, fuelEntries, onFilter }: Pr
     }
 
     onFilter(filtered, filteredFuel);
-  };
+  }, [services, fuelEntries, fechaDesde, fechaHasta, selectedPersonal, selectedMoviles, selectedClientes, tipoPersonal, opsNames, onFilter]);
+
+  // Auto-apply filters whenever any filter value changes
+  useEffect(() => {
+    applyFilters();
+  }, [applyFilters]);
 
   const clearFilters = () => {
     setSelectedPersonal([]);
