@@ -21,8 +21,8 @@ interface Props {
 }
 
 export default function StatDetailPanel({ statKey, services, fuelEntries, selectedDate }: Props) {
-  const dayServices = services.filter((s) => s.fecha === selectedDate);
-  const dayFuel = fuelEntries.filter((f) => f.fecha === selectedDate);
+  const dayServices = selectedDate ? services.filter((s) => s.fecha === selectedDate) : services;
+  const dayFuel = selectedDate ? fuelEntries.filter((f) => f.fecha === selectedDate) : fuelEntries;
 
   const content = useMemo(() => {
     switch (statKey) {
