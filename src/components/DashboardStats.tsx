@@ -16,8 +16,8 @@ type StatKey = typeof STAT_KEYS[number];
 export default function DashboardStats({ services, fuelEntries, selectedDate }: Props) {
   const [activeKey, setActiveKey] = useState<StatKey | null>(null);
 
-  const dayServices = services.filter((s) => s.fecha === selectedDate);
-  const dayFuel = fuelEntries.filter((f) => f.fecha === selectedDate);
+  const dayServices = selectedDate ? services.filter((s) => s.fecha === selectedDate) : services;
+  const dayFuel = selectedDate ? fuelEntries.filter((f) => f.fecha === selectedDate) : fuelEntries;
   const totalServicios = new Set(dayServices.map(getServiceKey)).size;
 
   const totalProd = dayServices.reduce((acc, s) => acc + getAdjustedHours(s).prod, 0);
