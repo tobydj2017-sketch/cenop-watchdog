@@ -171,20 +171,17 @@ export function minutesToTime(min: number): string {
  * working on external (non-CENOP) services.
  */
 export function getCenopEnOperacionesMinutes(services: ServiceEntry[]): number {
-  const personal = getPersonal();
-  const opsNames = new Set(
-    personal.filter((p) => p.roles.includes("operaciones")).map((p) => p.nombre)
-  );
-
   let totalMin = 0;
   services.forEach((s) => {
-    if (isBaseServiceEntry(s)) return; // skip CENOP base services
-    const worker = s.chofer || s.custodio;
-    if (!worker) return;
-    // Only count if worker is NOT operaciones (i.e., is CENOP personnel)
-    if (opsNames.has(worker)) return;
     const h = getAdjustedHours(s);
-    totalMin += h.prod;
+    // Count chofer hours if flagged as operations
+    if (s.chofer && s.choferEsOperaciones) {
+      totalMin += h.prod;
+    }
+    // Count custodio hours if flagged as operations (and different from chofer to avoid double-counting)
+    if (s.custodio && s.custodioEsOperaciones && s.custodio !== s.chofer) {
+      totalMin += h.prod;
+    }
   });
   return totalMin;
 }
