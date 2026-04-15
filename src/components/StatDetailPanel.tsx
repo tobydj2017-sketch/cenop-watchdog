@@ -138,19 +138,27 @@ function HorasDetail({ services, type }: { services: ServiceEntry[]; type: "prod
 
 function CenopOpsDetail({ services }: { services: ServiceEntry[] }) {
   const data = useMemo(() => {
-    const personal = getPersonal();
-    const opsNames = new Set(personal.filter((p) => p.roles.includes("operaciones")).map((p) => p.nombre));
     const map = new Map<string, { prod: number; clients: Set<string> }>();
 
     services.forEach((s) => {
-      if (normalizeClientName(s.cliente) === "CENOP") return;
-      const worker = s.chofer || s.custodio;
-      if (!worker || opsNames.has(worker)) return;
       const h = getAdjustedHours(s);
-      const existing = map.get(worker) || { prod: 0, clients: new Set<string>() };
-      existing.prod += h.prod;
-      existing.clients.add(normalizeClientName(s.cliente));
-      map.set(worker, existing);
+      const client = normalizeClientName(s.cliente);
+
+      // Count chofer if flagged as operations
+      if (s.chofer && s.choferEsOperaciones) {
+        const existing = map.get(s.chofer) || { prod: 0, clients: new Set<string>() };
+        existing.prod += h.prod;
+        existing.clients.add(client);
+        map.set(s.chofer, existing);
+      }
+
+      // Count custodio if flagged as operations (avoid double-count)
+      if (s.custodio && s.custodioEsOperaciones && s.custodio !== s.chofer) {
+        const existing = map.get(s.custodio) || { prod: 0, clients: new Set<string>() };
+        existing.prod += h.prod;
+        existing.clients.add(client);
+        map.set(s.custodio, existing);
+      }
     });
 
     return Array.from(map.entries())
