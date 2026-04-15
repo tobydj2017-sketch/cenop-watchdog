@@ -22,7 +22,7 @@ const today = "2025-12-01";
 export default function Index() {
   const [services, setServices] = useState<ServiceEntry[]>(getServices);
   const [fuelEntries, setFuelEntries] = useState<FuelEntry[]>(getFuelEntries);
-  const [selectedDate, setSelectedDate] = useState(today);
+  const [selectedDate, setSelectedDate] = useState("");
   const [activeTab, setActiveTab] = useState<"carga" | "dashboard" | "personal" | "clientes">("carga");
 
   const handleAddService = useCallback((entry: ServiceEntry) => {
@@ -49,8 +49,8 @@ export default function Index() {
     () => services.filter(isCountableServiceEntry),
     [services],
   );
-  const dayServices = cleanServices.filter((s) => s.fecha === selectedDate);
-  const dayFuel = fuelEntries.filter((f) => f.fecha === selectedDate);
+  const dayServices = selectedDate ? cleanServices.filter((s) => s.fecha === selectedDate) : cleanServices;
+  const dayFuel = selectedDate ? fuelEntries.filter((f) => f.fecha === selectedDate) : fuelEntries;
 
   return (
     <div className="min-h-screen bg-background">
