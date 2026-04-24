@@ -8,9 +8,12 @@ import { DownloadReport } from "./reportAnalytics";
 
 const BRAND = "CENOP — AM Seguridad";
 const PRIMARY_COLOR: [number, number, number] = [30, 30, 30];
-const ACCENT_COLOR: [number, number, number] = [217, 119, 6]; // amber
+const AM_GREEN: [number, number, number] = [60, 180, 70];
+const ACCENT_COLOR: [number, number, number] = AM_GREEN;
 const HEADER_BG: [number, number, number] = [245, 245, 245];
 const AM_LOGO_PATH = "/AM.png";
+
+type ChartDatum = { name: string; value: number; label?: string };
 
 async function loadImageAsDataUrl(src: string): Promise<string> {
   const response = await fetch(src);
@@ -69,6 +72,56 @@ function addFooter(doc: jsPDF) {
     doc.text(`Página ${i} de ${pages}`, w - 14, h - 8, { align: "right" });
     doc.text(BRAND, 14, h - 8);
   }
+}
+
+function addSectionTitle(doc: jsPDF, title: string, x: number, y: number) {
+  doc.setFontSize(10);
+  doc.setTextColor(...AM_GREEN);
+  doc.setFont("helvetica", "bold");
+  doc.text(title, x, y);
+}
+
+function ensureSpace(doc: jsPDF, y: number, height: number) {
+  if (y + height > doc.internal.pageSize.getHeight() - 20) {
+    doc.addPage();
+    return 30;
+  }
+  return y;
+}
+
+function drawBarChart(doc: jsPDF, title: string, data: ChartDatum[], startY: number, maxItems = 8) {
+  const rows = data.filter((item) => item.value > 0).slice(0, maxItems);
+  if (!rows.length) return startY;
+
+  const w = doc.internal.pageSize.getWidth();
+  const chartX = 14;
+  const chartW = w - 28;
+  const rowH = 7;
+  const chartH = 12 + rows.length * rowH;
+  let y = ensureSpace(doc, startY, chartH + 8);
+  const max = Math.max(...rows.map((item) => item.value));
+
+  addSectionTitle(doc, title, chartX, y);
+  y += 7;
+
+  rows.forEach((item, index) => {
+    const rowY = y + index * rowH;
+    const label = item.name.length > 26 ? `${item.name.slice(0, 25)}…` : item.name;
+    const valueW = Math.max(4, ((chartW - 74) * item.value) / max);
+
+    doc.setFontSize(7);
+    doc.setFont("helvetica", "normal");
+    doc.setTextColor(70, 70, 70);
+    doc.text(label, chartX, rowY + 4.5);
+    doc.setFillColor(232, 244, 233);
+    doc.roundedRect(chartX + 44, rowY, chartW - 74, 4.5, 1, 1, "F");
+    doc.setFillColor(...AM_GREEN);
+    doc.roundedRect(chartX + 44, rowY, valueW, 4.5, 1, 1, "F");
+    doc.setTextColor(...PRIMARY_COLOR);
+    doc.text(item.label || item.value.toLocaleString("es-AR"), chartX + chartW - 27, rowY + 4.5);
+  });
+
+  return y + rows.length * rowH + 7;
 }
 
 function tableStyle() {
