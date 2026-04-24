@@ -6,7 +6,7 @@ import { FuelEntry, generateId } from "@/lib/types";
 import { MOVILES } from "@/lib/cenopData";
 import { getActivePersonalNames } from "@/lib/personalStore";
 import SearchableSelect from "@/components/SearchableSelect";
-import { Camera, Plus, Upload, Fuel } from "lucide-react";
+import { Camera, Plus, Upload, Fuel, ChevronLeft, ChevronRight } from "lucide-react";
 import { toast } from "sonner";
 
 interface Props {
@@ -17,6 +17,7 @@ interface Props {
 
 export default function FuelForm({ onAdd, selectedDate, existingEntries }: Props) {
   const [open, setOpen] = useState(false);
+  const [step, setStep] = useState(1);
   const allPersonal = getActivePersonalNames();
 
   const [monto, setMonto] = useState("");
@@ -80,94 +81,137 @@ export default function FuelForm({ onAdd, selectedDate, existingEntries }: Props
     setLugarCarga("");
     setObs("");
     setTicketImage(undefined);
+    setStep(1);
+    setOpen(false);
+  };
+
+  const closeForm = () => {
+    setStep(1);
     setOpen(false);
   };
 
   if (!open) {
     return (
-      <Button variant="secondary" onClick={() => setOpen(true)} className="w-full gap-2">
+      <Button variant="secondary" onClick={() => setOpen(true)} className="w-full h-14 gap-3 text-base font-bold bg-secondary/80">
         <Plus className="w-4 h-4" /> Cargar Combustible
       </Button>
     );
   }
 
   return (
-    <form onSubmit={handleSubmit} className="glass-card p-5 space-y-4">
+    <form onSubmit={handleSubmit} className="rounded-lg border border-primary/30 bg-secondary/70 p-6 space-y-6 shadow-lg">
       <div className="flex items-center justify-between">
-        <h3 className="section-title text-sm">Carga de Combustible</h3>
-        <Button type="button" variant="ghost" size="sm" onClick={() => setOpen(false)}>
+        <div>
+          <h3 className="section-title text-base">Carga de Combustible</h3>
+          <p className="text-sm text-muted-foreground mt-1">Paso {step} de 3</p>
+        </div>
+        <Button type="button" variant="ghost" size="sm" onClick={closeForm}>
           Cancelar
         </Button>
       </div>
 
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-        <div className="space-y-1">
-          <Label className="text-xs text-muted-foreground">Patente (Móvil)</Label>
-          <SearchableSelect options={MOVILES} value={movil} onChange={setMovil} placeholder="Seleccionar..." />
-        </div>
-        <div className="space-y-1">
-          <Label className="text-xs text-muted-foreground">Asignación (Chofer)</Label>
-          <SearchableSelect options={allPersonal} value={chofer} onChange={setChofer} placeholder="Seleccionar..." />
-        </div>
-        <div className="space-y-1">
-          <Label className="text-xs text-muted-foreground">Kilometraje Actual</Label>
-          <Input value={kilometraje} onChange={(e) => setKilometraje(e.target.value)} placeholder="Ej: 125430" className="h-9 text-sm" />
-        </div>
-        <div className="space-y-1">
-          <Label className="text-xs text-muted-foreground">Lugar de Carga</Label>
-          <Input value={lugarCarga} onChange={(e) => setLugarCarga(e.target.value)} placeholder="Ej: YPF Ezeiza" className="h-9 text-sm" />
-        </div>
+      <div className="grid grid-cols-3 gap-2" aria-label="Progreso de carga de combustible">
+        {["Vehículo", "Carga", "Comprobante"].map((label, index) => (
+          <div
+            key={label}
+            className={`rounded-md border px-3 py-2 text-center text-sm font-bold ${
+              step === index + 1
+                ? "border-primary bg-primary text-primary-foreground"
+                : "border-border bg-background/60 text-muted-foreground"
+            }`}
+          >
+            {label}
+          </div>
+        ))}
       </div>
 
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-        <div className="space-y-1">
-          <Label className="text-xs text-muted-foreground">Litros Cargados</Label>
-          <Input type="number" step="0.01" value={litros} onChange={(e) => setLitros(e.target.value)} className="h-9 text-sm" />
-        </div>
-        <div className="space-y-1">
-          <Label className="text-xs text-muted-foreground">Monto de Carga ($)</Label>
-          <Input type="number" step="0.01" value={monto} onChange={(e) => setMonto(e.target.value)} className="h-9 text-sm" />
-        </div>
-        <div className="space-y-1">
-          <Label className="text-xs text-muted-foreground flex items-center gap-1">
-            <Fuel className="w-3 h-3" /> Precio por Litro
-          </Label>
-          <div className="h-9 flex items-center px-3 rounded-md border border-input bg-muted/50 text-sm font-mono font-semibold text-primary">
-            {precioPorLitro !== "—" ? `$${precioPorLitro}` : "—"}
+      {step === 1 && (
+        <div className="grid md:grid-cols-2 gap-5">
+          <div className="space-y-2">
+            <Label className="text-base font-bold">Patente / Móvil</Label>
+            <SearchableSelect options={MOVILES} value={movil} onChange={setMovil} placeholder="Seleccionar móvil..." />
+          </div>
+          <div className="space-y-2">
+            <Label className="text-base font-bold">Chofer asignado</Label>
+            <SearchableSelect options={allPersonal} value={chofer} onChange={setChofer} placeholder="Seleccionar chofer..." />
+          </div>
+          <div className="space-y-2">
+            <Label className="text-base font-bold">Kilometraje actual</Label>
+            <Input value={kilometraje} onChange={(e) => setKilometraje(e.target.value)} placeholder="Ej: 125430" className="h-12 text-lg" />
+          </div>
+          <div className="space-y-2">
+            <Label className="text-base font-bold">Lugar de carga</Label>
+            <Input value={lugarCarga} onChange={(e) => setLugarCarga(e.target.value)} placeholder="Ej: YPF Ezeiza" className="h-12 text-lg" />
           </div>
         </div>
-        <div className="space-y-1">
-          <Label className="text-xs text-muted-foreground">N° Remito <span className="text-destructive">*</span></Label>
-          <Input value={numeroRemito} onChange={(e) => setNumeroRemito(e.target.value)} className="h-9 text-sm" required />
-        </div>
-      </div>
+      )}
 
-      <div className="grid grid-cols-2 gap-3">
-        <div className="space-y-1">
-          <Label className="text-xs text-muted-foreground">Estación</Label>
-          <Input value={estacion} onChange={(e) => setEstacion(e.target.value)} className="h-9 text-sm" />
+      {step === 2 && (
+        <div className="grid md:grid-cols-2 gap-5">
+          <div className="space-y-2">
+            <Label className="text-base font-bold">Litros cargados</Label>
+            <Input type="number" step="0.01" value={litros} onChange={(e) => setLitros(e.target.value)} className="h-12 text-lg" />
+          </div>
+          <div className="space-y-2">
+            <Label className="text-base font-bold">Monto de carga ($)</Label>
+            <Input type="number" step="0.01" value={monto} onChange={(e) => setMonto(e.target.value)} className="h-12 text-lg" />
+          </div>
+          <div className="space-y-2">
+            <Label className="text-base font-bold flex items-center gap-2">
+              <Fuel className="w-4 h-4" /> Precio por litro
+            </Label>
+            <div className="h-12 flex items-center px-4 rounded-md border border-input bg-background/70 text-lg font-mono font-bold text-primary">
+              {precioPorLitro !== "—" ? `$${precioPorLitro}` : "—"}
+            </div>
+          </div>
+          <div className="space-y-2">
+            <Label className="text-base font-bold">N° Remito <span className="text-destructive">*</span></Label>
+            <Input value={numeroRemito} onChange={(e) => setNumeroRemito(e.target.value)} className="h-12 text-lg" required />
+          </div>
         </div>
-        <div className="space-y-1">
-          <Label className="text-xs text-muted-foreground">Observaciones</Label>
-          <Input value={obs} onChange={(e) => setObs(e.target.value)} className="h-9 text-sm" />
-        </div>
-      </div>
+      )}
 
-      <div className="flex items-center gap-3">
-        <input ref={fileRef} type="file" accept="image/*" capture="environment" onChange={handleImage} className="hidden" />
-        <Button type="button" variant="secondary" size="sm" onClick={() => fileRef.current?.click()} className="gap-2">
-          <Camera className="w-4 h-4" /> {ticketImage ? "Cambiar Foto" : "Foto del Ticket"}
+      {step === 3 && (
+        <div className="space-y-5">
+          <div className="grid md:grid-cols-2 gap-5">
+            <div className="space-y-2">
+              <Label className="text-base font-bold">Estación</Label>
+              <Input value={estacion} onChange={(e) => setEstacion(e.target.value)} className="h-12 text-lg" />
+            </div>
+            <div className="space-y-2">
+              <Label className="text-base font-bold">Observaciones</Label>
+              <Input value={obs} onChange={(e) => setObs(e.target.value)} className="h-12 text-lg" />
+            </div>
+          </div>
+
+          <div className="flex items-center gap-4 rounded-md border border-border bg-background/60 p-4">
+            <input ref={fileRef} type="file" accept="image/*" capture="environment" onChange={handleImage} className="hidden" />
+            <Button type="button" variant="secondary" onClick={() => fileRef.current?.click()} className="h-12 gap-2 text-base">
+              <Camera className="w-5 h-5" /> {ticketImage ? "Cambiar foto" : "Foto del ticket"}
+            </Button>
+            {ticketImage && (
+              <div className="w-24 h-24 rounded border border-border overflow-hidden">
+                <img src={ticketImage} alt="Ticket" className="w-full h-full object-cover" />
+              </div>
+            )}
+          </div>
+        </div>
+      )}
+
+      <div className="flex items-center justify-between gap-3 pt-2">
+        <Button type="button" variant="outline" onClick={() => setStep((current) => Math.max(1, current - 1))} disabled={step === 1} className="h-12 px-5 text-base gap-2">
+          <ChevronLeft className="w-5 h-5" /> Anterior
         </Button>
-        {ticketImage && (
-          <div className="w-16 h-16 rounded border border-border overflow-hidden">
-            <img src={ticketImage} alt="Ticket" className="w-full h-full object-cover" />
-          </div>
+        {step < 3 ? (
+          <Button type="button" onClick={() => setStep((current) => Math.min(3, current + 1))} className="h-12 px-6 text-base gap-2">
+            Siguiente <ChevronRight className="w-5 h-5" />
+          </Button>
+        ) : (
+          <Button type="submit" className="h-12 px-6 text-base gap-2">
+            <Upload className="w-5 h-5" /> Guardar carga
+          </Button>
         )}
       </div>
-
-      <Button type="submit" className="w-full gap-2">
-        <Upload className="w-4 h-4" /> Guardar Carga
-      </Button>
     </form>
   );
 }
