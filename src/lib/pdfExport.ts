@@ -8,9 +8,12 @@ import { DownloadReport } from "./reportAnalytics";
 
 const BRAND = "CENOP — AM Seguridad";
 const PRIMARY_COLOR: [number, number, number] = [30, 30, 30];
-const ACCENT_COLOR: [number, number, number] = [217, 119, 6]; // amber
+const AM_GREEN: [number, number, number] = [60, 180, 70];
+const ACCENT_COLOR: [number, number, number] = AM_GREEN;
 const HEADER_BG: [number, number, number] = [245, 245, 245];
 const AM_LOGO_PATH = "/AM.png";
+
+type ChartDatum = { name: string; value: number; label?: string };
 
 async function loadImageAsDataUrl(src: string): Promise<string> {
   const response = await fetch(src);
@@ -71,6 +74,56 @@ function addFooter(doc: jsPDF) {
   }
 }
 
+function addSectionTitle(doc: jsPDF, title: string, x: number, y: number) {
+  doc.setFontSize(10);
+  doc.setTextColor(...AM_GREEN);
+  doc.setFont("helvetica", "bold");
+  doc.text(title, x, y);
+}
+
+function ensureSpace(doc: jsPDF, y: number, height: number) {
+  if (y + height > doc.internal.pageSize.getHeight() - 20) {
+    doc.addPage();
+    return 30;
+  }
+  return y;
+}
+
+function drawBarChart(doc: jsPDF, title: string, data: ChartDatum[], startY: number, maxItems = 8) {
+  const rows = data.filter((item) => item.value > 0).slice(0, maxItems);
+  if (!rows.length) return startY;
+
+  const w = doc.internal.pageSize.getWidth();
+  const chartX = 14;
+  const chartW = w - 28;
+  const rowH = 7;
+  const chartH = 12 + rows.length * rowH;
+  let y = ensureSpace(doc, startY, chartH + 8);
+  const max = Math.max(...rows.map((item) => item.value));
+
+  addSectionTitle(doc, title, chartX, y);
+  y += 7;
+
+  rows.forEach((item, index) => {
+    const rowY = y + index * rowH;
+    const label = item.name.length > 26 ? `${item.name.slice(0, 25)}…` : item.name;
+    const valueW = Math.max(4, ((chartW - 74) * item.value) / max);
+
+    doc.setFontSize(7);
+    doc.setFont("helvetica", "normal");
+    doc.setTextColor(70, 70, 70);
+    doc.text(label, chartX, rowY + 4.5);
+    doc.setFillColor(232, 244, 233);
+    doc.roundedRect(chartX + 44, rowY, chartW - 74, 4.5, 1, 1, "F");
+    doc.setFillColor(...AM_GREEN);
+    doc.roundedRect(chartX + 44, rowY, valueW, 4.5, 1, 1, "F");
+    doc.setTextColor(...PRIMARY_COLOR);
+    doc.text(item.label || item.value.toLocaleString("es-AR"), chartX + chartW - 27, rowY + 4.5);
+  });
+
+  return y + rows.length * rowH + 7;
+}
+
 function tableStyle() {
   return {
     headStyles: {
@@ -97,10 +150,7 @@ export async function exportCargaDiaPDF(services: ServiceEntry[], fuel: FuelEntr
   let startY = 56;
 
   if (services.length > 0) {
-    doc.setFontSize(10);
-    doc.setTextColor(...PRIMARY_COLOR);
-    doc.setFont("helvetica", "bold");
-    doc.text("Servicios del Día", 14, startY);
+    addSectionTitle(doc, "Servicios del Día", 14, startY);
     startY += 4;
 
     autoTable(doc, {
@@ -133,10 +183,7 @@ export async function exportCargaDiaPDF(services: ServiceEntry[], fuel: FuelEntr
       doc.addPage();
       startY = 30;
     }
-    doc.setFontSize(10);
-    doc.setTextColor(...PRIMARY_COLOR);
-    doc.setFont("helvetica", "bold");
-    doc.text("Combustible del Día", 14, startY);
+    addSectionTitle(doc, "Combustible del Día", 14, startY);
     startY += 4;
 
     autoTable(doc, {
@@ -168,9 +215,10 @@ export async function exportPersonalPDF(
   const doc = new jsPDF();
   const logoDataUrl = await loadImageAsDataUrl(AM_LOGO_PATH);
   addHeader(doc, "Reporte de Personal", `${byPerson.length} personas | Generado con filtros activos`, logoDataUrl);
+  const chartEndY = drawBarChart(doc, "Gráfico — Top personal por horas totales", byPerson.map((p) => ({ name: p.nombre, value: p.total, label: formatHoursMinutes(p.total) })), 58);
 
   autoTable(doc, {
-    startY: 56,
+    startY: chartEndY,
     head: [["Personal", "Clientes", "Servicios", "Hs Prod.", "Hs Improd.", "Hs Total", "Eficiencia"]],
     body: byPerson.map((p) => [
       p.nombre,
@@ -195,9 +243,10 @@ export async function exportMovilesPDF(
   const doc = new jsPDF();
   const logoDataUrl = await loadImageAsDataUrl(AM_LOGO_PATH);
   addHeader(doc, "Reporte de Móviles", `${byMovil.length} móviles | Generado con filtros activos`, logoDataUrl);
+  const chartEndY = drawBarChart(doc, "Gráfico — Top móviles por horas totales", byMovil.map((m) => ({ name: m.patente, value: m.total, label: formatHoursMinutes(m.total) })), 58);
 
   autoTable(doc, {
-    startY: 56,
+    startY: chartEndY,
     head: [["Patente", "Servicios", "Hs Prod.", "Hs Improd.", "Hs Total", "Eficiencia"]],
     body: byMovil.map((m) => [
       m.patente,
@@ -221,9 +270,10 @@ export async function exportClientesPDF(
   const doc = new jsPDF();
   const logoDataUrl = await loadImageAsDataUrl(AM_LOGO_PATH);
   addHeader(doc, "Reporte de Clientes", `${byCliente.length} clientes | Generado con filtros activos`, logoDataUrl);
+  const chartEndY = drawBarChart(doc, "Gráfico — Top clientes por horas totales", byCliente.map((c) => ({ name: c.cliente, value: c.total, label: formatHoursMinutes(c.total) })), 58);
 
   autoTable(doc, {
-    startY: 56,
+    startY: chartEndY,
     head: [["Cliente", "Servicios", "Hs Prod.", "Hs Improd.", "Hs Total", "Eficiencia"]],
     body: byCliente.map((c) => [
       c.cliente,
@@ -256,10 +306,7 @@ export async function exportResumenPDF(
   let y = 58;
 
   // Summary cards as a table
-  doc.setFontSize(10);
-  doc.setTextColor(...PRIMARY_COLOR);
-  doc.setFont("helvetica", "bold");
-  doc.text("Indicadores Generales", 14, y);
+  addSectionTitle(doc, "Indicadores Generales", 14, y);
   y += 4;
 
   autoTable(doc, {
@@ -281,11 +328,12 @@ export async function exportResumenPDF(
 
   y = (doc as any).lastAutoTable.finalY + 10;
 
+  y = drawBarChart(doc, "Gráfico — Top personal por horas totales", byPerson.map((p) => ({ name: p.nombre, value: p.total, label: formatHoursMinutes(p.total) })), y, 6);
+  y = drawBarChart(doc, "Gráfico — Top clientes por horas totales", byCliente.map((c) => ({ name: c.cliente, value: c.total, label: formatHoursMinutes(c.total) })), y, 6);
+
   // Top 10 Personal
-  doc.setFontSize(10);
-  doc.setTextColor(...PRIMARY_COLOR);
-  doc.setFont("helvetica", "bold");
-  doc.text("Top 10 Personal (por horas)", 14, y);
+  y = ensureSpace(doc, y, 70);
+  addSectionTitle(doc, "Top 10 Personal (por horas)", 14, y);
   y += 4;
 
   autoTable(doc, {
@@ -302,10 +350,7 @@ export async function exportResumenPDF(
   if (y > doc.internal.pageSize.getHeight() - 60) { doc.addPage(); y = 30; }
 
   // Top 10 Clientes
-  doc.setFontSize(10);
-  doc.setTextColor(...PRIMARY_COLOR);
-  doc.setFont("helvetica", "bold");
-  doc.text("Top 10 Clientes (por horas)", 14, y);
+  addSectionTitle(doc, "Top 10 Clientes (por horas)", 14, y);
   y += 4;
 
   autoTable(doc, {
@@ -367,9 +412,10 @@ export async function exportDownloadReportPDF(report: DownloadReport) {
   const doc = new jsPDF({ orientation: report.columns.length > 6 ? "landscape" : "portrait" });
   const logoDataUrl = await loadImageAsDataUrl(AM_LOGO_PATH);
   addHeader(doc, report.title, `${report.description} | ${report.totalLabel}: ${report.totalValue}`, logoDataUrl);
+  const chartEndY = drawBarChart(doc, `Gráfico — ${report.metricLabel}`, report.chartData, 58, 10);
 
   autoTable(doc, {
-    startY: 56,
+    startY: chartEndY,
     head: [report.columns],
     body: report.rows.length ? report.rows : [["Sin datos para los filtros seleccionados"]],
     ...tableStyle(),
