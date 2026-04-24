@@ -212,7 +212,33 @@ export default function ServiceEditDialog({ service, open, onClose, onSave, exis
             </div>
           </section>
 
-          {/* Peajes */}
+          {/* Tipo cruzado */}
+          <section className="space-y-3">
+            <h4 className="text-sm font-extrabold uppercase tracking-wider text-primary">Tipo de Servicio Cruzado</h4>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-2">
+              {[
+                { value: "ninguno", label: "Ninguno" },
+                { value: "cenop_en_op", label: "CENOP en Operaciones" },
+                { value: "op_en_cenop", label: "Operaciones en CENOP" },
+              ].map((opt) => {
+                const current = form.tipoCenopOp ?? "ninguno";
+                return (
+                  <button
+                    key={opt.value}
+                    type="button"
+                    onClick={() => set("tipoCenopOp", opt.value)}
+                    className={`h-11 rounded-md border-2 px-4 text-sm font-bold transition-all ${
+                      current === opt.value
+                        ? "border-primary bg-primary text-primary-foreground"
+                        : "border-border bg-background text-foreground hover:border-primary/50"
+                    }`}
+                  >
+                    {opt.label}
+                  </button>
+                );
+              })}
+            </div>
+          </section>
           <section className="space-y-3 rounded-md border border-border p-4">
             <div className="flex items-center justify-between">
               <h4 className="text-sm font-extrabold uppercase tracking-wider">Peajes</h4>

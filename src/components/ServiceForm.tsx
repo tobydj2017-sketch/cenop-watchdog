@@ -52,6 +52,7 @@ export default function ServiceForm({ onAdd, selectedDate, existingServices }: P
   const [peajes, setPeajes] = useState<PeajeEntry[]>([]);
   const [comisiones, setComisiones] = useState<ComisionEntry[]>([]);
   const [serviciosOp, setServiciosOp] = useState<ServicioOperacionesEntry[]>([]);
+  const [tipoCenopOp, setTipoCenopOp] = useState<"ninguno" | "cenop_en_op" | "op_en_cenop">("ninguno");
 
   const allPersonalEntries = getPersonal();
   const allPersonal = getActivePersonalNames();
@@ -170,11 +171,13 @@ export default function ServiceForm({ onAdd, selectedDate, existingServices }: P
       serviciosOperaciones: serviciosOp.length > 0 ? serviciosOp : undefined,
       choferEsOperaciones: !!opsBadgeMap[form.chofer],
       custodioEsOperaciones: !!opsBadgeMap[form.custodio],
+      tipoCenopOp,
     });
     setForm(defaultEntry);
     setPeajes([]);
     setComisiones([]);
     setServiciosOp([]);
+    setTipoCenopOp("ninguno");
     setStep(1);
     setOpen(false);
   };
@@ -336,6 +339,29 @@ export default function ServiceForm({ onAdd, selectedDate, existingServices }: P
             {renderField({ label: "KM Final", field: "kmFinal", type: "number" })}
             {renderField({ label: "Continúa Orden N°", field: "continuaOrden" })}
             {renderField({ label: "Observaciones", field: "observaciones" })}
+          </div>
+          <div className="rounded-md border border-primary/40 bg-background p-4 text-foreground">
+            <p className="text-sm font-extrabold uppercase tracking-wider text-muted-foreground mb-3">Tipo de Servicio Cruzado</p>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-2">
+              {[
+                { value: "ninguno", label: "Ninguno" },
+                { value: "cenop_en_op", label: "CENOP en Operaciones" },
+                { value: "op_en_cenop", label: "Operaciones en CENOP" },
+              ].map((opt) => (
+                <button
+                  key={opt.value}
+                  type="button"
+                  onClick={() => setTipoCenopOp(opt.value as typeof tipoCenopOp)}
+                  className={`h-12 rounded-md border-2 px-4 text-sm font-bold transition-all ${
+                    tipoCenopOp === opt.value
+                      ? "border-primary bg-primary text-primary-foreground"
+                      : "border-border bg-background text-foreground hover:border-primary/50"
+                  }`}
+                >
+                  {opt.label}
+                </button>
+              ))}
+            </div>
           </div>
           <div className="grid gap-4">
             <div className="rounded-md border border-border bg-background p-4 text-foreground">
