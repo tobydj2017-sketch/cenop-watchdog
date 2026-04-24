@@ -296,7 +296,7 @@ export default function ServiceForm({ onAdd, selectedDate, existingServices }: P
             </Label>
             <SearchableSelect options={allPersonal} value={form.chofer} onChange={(v) => set("chofer", v)} placeholder="Seleccionar..." badgeMap={roleBadgeMap} inputClassName="h-12 text-lg bg-background text-foreground border-input" />
           </div>
-          <Field label="Cita Chofer" field="citaChofer" type="time" />
+          {renderField({ label: "Cita Chofer", field: "citaChofer", type: "time" })}
           <div className="space-y-2">
             <Label className="text-base font-bold text-background flex items-center gap-2">
               Custodio
@@ -306,7 +306,7 @@ export default function ServiceForm({ onAdd, selectedDate, existingServices }: P
             </Label>
             <SearchableSelect options={allPersonal} value={form.custodio} onChange={(v) => set("custodio", v)} placeholder="Seleccionar..." badgeMap={roleBadgeMap} inputClassName="h-12 text-lg bg-background text-foreground border-input" />
           </div>
-          <Field label="Cita Custodio" field="citaCustodio" type="time" />
+          {renderField({ label: "Cita Custodio", field: "citaCustodio", type: "time" })}
         </div>
       )}
 
@@ -314,14 +314,14 @@ export default function ServiceForm({ onAdd, selectedDate, existingServices }: P
         <div className="space-y-5">
           <p className="text-sm font-extrabold uppercase tracking-wider text-muted">Horarios del Servicio</p>
           <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-5">
-            <Field label="Salida CENOP" field="salidaCenop" type="time" />
-            <Field label="Llegada Servicio" field="llegadaServicio" type="time" />
-            <Field label="Inicia Servicio" field="iniciaServicio" type="time" />
-            <Field label="Llegada Destino" field="llegadaDestino" type="time" />
-            <Field label="Finaliza Servicio" field="finalizaServicio" type="time" />
-            <Field label="Llegada CENOP" field="llegadaCenop" type="time" />
-            <Field label="Franco Chofer" field="horaFrancoChofer" type="time" />
-            <Field label="Franco Custodio" field="horaFrancoCustodio" type="time" />
+            {renderField({ label: "Salida CENOP", field: "salidaCenop", type: "time" })}
+            {renderField({ label: "Llegada Servicio", field: "llegadaServicio", type: "time" })}
+            {renderField({ label: "Inicia Servicio", field: "iniciaServicio", type: "time" })}
+            {renderField({ label: "Llegada Destino", field: "llegadaDestino", type: "time" })}
+            {renderField({ label: "Finaliza Servicio", field: "finalizaServicio", type: "time" })}
+            {renderField({ label: "Llegada CENOP", field: "llegadaCenop", type: "time" })}
+            {renderField({ label: "Franco Chofer", field: "horaFrancoChofer", type: "time" })}
+            {renderField({ label: "Franco Custodio", field: "horaFrancoCustodio", type: "time" })}
           </div>
         </div>
       )}
@@ -329,9 +329,9 @@ export default function ServiceForm({ onAdd, selectedDate, existingServices }: P
       {step === 5 && (
         <div className="space-y-5">
           <div className="grid md:grid-cols-3 gap-5">
-            <Field label="N° Remito" field="remito" />
-            <Field label="Continúa Orden N°" field="continuaOrden" />
-            <Field label="Observaciones" field="observaciones" />
+            {renderField({ label: "N° Remito", field: "remito" })}
+            {renderField({ label: "Continúa Orden N°", field: "continuaOrden" })}
+            {renderField({ label: "Observaciones", field: "observaciones" })}
           </div>
           <div className="grid gap-4">
             <div className="rounded-md border border-border bg-background p-4 text-foreground">
