@@ -284,6 +284,16 @@ export default function ServiceTable({ services, onDelete, onUpdate, allServices
           onClose={() => setSelectedServiceKey(null)}
         />
       )}
+
+      {onUpdate && (
+        <ServiceEditDialog
+          service={editingService}
+          open={editingService !== null}
+          onClose={() => setEditingService(null)}
+          onSave={(entry) => onUpdate(entry)}
+          existingServices={allServices ?? services}
+        />
+      )}
     </>
   );
 }
