@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { ServiceEntry } from "@/lib/types";
+import { getServiceKey, ServiceEntry, timeToMinutes } from "@/lib/types";
 import { ArrowDownUp, Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { cleanTime } from "@/lib/formatTime";
@@ -32,9 +32,36 @@ const SERVICE_BADGE_COLORS = [
   "bg-[hsl(60,70%,45%)]/25 text-[hsl(60,70%,45%)] ring-2 ring-[hsl(60,70%,45%)]/40",
 ];
 
+type SortKey = "solicitud" | "fecha" | "cliente" | "destino" | "chofer" | "custodio" | "movil" | "remito" | "salidaCenop" | "finalizaServicio" | "peajes" | "horasProductivas" | "horasImproductivas" | "horasTotales";
+
+const TABLE_HEADERS: { label: string; sortKey?: SortKey }[] = [
+  { label: "#", sortKey: "solicitud" },
+  { label: "Fecha", sortKey: "fecha" },
+  { label: "Cliente", sortKey: "cliente" },
+  { label: "Destino", sortKey: "destino" },
+  { label: "Chofer", sortKey: "chofer" },
+  { label: "Custodio", sortKey: "custodio" },
+  { label: "Móvil", sortKey: "movil" },
+  { label: "Remito", sortKey: "remito" },
+  { label: "Salida", sortKey: "salidaCenop" },
+  { label: "Fin Serv.", sortKey: "finalizaServicio" },
+  { label: "Peajes", sortKey: "peajes" },
+  { label: "Hs Prod.", sortKey: "horasProductivas" },
+  { label: "Hs Improd.", sortKey: "horasImproductivas" },
+  { label: "Hs Total", sortKey: "horasTotales" },
+  { label: "" },
+];
+
+const collator = new Intl.Collator("es", { numeric: true, sensitivity: "base" });
+
+const formatDate = (date: string) => date ? date.split("-").reverse().join("/") : "—";
+
+const getPeajesTotal = (service: ServiceEntry) =>
+  service.peajes?.reduce((sum, peaje) => sum + (peaje.monto || 0), 0) || 0;
+
 export default function ServiceTable({ services, onDelete }: Props) {
-  const [selectedSolicitud, setSelectedSolicitud] = useState<number | null>(null);
-  const [sortDirection, setSortDirection] = useState<"asc" | "desc">("asc");
+  const [selectedServiceKey, setSelectedServiceKey] = useState<string | null>(null);
+  const [sortConfig, setSortConfig] = useState<{ key: SortKey; direction: "asc" | "desc" }>({ key: "fecha", direction: "asc" });
 
   if (services.length === 0) {
     return (
@@ -44,26 +71,54 @@ export default function ServiceTable({ services, onDelete }: Props) {
     );
   }
 
-  const uniqueSolicitudes = [...new Set(services.map((s) => s.solicitud))];
-  const solicitudColorMap = new Map<number, number>();
-  uniqueSolicitudes.forEach((sol, i) => {
-    solicitudColorMap.set(sol, i % SERVICE_COLORS.length);
+  const uniqueServiceKeys = [...new Set(services.map((s) => getServiceKey(s)))];
+  const serviceColorMap = new Map<string, number>();
+  uniqueServiceKeys.forEach((serviceKey, i) => {
+    serviceColorMap.set(serviceKey, i % SERVICE_COLORS.length);
   });
 
-  const selectedServices = selectedSolicitud !== null
-    ? services.filter((s) => s.solicitud === selectedSolicitud)
+  const selectedServices = selectedServiceKey !== null
+    ? services.filter((s) => getServiceKey(s) === selectedServiceKey)
     : [];
 
-  const displayedServices = services
+  const groupedServices = services
     .filter((s) => s.chofer || s.custodio)
-    .sort((a, b) => {
-      const solicitudDiff = sortDirection === "asc"
-        ? a.solicitud - b.solicitud
-        : b.solicitud - a.solicitud;
+    .reduce<Map<string, ServiceEntry[]>>((map, service) => {
+      const serviceKey = getServiceKey(service);
+      map.set(serviceKey, [...(map.get(serviceKey) || []), service]);
+      return map;
+    }, new Map());
 
-      if (solicitudDiff !== 0) return solicitudDiff;
-      return (a.chofer || a.custodio || "").localeCompare(b.chofer || b.custodio || "", "es");
-    });
+  const getSortValue = (group: ServiceEntry[], key: SortKey): string | number => {
+    const first = group[0];
+    const textValues = group.flatMap((service) => key === "chofer" || key === "custodio" ? [service[key]] : []);
+
+    if (key === "chofer" || key === "custodio") return textValues.filter(Boolean).sort((a, b) => collator.compare(a, b))[0] || "";
+    if (key === "peajes") return group.reduce((sum, service) => sum + getPeajesTotal(service), 0);
+    if (key === "salidaCenop" || key === "finalizaServicio" || key === "horasProductivas" || key === "horasImproductivas" || key === "horasTotales") return timeToMinutes(first[key] || "");
+    if (key === "solicitud") return first.solicitud;
+    return String(first[key] || "");
+  };
+
+  const displayedServices = [...groupedServices.values()]
+    .sort((a, b) => {
+      const aValue = getSortValue(a, sortConfig.key);
+      const bValue = getSortValue(b, sortConfig.key);
+      const result = typeof aValue === "number" && typeof bValue === "number"
+        ? aValue - bValue
+        : collator.compare(String(aValue), String(bValue));
+
+      if (result !== 0) return sortConfig.direction === "asc" ? result : -result;
+      return collator.compare(getServiceKey(a[0]), getServiceKey(b[0]));
+    })
+    .flatMap((group) => group);
+
+  const handleSort = (key: SortKey) => {
+    setSortConfig((current) => ({
+      key,
+      direction: current.key === key && current.direction === "asc" ? "desc" : "asc",
+    }));
+  };
 
   return (
     <>
@@ -72,29 +127,28 @@ export default function ServiceTable({ services, onDelete }: Props) {
           <table className="w-full text-sm">
             <thead className="sticky top-0 z-10 bg-card">
               <tr className="border-b border-border">
-                {["#", "Cliente", "Destino", "Chofer", "Custodio", "Móvil", "Remito", "Salida", "Fin Serv.", "Peajes", "Hs Prod.", "Hs Improd.", "Hs Total", ""].map(
-                  (h) => (
-                    <th key={h} className="px-3 py-3 text-left text-xs text-muted-foreground uppercase tracking-wider font-semibold whitespace-nowrap">
-                      {h === "#" ? (
+                {TABLE_HEADERS.map((header) => (
+                    <th key={header.label || "actions"} className="px-3 py-3 text-left text-xs text-muted-foreground uppercase tracking-wider font-semibold whitespace-nowrap">
+                      {header.sortKey ? (
                         <Button
                           type="button"
                           variant="ghost"
                           size="sm"
-                          onClick={() => setSortDirection((current) => current === "asc" ? "desc" : "asc")}
+                          onClick={() => handleSort(header.sortKey)}
                           className="h-7 px-2 -ml-2 gap-1 text-xs uppercase tracking-wider text-muted-foreground hover:text-foreground"
                         >
-                          #
-                          <ArrowDownUp className="w-3 h-3" />
+                          {header.label}
+                          <ArrowDownUp className={`w-3 h-3 ${sortConfig.key === header.sortKey ? "text-foreground" : ""}`} />
                         </Button>
-                      ) : h}
+                      ) : header.label}
                     </th>
-                  )
-                )}
+                  ))}
               </tr>
             </thead>
             <tbody>
               {displayedServices.map((s) => {
-                const colorIdx = solicitudColorMap.get(s.solicitud) ?? 0;
+                const serviceKey = getServiceKey(s);
+                const colorIdx = serviceColorMap.get(serviceKey) ?? 0;
                 const rowColor = SERVICE_COLORS[colorIdx];
                 const badgeColor = SERVICE_BADGE_COLORS[colorIdx];
 
@@ -102,13 +156,14 @@ export default function ServiceTable({ services, onDelete }: Props) {
                   <tr
                     key={s.id}
                     className={`border-b border-border/50 border-l-[6px] hover:brightness-130 transition-all cursor-pointer ${rowColor}`}
-                    onClick={() => setSelectedSolicitud(s.solicitud)}
+                    onClick={() => setSelectedServiceKey(serviceKey)}
                   >
                     <td className="px-3 py-2.5">
                       <span className={`inline-flex items-center justify-center w-7 h-7 rounded-md font-mono text-xs font-bold ${badgeColor}`}>
                         {s.solicitud}
                       </span>
                     </td>
+                    <td className="px-3 py-2.5 font-mono text-xs text-muted-foreground">{formatDate(s.fecha)}</td>
                     <td className="px-3 py-2.5 font-semibold">{s.cliente}</td>
                     <td className="px-3 py-2.5 text-muted-foreground">{s.destino}</td>
                     <td className="px-3 py-2.5">{s.chofer || "—"}</td>
@@ -143,10 +198,10 @@ export default function ServiceTable({ services, onDelete }: Props) {
         </div>
       </div>
 
-      {selectedSolicitud !== null && selectedServices.length > 0 && (
+      {selectedServiceKey !== null && selectedServices.length > 0 && (
         <ServiceDetailView
           services={selectedServices}
-          onClose={() => setSelectedSolicitud(null)}
+          onClose={() => setSelectedServiceKey(null)}
         />
       )}
     </>
