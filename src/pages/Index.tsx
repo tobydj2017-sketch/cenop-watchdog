@@ -137,9 +137,8 @@ export default function Index() {
 
   return (
     <SidebarProvider>
-      <div className="min-h-screen w-full bg-background">
-        <AppSidebar activeTab={activeTab} setActiveTab={setActiveTab} />
-        <SidebarInset>
+      <AppSidebar activeTab={activeTab} setActiveTab={setActiveTab} />
+      <SidebarInset>
           {/* Encabezado */}
           <header className="sticky top-0 z-40 border-b border-border bg-card/50 backdrop-blur-sm">
             <div className="mx-auto flex max-w-7xl items-center justify-between px-4 py-3">
@@ -220,8 +219,7 @@ export default function Index() {
           </>
         )}
           </main>
-        </SidebarInset>
-      </div>
+      </SidebarInset>
     </SidebarProvider>
   );
 }
