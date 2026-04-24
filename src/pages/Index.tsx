@@ -31,7 +31,7 @@ import PersonalManager from "@/components/PersonalManager";
 import ClientManager from "@/components/ClientManager";
 import { ServiceEntry, FuelEntry, isCountableServiceEntry } from "@/lib/types";
 import {
-  getServices, saveServices, addService, deleteService,
+  getServices, saveServices, addService, deleteService, updateService,
   getFuelEntries, addFuelEntry, deleteFuelEntry,
 } from "@/lib/store";
 import { exportCargaDiaPDF, exportPersonalManagerPDF, exportClientManagerPDF } from "@/lib/pdfExport";
