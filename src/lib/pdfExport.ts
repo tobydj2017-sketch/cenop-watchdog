@@ -10,31 +10,49 @@ const BRAND = "CENOP — AM Seguridad";
 const PRIMARY_COLOR: [number, number, number] = [30, 30, 30];
 const ACCENT_COLOR: [number, number, number] = [217, 119, 6]; // amber
 const HEADER_BG: [number, number, number] = [245, 245, 245];
+const AM_LOGO_PATH = "/AM.png";
 
-function addHeader(doc: jsPDF, title: string, subtitle?: string) {
+async function loadImageAsDataUrl(src: string): Promise<string> {
+  const response = await fetch(src);
+  const blob = await response.blob();
+
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onloadend = () => resolve(reader.result as string);
+    reader.onerror = reject;
+    reader.readAsDataURL(blob);
+  });
+}
+
+function addHeader(doc: jsPDF, title: string, subtitle?: string, logoDataUrl?: string) {
   const w = doc.internal.pageSize.getWidth();
   // Brand bar
   doc.setFillColor(...PRIMARY_COLOR);
-  doc.rect(0, 0, w, 22, "F");
+  doc.rect(0, 0, w, 28, "F");
+
+  if (logoDataUrl) {
+    doc.addImage(logoDataUrl, "PNG", 14, 4, 18, 18);
+  }
+
   doc.setTextColor(255, 255, 255);
   doc.setFontSize(11);
   doc.setFont("helvetica", "bold");
-  doc.text(BRAND, 14, 14);
+  doc.text(BRAND, logoDataUrl ? 36 : 14, 16);
   doc.setFontSize(8);
   doc.setFont("helvetica", "normal");
-  doc.text(new Date().toLocaleDateString("es-AR", { day: "2-digit", month: "2-digit", year: "numeric", hour: "2-digit", minute: "2-digit" }), w - 14, 14, { align: "right" });
+  doc.text(new Date().toLocaleDateString("es-AR", { day: "2-digit", month: "2-digit", year: "numeric", hour: "2-digit", minute: "2-digit" }), w - 14, 16, { align: "right" });
 
   // Title
   doc.setTextColor(...ACCENT_COLOR);
   doc.setFontSize(16);
   doc.setFont("helvetica", "bold");
-  doc.text(title, 14, 36);
+  doc.text(title, 14, 42);
 
   if (subtitle) {
     doc.setTextColor(100, 100, 100);
     doc.setFontSize(9);
     doc.setFont("helvetica", "normal");
-    doc.text(subtitle, 14, 44);
+    doc.text(subtitle, 14, 50);
   }
 }
 
