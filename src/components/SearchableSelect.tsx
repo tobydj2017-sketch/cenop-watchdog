@@ -9,10 +9,12 @@ interface Props {
   onChange: (value: string) => void;
   placeholder?: string;
   className?: string;
+  inputClassName?: string;
+  dropdownClassName?: string;
   badgeMap?: Record<string, string>;
 }
 
-export default function SearchableSelect({ options, value, onChange, placeholder, className, badgeMap }: Props) {
+export default function SearchableSelect({ options, value, onChange, placeholder, className, inputClassName, dropdownClassName, badgeMap }: Props) {
   const [open, setOpen] = useState(false);
   const [search, setSearch] = useState("");
   const ref = useRef<HTMLDivElement>(null);
@@ -43,12 +45,12 @@ export default function SearchableSelect({ options, value, onChange, placeholder
             setSearch("");
           }}
           placeholder={placeholder}
-          className="h-9 text-sm pr-8"
+          className={cn("h-9 text-sm pr-8", inputClassName)}
         />
         <ChevronDown className="absolute right-2 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground pointer-events-none" />
       </div>
       {open && (
-        <div className="absolute z-50 mt-1 w-full max-h-48 overflow-auto rounded-md border border-border bg-popover text-popover-foreground shadow-md">
+        <div className={cn("absolute z-50 mt-1 w-full max-h-48 overflow-auto rounded-md border border-border bg-popover text-popover-foreground shadow-md", dropdownClassName)}>
           {filtered.length === 0 ? (
             <div className="px-3 py-2 text-xs text-muted-foreground">Sin resultados</div>
           ) : (
