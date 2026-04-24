@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { ServiceEntry } from "@/lib/types";
+import { getServiceKey, ServiceEntry, timeToMinutes } from "@/lib/types";
 import { ArrowDownUp, Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { cleanTime } from "@/lib/formatTime";
@@ -31,6 +31,33 @@ const SERVICE_BADGE_COLORS = [
   "bg-[hsl(330,80%,55%)]/25 text-[hsl(330,80%,55%)] ring-2 ring-[hsl(330,80%,55%)]/40",
   "bg-[hsl(60,70%,45%)]/25 text-[hsl(60,70%,45%)] ring-2 ring-[hsl(60,70%,45%)]/40",
 ];
+
+type SortKey = "solicitud" | "fecha" | "cliente" | "destino" | "chofer" | "custodio" | "movil" | "remito" | "salidaCenop" | "finalizaServicio" | "peajes" | "horasProductivas" | "horasImproductivas" | "horasTotales";
+
+const TABLE_HEADERS: { label: string; sortKey?: SortKey }[] = [
+  { label: "#", sortKey: "solicitud" },
+  { label: "Fecha", sortKey: "fecha" },
+  { label: "Cliente", sortKey: "cliente" },
+  { label: "Destino", sortKey: "destino" },
+  { label: "Chofer", sortKey: "chofer" },
+  { label: "Custodio", sortKey: "custodio" },
+  { label: "Móvil", sortKey: "movil" },
+  { label: "Remito", sortKey: "remito" },
+  { label: "Salida", sortKey: "salidaCenop" },
+  { label: "Fin Serv.", sortKey: "finalizaServicio" },
+  { label: "Peajes", sortKey: "peajes" },
+  { label: "Hs Prod.", sortKey: "horasProductivas" },
+  { label: "Hs Improd.", sortKey: "horasImproductivas" },
+  { label: "Hs Total", sortKey: "horasTotales" },
+  { label: "" },
+];
+
+const collator = new Intl.Collator("es", { numeric: true, sensitivity: "base" });
+
+const formatDate = (date: string) => date ? date.split("-").reverse().join("/") : "—";
+
+const getPeajesTotal = (service: ServiceEntry) =>
+  service.peajes?.reduce((sum, peaje) => sum + (peaje.monto || 0), 0) || 0;
 
 export default function ServiceTable({ services, onDelete }: Props) {
   const [selectedSolicitud, setSelectedSolicitud] = useState<number | null>(null);
