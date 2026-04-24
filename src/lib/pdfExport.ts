@@ -306,10 +306,7 @@ export async function exportResumenPDF(
   let y = 58;
 
   // Summary cards as a table
-  doc.setFontSize(10);
-  doc.setTextColor(...PRIMARY_COLOR);
-  doc.setFont("helvetica", "bold");
-  doc.text("Indicadores Generales", 14, y);
+  addSectionTitle(doc, "Indicadores Generales", 14, y);
   y += 4;
 
   autoTable(doc, {
@@ -331,11 +328,12 @@ export async function exportResumenPDF(
 
   y = (doc as any).lastAutoTable.finalY + 10;
 
+  y = drawBarChart(doc, "Gráfico — Top personal por horas totales", byPerson.map((p) => ({ name: p.nombre, value: p.total, label: formatHoursMinutes(p.total) })), y, 6);
+  y = drawBarChart(doc, "Gráfico — Top clientes por horas totales", byCliente.map((c) => ({ name: c.cliente, value: c.total, label: formatHoursMinutes(c.total) })), y, 6);
+
   // Top 10 Personal
-  doc.setFontSize(10);
-  doc.setTextColor(...PRIMARY_COLOR);
-  doc.setFont("helvetica", "bold");
-  doc.text("Top 10 Personal (por horas)", 14, y);
+  y = ensureSpace(doc, y, 70);
+  addSectionTitle(doc, "Top 10 Personal (por horas)", 14, y);
   y += 4;
 
   autoTable(doc, {
@@ -352,10 +350,7 @@ export async function exportResumenPDF(
   if (y > doc.internal.pageSize.getHeight() - 60) { doc.addPage(); y = 30; }
 
   // Top 10 Clientes
-  doc.setFontSize(10);
-  doc.setTextColor(...PRIMARY_COLOR);
-  doc.setFont("helvetica", "bold");
-  doc.text("Top 10 Clientes (por horas)", 14, y);
+  addSectionTitle(doc, "Top 10 Clientes (por horas)", 14, y);
   y += 4;
 
   autoTable(doc, {
