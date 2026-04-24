@@ -198,10 +198,10 @@ export default function ServiceTable({ services, onDelete }: Props) {
         </div>
       </div>
 
-      {selectedSolicitud !== null && selectedServices.length > 0 && (
+      {selectedServiceKey !== null && selectedServices.length > 0 && (
         <ServiceDetailView
           services={selectedServices}
-          onClose={() => setSelectedSolicitud(null)}
+          onClose={() => setSelectedServiceKey(null)}
         />
       )}
     </>
