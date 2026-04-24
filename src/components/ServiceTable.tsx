@@ -139,20 +139,26 @@ export default function ServiceTable({ services, onDelete }: Props) {
     .sort((a, b) => {
       const aValue = getSortValue(a.rows, sortConfig.key);
       const bValue = getSortValue(b.rows, sortConfig.key);
-      const result = typeof aValue === "number" && typeof bValue === "number"
+      const primary = typeof aValue === "number" && typeof bValue === "number"
         ? aValue - bValue
         : collator.compare(String(aValue), String(bValue));
 
-      if (result !== 0) return sortConfig.direction === "asc" ? result : -result;
-      return collator.compare(a.key, b.key);
+      // Tiebreaker: use solicitud number so direction toggles still produce visible change
+      const tiebreak = a.rows[0].solicitud - b.rows[0].solicitud;
+      const combined = primary !== 0 ? primary : tiebreak;
+      return sortConfig.direction === "asc" ? combined : -combined;
     })
     .flatMap((group) => group.rows);
 
   const handleSort = (key: SortKey) => {
-    setSortConfig((current) => ({
-      key,
-      direction: current.key === key && current.direction === "asc" ? "desc" : "asc",
-    }));
+    setSortConfig((current) => {
+      if (current.key === key) {
+        return { key, direction: current.direction === "asc" ? "desc" : "asc" };
+      }
+      // Default to desc for date/numeric columns, asc for text
+      const numericKeys: SortKey[] = ["fecha", "solicitud", "peajes", "salidaCenop", "finalizaServicio", "horasProductivas", "horasImproductivas", "horasTotales"];
+      return { key, direction: numericKeys.includes(key) ? "desc" : "asc" };
+    });
   };
 
   return (
