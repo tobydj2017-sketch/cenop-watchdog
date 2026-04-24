@@ -39,6 +39,8 @@ const defaultEntry = {
   horaFrancoCustodio: "",
   ordenCarga: "",
   remito: "",
+  kmInicio: "",
+  kmFinal: "",
   continuaOrden: "",
   observaciones: "",
 };
@@ -330,6 +332,8 @@ export default function ServiceForm({ onAdd, selectedDate, existingServices }: P
         <div className="space-y-5">
           <div className="grid md:grid-cols-3 gap-5">
             {renderField({ label: "N° Remito", field: "remito" })}
+            {renderField({ label: "KM Inicio", field: "kmInicio", type: "number" })}
+            {renderField({ label: "KM Final", field: "kmFinal", type: "number" })}
             {renderField({ label: "Continúa Orden N°", field: "continuaOrden" })}
             {renderField({ label: "Observaciones", field: "observaciones" })}
           </div>
