@@ -36,6 +36,11 @@ export function deleteService(id: string) {
   saveServices(getServices().filter((e) => e.id !== id));
 }
 
+export function updateService(entry: ServiceEntry) {
+  const entries = getServices().map((e) => (e.id === entry.id ? entry : e));
+  saveServices(entries);
+}
+
 export function getFuelEntries(): FuelEntry[] {
   const data = localStorage.getItem(FUEL_KEY);
   return data ? JSON.parse(data) : [];

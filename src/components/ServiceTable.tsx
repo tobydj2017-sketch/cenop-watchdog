@@ -1,13 +1,16 @@
 import { useState } from "react";
 import { getServiceKey, ServiceEntry, timeToMinutes } from "@/lib/types";
-import { ArrowDownUp, Trash2 } from "lucide-react";
+import { ArrowDownUp, Trash2, Pencil } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { cleanTime } from "@/lib/formatTime";
 import ServiceDetailView from "@/components/ServiceDetailView";
+import ServiceEditDialog from "@/components/ServiceEditDialog";
 
 interface Props {
   services: ServiceEntry[];
   onDelete: (id: string) => void;
+  onUpdate?: (entry: ServiceEntry) => void;
+  allServices?: ServiceEntry[];
 }
 
 const SERVICE_COLORS = [
@@ -118,8 +121,9 @@ const buildPairGroups = (entries: ServiceEntry[]) => {
   return groups;
 };
 
-export default function ServiceTable({ services, onDelete }: Props) {
+export default function ServiceTable({ services, onDelete, onUpdate, allServices }: Props) {
   const [selectedServiceKey, setSelectedServiceKey] = useState<string | null>(null);
+  const [editingService, setEditingService] = useState<ServiceEntry | null>(null);
   const [sortConfig, setSortConfig] = useState<{ key: SortKey; direction: SortDirection } | null>(null);
 
   if (services.length === 0) {
@@ -243,14 +247,28 @@ export default function ServiceTable({ services, onDelete }: Props) {
                     <td className="px-3 py-2.5 font-mono text-xs text-destructive font-semibold">{cleanTime(s.horasImproductivas)}</td>
                     <td className="px-3 py-2.5 font-mono text-xs font-semibold">{cleanTime(s.horasTotales)}</td>
                     <td className="px-3 py-2.5">
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        onClick={(e) => { e.stopPropagation(); onDelete(s.id); }}
-                        className="h-7 w-7 p-0 text-muted-foreground hover:text-destructive"
-                      >
-                        <Trash2 className="w-3.5 h-3.5" />
-                      </Button>
+                      <div className="flex items-center gap-1">
+                        {onUpdate && (
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={(e) => { e.stopPropagation(); setEditingService(s); }}
+                            className="h-7 w-7 p-0 text-muted-foreground hover:text-primary"
+                            title="Editar"
+                          >
+                            <Pencil className="w-3.5 h-3.5" />
+                          </Button>
+                        )}
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={(e) => { e.stopPropagation(); onDelete(s.id); }}
+                          className="h-7 w-7 p-0 text-muted-foreground hover:text-destructive"
+                          title="Eliminar"
+                        >
+                          <Trash2 className="w-3.5 h-3.5" />
+                        </Button>
+                      </div>
                     </td>
                   </tr>
                 );
@@ -264,6 +282,16 @@ export default function ServiceTable({ services, onDelete }: Props) {
         <ServiceDetailView
           services={selectedServices}
           onClose={() => setSelectedServiceKey(null)}
+        />
+      )}
+
+      {onUpdate && (
+        <ServiceEditDialog
+          service={editingService}
+          open={editingService !== null}
+          onClose={() => setEditingService(null)}
+          onSave={(entry) => onUpdate(entry)}
+          existingServices={allServices ?? services}
         />
       )}
     </>

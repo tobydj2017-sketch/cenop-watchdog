@@ -31,7 +31,7 @@ import PersonalManager from "@/components/PersonalManager";
 import ClientManager from "@/components/ClientManager";
 import { ServiceEntry, FuelEntry, isCountableServiceEntry } from "@/lib/types";
 import {
-  getServices, saveServices, addService, deleteService,
+  getServices, saveServices, addService, deleteService, updateService,
   getFuelEntries, addFuelEntry, deleteFuelEntry,
 } from "@/lib/store";
 import { exportCargaDiaPDF, exportPersonalManagerPDF, exportClientManagerPDF } from "@/lib/pdfExport";
@@ -115,6 +115,11 @@ export default function Index() {
 
   const handleDeleteService = useCallback((id: string) => {
     deleteService(id);
+    setServices(getServices());
+  }, []);
+
+  const handleUpdateService = useCallback((entry: ServiceEntry) => {
+    updateService(entry);
     setServices(getServices());
   }, []);
 
@@ -214,7 +219,7 @@ export default function Index() {
               <FuelForm onAdd={handleAddFuel} selectedDate={selectedDate} existingEntries={fuelEntries} />
             </div>
 
-            <ServiceTable services={dayServices} onDelete={handleDeleteService} />
+            <ServiceTable services={dayServices} onDelete={handleDeleteService} onUpdate={handleUpdateService} allServices={services} />
             <FuelTable entries={dayFuel} onDelete={handleDeleteFuel} />
           </>
         )}
