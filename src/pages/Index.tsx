@@ -1,5 +1,5 @@
 import { useState, useCallback, useMemo, useEffect } from "react";
-import { Shield, CalendarDays, BarChart3, ClipboardList, Users, Building2, Download, Moon, Sun } from "lucide-react";
+import { Shield, CalendarDays, BarChart3, ClipboardList, Users, Building2, Download, Moon, Sun, FileText } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
@@ -9,6 +9,7 @@ import ServiceTable from "@/components/ServiceTable";
 import FuelForm from "@/components/FuelForm";
 import FuelTable from "@/components/FuelTable";
 import FullDashboard from "@/components/FullDashboard";
+import DashboardReportes from "@/components/dashboard/DashboardReportes";
 import PersonalManager from "@/components/PersonalManager";
 import ClientManager from "@/components/ClientManager";
 import { ServiceEntry, FuelEntry, isCountableServiceEntry } from "@/lib/types";
@@ -24,7 +25,7 @@ export default function Index() {
   const [services, setServices] = useState<ServiceEntry[]>(getServices);
   const [fuelEntries, setFuelEntries] = useState<FuelEntry[]>(getFuelEntries);
   const [selectedDate, setSelectedDate] = useState("");
-  const [activeTab, setActiveTab] = useState<"carga" | "dashboard" | "personal" | "clientes">("carga");
+  const [activeTab, setActiveTab] = useState<"carga" | "dashboard" | "personal" | "clientes" | "reportes">("carga");
   const [amLightTheme, setAmLightTheme] = useState(() => localStorage.getItem("cenop-theme") === "am-light");
 
   useEffect(() => {
@@ -119,6 +120,7 @@ export default function Index() {
               { key: "dashboard", label: "Panel de Análisis", icon: BarChart3 },
               { key: "personal", label: "Personal", icon: Users },
               { key: "clientes", label: "Clientes", icon: Building2 },
+              { key: "reportes", label: "Reportes", icon: FileText },
             ] as const).map(({ key, label, icon: Icon }) => (
               <button
                 key={key}
@@ -149,6 +151,8 @@ export default function Index() {
           <PersonalManager />
         ) : activeTab === "clientes" ? (
           <ClientManager />
+        ) : activeTab === "reportes" ? (
+          <DashboardReportes services={cleanServices} fuelEntries={fuelEntries} />
         ) : (
           <>
             <DashboardStats services={cleanServices} fuelEntries={fuelEntries} selectedDate={selectedDate} />
