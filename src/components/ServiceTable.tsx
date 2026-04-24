@@ -33,6 +33,7 @@ const SERVICE_BADGE_COLORS = [
 ];
 
 type SortKey = "solicitud" | "fecha" | "cliente" | "destino" | "chofer" | "custodio" | "movil" | "remito" | "salidaCenop" | "finalizaServicio" | "peajes" | "horasProductivas" | "horasImproductivas" | "horasTotales";
+type SortDirection = "asc" | "desc";
 
 const TABLE_HEADERS: { label: string; sortKey?: SortKey }[] = [
   { label: "#", sortKey: "solicitud" },
@@ -55,6 +56,27 @@ const TABLE_HEADERS: { label: string; sortKey?: SortKey }[] = [
 const collator = new Intl.Collator("es", { numeric: true, sensitivity: "base" });
 
 const formatDate = (date: string) => date ? date.split("-").reverse().join("/") : "—";
+
+const parseDateValue = (date: string) => {
+  if (!date) return Number.NEGATIVE_INFINITY;
+
+  if (/^\d{4}-\d{2}-\d{2}$/.test(date)) {
+    return new Date(`${date}T00:00:00`).getTime();
+  }
+
+  if (/^\d{2}\/\d{2}\/\d{4}$/.test(date)) {
+    const [day, month, year] = date.split("/");
+    return new Date(`${year}-${month}-${day}T00:00:00`).getTime();
+  }
+
+  const parsed = new Date(date).getTime();
+  return Number.isNaN(parsed) ? Number.NEGATIVE_INFINITY : parsed;
+};
+
+const getInitialSortDirection = (key: SortKey): SortDirection => {
+  if (key === "fecha") return "desc";
+  return "asc";
+};
 
 const getPeajesTotal = (service: ServiceEntry) =>
   service.peajes?.reduce((sum, peaje) => sum + (peaje.monto || 0), 0) || 0;
@@ -98,7 +120,7 @@ const buildPairGroups = (entries: ServiceEntry[]) => {
 
 export default function ServiceTable({ services, onDelete }: Props) {
   const [selectedServiceKey, setSelectedServiceKey] = useState<string | null>(null);
-  const [sortConfig, setSortConfig] = useState<{ key: SortKey; direction: "asc" | "desc" } | null>(null);
+  const [sortConfig, setSortConfig] = useState<{ key: SortKey; direction: SortDirection } | null>(null);
 
   if (services.length === 0) {
     return (
@@ -129,6 +151,7 @@ export default function ServiceTable({ services, onDelete }: Props) {
     const textValues = group.flatMap((service) => key === "chofer" || key === "custodio" ? [service[key]] : []);
 
     if (key === "chofer" || key === "custodio") return textValues.filter(Boolean).sort((a, b) => collator.compare(a, b))[0] || "";
+    if (key === "fecha") return parseDateValue(first.fecha || "");
     if (key === "peajes") return group.reduce((sum, service) => sum + getPeajesTotal(service), 0);
     if (key === "salidaCenop" || key === "finalizaServicio" || key === "horasProductivas" || key === "horasImproductivas" || key === "horasTotales") return timeToMinutes(first[key] || "");
     if (key === "solicitud") return first.solicitud;
@@ -155,7 +178,7 @@ export default function ServiceTable({ services, onDelete }: Props) {
       if (current?.key === key) {
         return { key, direction: current.direction === "asc" ? "desc" : "asc" };
       }
-      return { key, direction: "asc" };
+      return { key, direction: getInitialSortDirection(key) };
     });
   };
 
