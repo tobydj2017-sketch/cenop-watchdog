@@ -164,8 +164,8 @@ export function buildDownloadReports(services: ServiceEntry[], fuelEntries: Fuel
       metricLabel: "Horas totales",
       totalLabel: "Clientes",
       totalValue: byCliente.length.toString(),
-      columns: ["Cliente", "Hs Total"],
-      rows: byCliente.map((row) => [row.name, row.label]),
+      columns: ["Cliente", "Hs Total", "Peajes"],
+      rows: byCliente.map((row) => [row.name, row.label, money(peajesByCliente.get(row.name) || 0)]),
       chartData: byCliente,
     },
     {
@@ -175,8 +175,8 @@ export function buildDownloadReports(services: ServiceEntry[], fuelEntries: Fuel
       metricLabel: "Horas totales",
       totalLabel: "Móviles",
       totalValue: byMovil.length.toString(),
-      columns: ["Móvil", "Hs Total"],
-      rows: byMovil.map((row) => [row.name, row.label]),
+      columns: ["Móvil", "Hs Total", "Peajes"],
+      rows: byMovil.map((row) => [row.name, row.label, money(peajesByMovil.get(row.name) || 0)]),
       chartData: byMovil,
     },
     {
