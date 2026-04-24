@@ -60,7 +60,7 @@ const getPeajesTotal = (service: ServiceEntry) =>
   service.peajes?.reduce((sum, peaje) => sum + (peaje.monto || 0), 0) || 0;
 
 export default function ServiceTable({ services, onDelete }: Props) {
-  const [selectedSolicitud, setSelectedSolicitud] = useState<number | null>(null);
+  const [selectedServiceKey, setSelectedServiceKey] = useState<string | null>(null);
   const [sortConfig, setSortConfig] = useState<{ key: SortKey; direction: "asc" | "desc" }>({ key: "fecha", direction: "asc" });
 
   if (services.length === 0) {
@@ -77,8 +77,8 @@ export default function ServiceTable({ services, onDelete }: Props) {
     serviceColorMap.set(serviceKey, i % SERVICE_COLORS.length);
   });
 
-  const selectedServices = selectedSolicitud !== null
-    ? services.filter((s) => s.solicitud === selectedSolicitud)
+  const selectedServices = selectedServiceKey !== null
+    ? services.filter((s) => getServiceKey(s) === selectedServiceKey)
     : [];
 
   const groupedServices = services
@@ -95,7 +95,7 @@ export default function ServiceTable({ services, onDelete }: Props) {
 
     if (key === "chofer" || key === "custodio") return textValues.filter(Boolean).sort((a, b) => collator.compare(a, b))[0] || "";
     if (key === "peajes") return group.reduce((sum, service) => sum + getPeajesTotal(service), 0);
-    if (["salidaCenop", "finalizaServicio", "horasProductivas", "horasImproductivas", "horasTotales"].includes(key)) return timeToMinutes(first[key] || "");
+    if (key === "salidaCenop" || key === "finalizaServicio" || key === "horasProductivas" || key === "horasImproductivas" || key === "horasTotales") return timeToMinutes(first[key] || "");
     if (key === "solicitud") return first.solicitud;
     return String(first[key] || "");
   };
