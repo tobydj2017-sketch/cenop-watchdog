@@ -88,12 +88,13 @@ function tableStyle() {
 }
 
 // ========== CARGA DE DATOS ==========
-export function exportCargaDiaPDF(services: ServiceEntry[], fuel: FuelEntry[], fecha: string) {
+export async function exportCargaDiaPDF(services: ServiceEntry[], fuel: FuelEntry[], fecha: string) {
   const doc = new jsPDF({ orientation: "landscape" });
+  const logoDataUrl = await loadImageAsDataUrl(AM_LOGO_PATH);
   const fechaLabel = fecha.split("-").reverse().join("/");
-  addHeader(doc, `Carga de Datos — ${fechaLabel}`, `Servicios: ${services.length} | Combustible: ${fuel.length} entradas`);
+  addHeader(doc, `Carga de Datos — ${fechaLabel}`, `Servicios: ${services.length} | Combustible: ${fuel.length} entradas`, logoDataUrl);
 
-  let startY = 50;
+  let startY = 56;
 
   if (services.length > 0) {
     doc.setFontSize(10);
@@ -161,14 +162,15 @@ export function exportCargaDiaPDF(services: ServiceEntry[], fuel: FuelEntry[], f
 }
 
 // ========== DASHBOARD PERSONAL ==========
-export function exportPersonalPDF(
+export async function exportPersonalPDF(
   byPerson: { nombre: string; prod: number; improd: number; servicios: number; total: number; clientes: string }[]
 ) {
   const doc = new jsPDF();
-  addHeader(doc, "Reporte de Personal", `${byPerson.length} personas | Generado con filtros activos`);
+  const logoDataUrl = await loadImageAsDataUrl(AM_LOGO_PATH);
+  addHeader(doc, "Reporte de Personal", `${byPerson.length} personas | Generado con filtros activos`, logoDataUrl);
 
   autoTable(doc, {
-    startY: 50,
+    startY: 56,
     head: [["Personal", "Clientes", "Servicios", "Hs Prod.", "Hs Improd.", "Hs Total", "Eficiencia"]],
     body: byPerson.map((p) => [
       p.nombre,
@@ -187,14 +189,15 @@ export function exportPersonalPDF(
 }
 
 // ========== DASHBOARD MOVILES ==========
-export function exportMovilesPDF(
+export async function exportMovilesPDF(
   byMovil: { patente: string; prod: number; improd: number; servicios: number; total: number }[]
 ) {
   const doc = new jsPDF();
-  addHeader(doc, "Reporte de Móviles", `${byMovil.length} móviles | Generado con filtros activos`);
+  const logoDataUrl = await loadImageAsDataUrl(AM_LOGO_PATH);
+  addHeader(doc, "Reporte de Móviles", `${byMovil.length} móviles | Generado con filtros activos`, logoDataUrl);
 
   autoTable(doc, {
-    startY: 50,
+    startY: 56,
     head: [["Patente", "Servicios", "Hs Prod.", "Hs Improd.", "Hs Total", "Eficiencia"]],
     body: byMovil.map((m) => [
       m.patente,
@@ -212,14 +215,15 @@ export function exportMovilesPDF(
 }
 
 // ========== DASHBOARD CLIENTES ==========
-export function exportClientesPDF(
+export async function exportClientesPDF(
   byCliente: { cliente: string; prod: number; improd: number; servicios: number; total: number }[]
 ) {
   const doc = new jsPDF();
-  addHeader(doc, "Reporte de Clientes", `${byCliente.length} clientes | Generado con filtros activos`);
+  const logoDataUrl = await loadImageAsDataUrl(AM_LOGO_PATH);
+  addHeader(doc, "Reporte de Clientes", `${byCliente.length} clientes | Generado con filtros activos`, logoDataUrl);
 
   autoTable(doc, {
-    startY: 50,
+    startY: 56,
     head: [["Cliente", "Servicios", "Hs Prod.", "Hs Improd.", "Hs Total", "Eficiencia"]],
     body: byCliente.map((c) => [
       c.cliente,
