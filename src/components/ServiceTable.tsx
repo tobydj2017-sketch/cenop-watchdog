@@ -1,13 +1,16 @@
 import { useState } from "react";
 import { getServiceKey, ServiceEntry, timeToMinutes } from "@/lib/types";
-import { ArrowDownUp, Trash2 } from "lucide-react";
+import { ArrowDownUp, Trash2, Pencil } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { cleanTime } from "@/lib/formatTime";
 import ServiceDetailView from "@/components/ServiceDetailView";
+import ServiceEditDialog from "@/components/ServiceEditDialog";
 
 interface Props {
   services: ServiceEntry[];
   onDelete: (id: string) => void;
+  onUpdate?: (entry: ServiceEntry) => void;
+  allServices?: ServiceEntry[];
 }
 
 const SERVICE_COLORS = [
