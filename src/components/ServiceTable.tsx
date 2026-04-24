@@ -177,7 +177,7 @@ export default function ServiceTable({ services, onDelete }: Props) {
                           className="h-7 px-2 -ml-2 gap-1 text-xs uppercase tracking-wider text-muted-foreground hover:text-foreground"
                         >
                           {header.label}
-                          <ArrowDownUp className={`w-3 h-3 ${sortConfig.key === header.sortKey ? "text-foreground" : ""}`} />
+                          <ArrowDownUp className={`w-3 h-3 ${sortConfig?.key === header.sortKey ? "text-foreground" : ""}`} />
                         </Button>
                       ) : header.label}
                     </th>
