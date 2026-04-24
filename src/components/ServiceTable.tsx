@@ -98,7 +98,7 @@ const buildPairGroups = (entries: ServiceEntry[]) => {
 
 export default function ServiceTable({ services, onDelete }: Props) {
   const [selectedServiceKey, setSelectedServiceKey] = useState<string | null>(null);
-  const [sortConfig, setSortConfig] = useState<{ key: SortKey; direction: "asc" | "desc" }>({ key: "fecha", direction: "asc" });
+  const [sortConfig, setSortConfig] = useState<{ key: SortKey; direction: "asc" | "desc" } | null>(null);
 
   if (services.length === 0) {
     return (
@@ -135,29 +135,27 @@ export default function ServiceTable({ services, onDelete }: Props) {
     return String(first[key] || "");
   };
 
-  const displayedServices = [...pairGroups]
-    .sort((a, b) => {
-      const aValue = getSortValue(a.rows, sortConfig.key);
-      const bValue = getSortValue(b.rows, sortConfig.key);
-      const primary = typeof aValue === "number" && typeof bValue === "number"
-        ? aValue - bValue
-        : collator.compare(String(aValue), String(bValue));
+  const displayedServices = (sortConfig
+    ? [...pairGroups].sort((a, b) => {
+        const aValue = getSortValue(a.rows, sortConfig.key);
+        const bValue = getSortValue(b.rows, sortConfig.key);
+        const primary = typeof aValue === "number" && typeof bValue === "number"
+          ? aValue - bValue
+          : collator.compare(String(aValue), String(bValue));
 
-      // Tiebreaker: use solicitud number so direction toggles still produce visible change
-      const tiebreak = a.rows[0].solicitud - b.rows[0].solicitud;
-      const combined = primary !== 0 ? primary : tiebreak;
-      return sortConfig.direction === "asc" ? combined : -combined;
-    })
+        const tiebreak = a.rows[0].solicitud - b.rows[0].solicitud;
+        const combined = primary !== 0 ? primary : tiebreak;
+        return sortConfig.direction === "asc" ? combined : -combined;
+      })
+    : pairGroups)
     .flatMap((group) => group.rows);
 
   const handleSort = (key: SortKey) => {
     setSortConfig((current) => {
-      if (current.key === key) {
+      if (current?.key === key) {
         return { key, direction: current.direction === "asc" ? "desc" : "asc" };
       }
-      // Default to desc for date/numeric columns, asc for text
-      const numericKeys: SortKey[] = ["fecha", "solicitud", "peajes", "salidaCenop", "finalizaServicio", "horasProductivas", "horasImproductivas", "horasTotales"];
-      return { key, direction: numericKeys.includes(key) ? "desc" : "asc" };
+      return { key, direction: "asc" };
     });
   };
 
@@ -179,7 +177,7 @@ export default function ServiceTable({ services, onDelete }: Props) {
                           className="h-7 px-2 -ml-2 gap-1 text-xs uppercase tracking-wider text-muted-foreground hover:text-foreground"
                         >
                           {header.label}
-                          <ArrowDownUp className={`w-3 h-3 ${sortConfig.key === header.sortKey ? "text-foreground" : ""}`} />
+                          <ArrowDownUp className={`w-3 h-3 ${sortConfig?.key === header.sortKey ? "text-foreground" : ""}`} />
                         </Button>
                       ) : header.label}
                     </th>
