@@ -118,6 +118,11 @@ export default function Index() {
     setServices(getServices());
   }, []);
 
+  const handleUpdateService = useCallback((entry: ServiceEntry) => {
+    updateService(entry);
+    setServices(getServices());
+  }, []);
+
   const handleAddFuel = useCallback((entry: FuelEntry) => {
     addFuelEntry(entry);
     setFuelEntries(getFuelEntries());
