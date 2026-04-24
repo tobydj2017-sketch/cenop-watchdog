@@ -1,7 +1,8 @@
-import { useState, useCallback, useMemo } from "react";
-import { Shield, CalendarDays, BarChart3, ClipboardList, Users, Building2, Download } from "lucide-react";
+import { useState, useCallback, useMemo, useEffect } from "react";
+import { Shield, CalendarDays, BarChart3, ClipboardList, Users, Building2, Download, Moon, Sun } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
+import { Switch } from "@/components/ui/switch";
 import DashboardStats from "@/components/DashboardStats";
 import ServiceForm from "@/components/ServiceForm";
 import ServiceTable from "@/components/ServiceTable";
@@ -24,6 +25,12 @@ export default function Index() {
   const [fuelEntries, setFuelEntries] = useState<FuelEntry[]>(getFuelEntries);
   const [selectedDate, setSelectedDate] = useState("");
   const [activeTab, setActiveTab] = useState<"carga" | "dashboard" | "personal" | "clientes">("carga");
+  const [amLightTheme, setAmLightTheme] = useState(() => localStorage.getItem("cenop-theme") === "am-light");
+
+  useEffect(() => {
+    document.documentElement.classList.toggle("am-light", amLightTheme);
+    localStorage.setItem("cenop-theme", amLightTheme ? "am-light" : "dark");
+  }, [amLightTheme]);
 
   const handleAddService = useCallback((entry: ServiceEntry) => {
     addService(entry);
@@ -67,6 +74,15 @@ export default function Index() {
             </div>
           </div>
           <div className="flex items-center gap-2">
+            <div className="flex items-center gap-2 rounded-lg border border-border bg-card px-3 py-2">
+              <Moon className="w-4 h-4 text-muted-foreground" />
+              <Switch
+                checked={amLightTheme}
+                onCheckedChange={setAmLightTheme}
+                aria-label="Cambiar tema AM claro"
+              />
+              <Sun className="w-4 h-4 text-primary" />
+            </div>
             {activeTab === "carga" && (
               <>
                 <div className="flex items-center gap-2 mr-2">
