@@ -55,6 +55,55 @@
     --chart-unproductive: 0 72% 50%;
     --chart-transit: 38 60% 50%;
   }
+
+  .am-light {
+    --background: 120 18% 97%;
+    --foreground: 150 20% 12%;
+
+    --card: 0 0% 100%;
+    --card-foreground: 150 20% 12%;
+
+    --popover: 0 0% 100%;
+    --popover-foreground: 150 20% 12%;
+
+    --primary: 124 50% 47%;
+    --primary-foreground: 0 0% 100%;
+
+    --secondary: 128 24% 92%;
+    --secondary-foreground: 150 20% 16%;
+
+    --muted: 120 18% 94%;
+    --muted-foreground: 145 10% 42%;
+
+    --accent: 124 50% 47%;
+    --accent-foreground: 0 0% 100%;
+
+    --destructive: 0 72% 48%;
+    --destructive-foreground: 0 0% 100%;
+
+    --success: 124 50% 47%;
+    --success-foreground: 0 0% 100%;
+
+    --warning: 42 88% 52%;
+    --warning-foreground: 150 20% 12%;
+
+    --border: 128 22% 84%;
+    --input: 128 22% 84%;
+    --ring: 124 50% 47%;
+
+    --sidebar-background: 0 0% 100%;
+    --sidebar-foreground: 150 20% 16%;
+    --sidebar-primary: 124 50% 47%;
+    --sidebar-primary-foreground: 0 0% 100%;
+    --sidebar-accent: 128 24% 92%;
+    --sidebar-accent-foreground: 150 20% 16%;
+    --sidebar-border: 128 22% 84%;
+    --sidebar-ring: 124 50% 47%;
+
+    --chart-productive: 124 50% 47%;
+    --chart-unproductive: 0 72% 48%;
+    --chart-transit: 42 88% 52%;
+  }
 }
 
 @layer base {
@@ -78,7 +127,7 @@
   }
 
   .glow-amber {
-    box-shadow: 0 0 20px hsl(38 92% 50% / 0.15), 0 0 60px hsl(38 92% 50% / 0.05);
+    box-shadow: 0 0 20px hsl(var(--primary) / 0.15), 0 0 60px hsl(var(--primary) / 0.05);
   }
 
   .stat-value {
