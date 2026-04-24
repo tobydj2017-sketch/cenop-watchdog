@@ -57,6 +57,7 @@ export interface ServiceEntry {
   serviciosOperaciones?: ServicioOperacionesEntry[];
   choferEsOperaciones?: boolean;
   custodioEsOperaciones?: boolean;
+  tipoCenopOp?: "ninguno" | "cenop_en_op" | "op_en_cenop";
 }
 
 export interface FuelEntry {
