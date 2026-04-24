@@ -141,7 +141,7 @@ export default function Index() {
       <SidebarInset>
           {/* Encabezado */}
           <header className="sticky top-0 z-40 border-b border-border bg-card/50 backdrop-blur-sm">
-            <div className="mx-auto flex max-w-7xl items-center justify-between px-4 py-3">
+            <div className="flex w-full items-center justify-between px-4 py-3">
               <div className="flex items-center gap-3">
                 <SidebarTrigger className="h-9 w-9" />
                 <div>
