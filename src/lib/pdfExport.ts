@@ -150,10 +150,7 @@ export async function exportCargaDiaPDF(services: ServiceEntry[], fuel: FuelEntr
   let startY = 56;
 
   if (services.length > 0) {
-    doc.setFontSize(10);
-    doc.setTextColor(...PRIMARY_COLOR);
-    doc.setFont("helvetica", "bold");
-    doc.text("Servicios del Día", 14, startY);
+    addSectionTitle(doc, "Servicios del Día", 14, startY);
     startY += 4;
 
     autoTable(doc, {
@@ -186,10 +183,7 @@ export async function exportCargaDiaPDF(services: ServiceEntry[], fuel: FuelEntr
       doc.addPage();
       startY = 30;
     }
-    doc.setFontSize(10);
-    doc.setTextColor(...PRIMARY_COLOR);
-    doc.setFont("helvetica", "bold");
-    doc.text("Combustible del Día", 14, startY);
+    addSectionTitle(doc, "Combustible del Día", 14, startY);
     startY += 4;
 
     autoTable(doc, {
