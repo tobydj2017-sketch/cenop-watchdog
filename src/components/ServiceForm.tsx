@@ -259,18 +259,25 @@ export default function ServiceForm({ onAdd, selectedDate, existingServices }: P
       </div>
 
       <div className="grid grid-cols-5 gap-2" aria-label="Progreso de carga de servicio">
-        {["Solicitud", "Destino", "Personal", "Horarios", "Extras"].map((label, index) => (
-          <div
-            key={label}
-            className={`rounded-md border px-2 py-3 text-center text-sm font-extrabold ${
-              step === index + 1
-                ? "border-primary bg-primary text-primary-foreground"
-                : "border-border bg-background text-muted-foreground"
-            }`}
-          >
-            {label}
-          </div>
-        ))}
+        {["Solicitud", "Destino", "Personal", "Horarios", "Extras"].map((label, index) => {
+          const targetStep = index + 1;
+
+          return (
+            <button
+              key={label}
+              type="button"
+              onClick={() => setStep(targetStep)}
+              aria-current={step === targetStep ? "step" : undefined}
+              className={`rounded-md border px-2 py-3 text-center text-sm font-extrabold transition-colors ${
+                step === targetStep
+                  ? "border-primary bg-primary text-primary-foreground"
+                  : "border-border bg-background text-muted-foreground hover:border-primary/50 hover:text-foreground"
+              }`}
+            >
+              {label}
+            </button>
+          );
+        })}
       </div>
 
       {step === 1 && (
