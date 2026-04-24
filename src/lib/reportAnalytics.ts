@@ -27,6 +27,16 @@ export interface DownloadReport {
 const formatDate = (date: string) => (date ? date.split("-").reverse().join("/") : "—");
 const money = (value: number) => `$${value.toLocaleString("es-AR")}`;
 
+function getPeajesTotal(service: ServiceEntry) {
+  return (service.peajes || []).reduce((sum, peaje) => sum + (peaje.monto || 0), 0);
+}
+
+function getPeajesDetail(service: ServiceEntry) {
+  return service.peajes?.length
+    ? service.peajes.map((peaje) => `${peaje.ubicacion || "Sin ubicación"}: ${money(peaje.monto || 0)}`).join(" | ")
+    : "—";
+}
+
 function roleByName() {
   return new Map(getPersonal().map((p) => [p.nombre, p.roles]));
 }
@@ -88,6 +98,16 @@ export function buildDownloadReports(services: ServiceEntry[], fuelEntries: Fuel
     }),
   );
 
+  const peajesByCliente = new Map<string, number>();
+  const peajesByMovil = new Map<string, number>();
+  services.forEach((service) => {
+    const peajesTotal = getPeajesTotal(service);
+    if (!peajesTotal) return;
+    const cliente = normalizeClientName(service.cliente);
+    peajesByCliente.set(cliente, (peajesByCliente.get(cliente) || 0) + peajesTotal);
+    if (service.movil) peajesByMovil.set(service.movil, (peajesByMovil.get(service.movil) || 0) + peajesTotal);
+  });
+
   return [
     {
       id: "cenop-en-operaciones",
@@ -96,9 +116,9 @@ export function buildDownloadReports(services: ServiceEntry[], fuelEntries: Fuel
       metricLabel: "Horas productivas",
       totalLabel: "Total",
       totalValue: formatHoursMinutes(cenopEnOperacionesRows.reduce((sum, row) => sum + row.minutes, 0)),
-      columns: ["Fecha", "Solicitud", "Personal", "Función", "Cliente", "Destino", "Móvil", "Hs Prod."],
+      columns: ["Fecha", "Solicitud", "Personal", "Función", "Cliente", "Destino", "Móvil", "Peajes", "Hs Prod."],
       rows: cenopEnOperacionesRows.map(({ service, worker, minutes }) => [
-        formatDate(service.fecha), service.solicitud, worker.nombre, worker.funcion, normalizeClientName(service.cliente), service.destino || "—", service.movil || "—", formatHoursMinutes(minutes),
+        formatDate(service.fecha), service.solicitud, worker.nombre, worker.funcion, normalizeClientName(service.cliente), service.destino || "—", service.movil || "—", money(getPeajesTotal(service)), formatHoursMinutes(minutes),
       ]),
       chartData: summarizeByName(cenopEnOperacionesRows.map((row) => ({ name: row.worker.nombre, minutes: row.minutes }))),
     },
@@ -109,9 +129,9 @@ export function buildDownloadReports(services: ServiceEntry[], fuelEntries: Fuel
       metricLabel: "Horas totales",
       totalLabel: "Total",
       totalValue: formatHoursMinutes(operacionesEnCenopRows.reduce((sum, row) => sum + row.minutes, 0)),
-      columns: ["Fecha", "Solicitud", "Personal", "Función", "Destino", "Móvil", "Remito", "Hs Total"],
+      columns: ["Fecha", "Solicitud", "Personal", "Función", "Destino", "Móvil", "Remito", "Peajes", "Hs Total"],
       rows: operacionesEnCenopRows.map(({ service, worker, minutes }) => [
-        formatDate(service.fecha), service.solicitud, worker.nombre, worker.funcion, service.destino || "—", service.movil || "—", service.remito || "—", formatHoursMinutes(minutes),
+        formatDate(service.fecha), service.solicitud, worker.nombre, worker.funcion, service.destino || "—", service.movil || "—", service.remito || "—", money(getPeajesTotal(service)), formatHoursMinutes(minutes),
       ]),
       chartData: summarizeByName(operacionesEnCenopRows.map((row) => ({ name: row.worker.nombre, minutes: row.minutes }))),
     },
@@ -122,8 +142,8 @@ export function buildDownloadReports(services: ServiceEntry[], fuelEntries: Fuel
       metricLabel: "Servicios",
       totalLabel: "Total",
       totalValue: serviciosUnicos.toString(),
-      columns: ["Fecha", "Solicitud", "Cliente", "Destino", "Chofer", "Custodio", "Móvil", "Remito", "Hs Total"],
-      rows: services.map((service) => [formatDate(service.fecha), service.solicitud, normalizeClientName(service.cliente), service.destino || "—", service.chofer || "—", service.custodio || "—", service.movil || "—", service.remito || "—", formatHoursMinutes(getAdjustedHours(service).prod + getAdjustedHours(service).improd)]),
+      columns: ["Fecha", "Solicitud", "Cliente", "Destino", "Chofer", "Custodio", "Móvil", "Remito", "Peajes", "Detalle Peajes", "Hs Total"],
+      rows: services.map((service) => [formatDate(service.fecha), service.solicitud, normalizeClientName(service.cliente), service.destino || "—", service.chofer || "—", service.custodio || "—", service.movil || "—", service.remito || "—", money(getPeajesTotal(service)), getPeajesDetail(service), formatHoursMinutes(getAdjustedHours(service).prod + getAdjustedHours(service).improd)]),
       chartData: byCliente,
     },
     {
@@ -144,8 +164,8 @@ export function buildDownloadReports(services: ServiceEntry[], fuelEntries: Fuel
       metricLabel: "Horas totales",
       totalLabel: "Clientes",
       totalValue: byCliente.length.toString(),
-      columns: ["Cliente", "Hs Total"],
-      rows: byCliente.map((row) => [row.name, row.label]),
+      columns: ["Cliente", "Hs Total", "Peajes"],
+      rows: byCliente.map((row) => [row.name, row.label, money(peajesByCliente.get(row.name) || 0)]),
       chartData: byCliente,
     },
     {
@@ -155,8 +175,8 @@ export function buildDownloadReports(services: ServiceEntry[], fuelEntries: Fuel
       metricLabel: "Horas totales",
       totalLabel: "Móviles",
       totalValue: byMovil.length.toString(),
-      columns: ["Móvil", "Hs Total"],
-      rows: byMovil.map((row) => [row.name, row.label]),
+      columns: ["Móvil", "Hs Total", "Peajes"],
+      rows: byMovil.map((row) => [row.name, row.label, money(peajesByMovil.get(row.name) || 0)]),
       chartData: byMovil,
     },
     {
