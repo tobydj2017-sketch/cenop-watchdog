@@ -187,11 +187,11 @@ export default function ServiceForm({ onAdd, selectedDate, existingServices }: P
     const idx = timeFields.indexOf(currentField);
     if (idx < 0 || idx >= timeFields.length - 1) return;
     const nextField = timeFields[idx + 1];
-    const nextInput = document.querySelector(`[data-timefield="${nextField}"]`) as HTMLInputElement;
+    const nextInput = document.querySelector(`[data-timefield="${nextField}"] input`) as HTMLInputElement;
     nextInput?.focus();
   };
 
-  const Field = ({ label, field, type = "text", placeholder = "" }: { label: string; field: string; type?: string; placeholder?: string }) => (
+  const renderField = ({ label, field, type = "text", placeholder = "" }: { label: string; field: string; type?: string; placeholder?: string }) => (
     <div className="space-y-2">
       <Label className="text-base font-bold text-background">{label}</Label>
       {type === "time" ? (
@@ -215,7 +215,7 @@ export default function ServiceForm({ onAdd, selectedDate, existingServices }: P
     </div>
   );
 
-  const SelectField = ({ label, field, options, onCustomChange, showBadges }: { label: string; field: string; options: string[]; onCustomChange?: (v: string) => void; showBadges?: boolean }) => (
+  const renderSelectField = ({ label, field, options, onCustomChange, showBadges }: { label: string; field: string; options: string[]; onCustomChange?: (v: string) => void; showBadges?: boolean }) => (
     <div className="space-y-2">
       <Label className="text-base font-bold text-background">{label}</Label>
       <SearchableSelect
