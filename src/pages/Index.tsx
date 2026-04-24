@@ -219,7 +219,7 @@ export default function Index() {
               <FuelForm onAdd={handleAddFuel} selectedDate={selectedDate} existingEntries={fuelEntries} />
             </div>
 
-            <ServiceTable services={dayServices} onDelete={handleDeleteService} />
+            <ServiceTable services={dayServices} onDelete={handleDeleteService} onUpdate={handleUpdateService} allServices={services} />
             <FuelTable entries={dayFuel} onDelete={handleDeleteFuel} />
           </>
         )}
