@@ -155,6 +155,10 @@ export default function ServiceForm({ onAdd, selectedDate, existingServices }: P
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
+    if (step < 5) {
+      setStep((current) => Math.min(5, current + 1));
+      return;
+    }
     const trimmedRemito = form.remito.trim();
     if (trimmedRemito && existingServices.some((s) => s.remito.trim().toUpperCase() === trimmedRemito.toUpperCase())) {
       toast.error(`Ya existe un servicio con el remito "${trimmedRemito}"`);
