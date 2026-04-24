@@ -121,8 +121,9 @@ const buildPairGroups = (entries: ServiceEntry[]) => {
   return groups;
 };
 
-export default function ServiceTable({ services, onDelete }: Props) {
+export default function ServiceTable({ services, onDelete, onUpdate, allServices }: Props) {
   const [selectedServiceKey, setSelectedServiceKey] = useState<string | null>(null);
+  const [editingService, setEditingService] = useState<ServiceEntry | null>(null);
   const [sortConfig, setSortConfig] = useState<{ key: SortKey; direction: SortDirection } | null>(null);
 
   if (services.length === 0) {
