@@ -8,7 +8,7 @@ import { getActiveClientNames } from "@/lib/clientStore";
 import { getPersonal, getActivePersonalNames } from "@/lib/personalStore";
 import SearchableSelect from "@/components/SearchableSelect";
 import TimeInput from "@/components/TimeInput";
-import { Plus, Trash2, CircleDollarSign, Briefcase, Building2 } from "lucide-react";
+import { Plus, Trash2, CircleDollarSign, Briefcase, Building2, ChevronLeft, ChevronRight } from "lucide-react";
 import { toast } from "sonner";
 
 interface Props {
@@ -46,6 +46,7 @@ const defaultEntry = {
 export default function ServiceForm({ onAdd, selectedDate, existingServices }: Props) {
   const [form, setForm] = useState(defaultEntry);
   const [open, setOpen] = useState(false);
+  const [step, setStep] = useState(1);
   const [peajes, setPeajes] = useState<PeajeEntry[]>([]);
   const [comisiones, setComisiones] = useState<ComisionEntry[]>([]);
   const [serviciosOp, setServiciosOp] = useState<ServicioOperacionesEntry[]>([]);
@@ -172,6 +173,12 @@ export default function ServiceForm({ onAdd, selectedDate, existingServices }: P
     setPeajes([]);
     setComisiones([]);
     setServiciosOp([]);
+    setStep(1);
+    setOpen(false);
+  };
+
+  const closeForm = () => {
+    setStep(1);
     setOpen(false);
   };
 
@@ -185,14 +192,15 @@ export default function ServiceForm({ onAdd, selectedDate, existingServices }: P
   };
 
   const Field = ({ label, field, type = "text", placeholder = "" }: { label: string; field: string; type?: string; placeholder?: string }) => (
-    <div className="space-y-1">
-      <Label className="text-xs text-muted-foreground">{label}</Label>
+    <div className="space-y-2">
+      <Label className="text-base font-bold text-background">{label}</Label>
       {type === "time" ? (
         <div data-timefield={field}>
           <TimeInput
             value={(form as any)[field]}
             onChange={(v) => set(field, v)}
             onComplete={() => focusNextTimeInput(field)}
+            className="h-12 text-lg bg-background text-foreground border-input"
           />
         </div>
       ) : (
@@ -201,20 +209,21 @@ export default function ServiceForm({ onAdd, selectedDate, existingServices }: P
           value={(form as any)[field]}
           onChange={(e) => set(field, type === "number" ? Number(e.target.value) : e.target.value)}
           placeholder={placeholder}
-          className="h-9 text-sm"
+          className="h-12 text-lg bg-background text-foreground border-input placeholder:text-muted-foreground"
         />
       )}
     </div>
   );
 
   const SelectField = ({ label, field, options, onCustomChange, showBadges }: { label: string; field: string; options: string[]; onCustomChange?: (v: string) => void; showBadges?: boolean }) => (
-    <div className="space-y-1">
-      <Label className="text-xs text-muted-foreground">{label}</Label>
+    <div className="space-y-2">
+      <Label className="text-base font-bold text-background">{label}</Label>
       <SearchableSelect
         options={options}
         value={(form as any)[field]}
         onChange={onCustomChange || ((v) => set(field, v))}
         placeholder={`Seleccionar...`}
+        inputClassName="h-12 text-lg bg-background text-foreground border-input"
         badgeMap={showBadges ? opsBadgeMap : undefined}
       />
     </div>
