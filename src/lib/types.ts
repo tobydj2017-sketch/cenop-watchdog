@@ -42,6 +42,8 @@ export interface ServiceEntry {
   horaFrancoCustodio: string;
   ordenCarga: string;
   remito: string;
+  kmInicio?: string;
+  kmFinal?: string;
   continuaOrden: string;
   observaciones: string;
   horasProductivas: string;
