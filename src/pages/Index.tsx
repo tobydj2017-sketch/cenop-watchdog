@@ -192,7 +192,7 @@ export default function Index() {
           </header>
 
           {/* Principal */}
-          <main className="container max-w-7xl mx-auto px-4 py-6 space-y-5">
+          <main className="w-full mx-auto px-4 py-6 space-y-5">
         {activeTab === "dashboard" ? (
           <FullDashboard
             services={cleanServices}
