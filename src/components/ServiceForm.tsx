@@ -171,11 +171,13 @@ export default function ServiceForm({ onAdd, selectedDate, existingServices }: P
       serviciosOperaciones: serviciosOp.length > 0 ? serviciosOp : undefined,
       choferEsOperaciones: !!opsBadgeMap[form.chofer],
       custodioEsOperaciones: !!opsBadgeMap[form.custodio],
+      tipoCenopOp,
     });
     setForm(defaultEntry);
     setPeajes([]);
     setComisiones([]);
     setServiciosOp([]);
+    setTipoCenopOp("ninguno");
     setStep(1);
     setOpen(false);
   };
