@@ -59,6 +59,43 @@ const formatDate = (date: string) => date ? date.split("-").reverse().join("/") 
 const getPeajesTotal = (service: ServiceEntry) =>
   service.peajes?.reduce((sum, peaje) => sum + (peaje.monto || 0), 0) || 0;
 
+const getRowRole = (service: ServiceEntry) => {
+  if (service.chofer && !service.custodio) return "chofer";
+  if (service.custodio && !service.chofer) return "custodio";
+  return "mixto";
+};
+
+const canJoinPair = (group: ServiceEntry[], service: ServiceEntry) => {
+  if (group.length >= 2) return false;
+  const first = group[0];
+  const sameService = getServiceKey(first) === getServiceKey(service)
+    && first.cliente === service.cliente
+    && first.destino === service.destino
+    && first.movil === service.movil
+    && (first.remito || "") === (service.remito || "");
+
+  if (!sameService) return false;
+  const roles = new Set(group.map(getRowRole));
+  const nextRole = getRowRole(service);
+  return nextRole !== "mixto" && !roles.has(nextRole);
+};
+
+const buildPairGroups = (entries: ServiceEntry[]) => {
+  const groups: { key: string; rows: ServiceEntry[] }[] = [];
+
+  entries.filter((s) => s.chofer || s.custodio).forEach((service) => {
+    const lastGroup = groups[groups.length - 1];
+    if (lastGroup && canJoinPair(lastGroup.rows, service)) {
+      lastGroup.rows.push(service);
+      return;
+    }
+
+    groups.push({ key: `pair-${groups.length}-${service.id}`, rows: [service] });
+  });
+
+  return groups;
+};
+
 export default function ServiceTable({ services, onDelete }: Props) {
   const [selectedServiceKey, setSelectedServiceKey] = useState<string | null>(null);
   const [sortConfig, setSortConfig] = useState<{ key: SortKey; direction: "asc" | "desc" }>({ key: "fecha", direction: "asc" });
@@ -71,23 +108,21 @@ export default function ServiceTable({ services, onDelete }: Props) {
     );
   }
 
-  const uniqueServiceKeys = [...new Set(services.map((s) => getServiceKey(s)))];
+  const pairGroups = buildPairGroups(services);
+  const rowPairKeyMap = new Map<string, string>();
+  pairGroups.forEach((group) => {
+    group.rows.forEach((service) => rowPairKeyMap.set(service.id, group.key));
+  });
+
+  const uniqueServiceKeys = pairGroups.map((group) => group.key);
   const serviceColorMap = new Map<string, number>();
   uniqueServiceKeys.forEach((serviceKey, i) => {
     serviceColorMap.set(serviceKey, i % SERVICE_COLORS.length);
   });
 
   const selectedServices = selectedServiceKey !== null
-    ? services.filter((s) => getServiceKey(s) === selectedServiceKey)
+    ? pairGroups.find((group) => group.key === selectedServiceKey)?.rows || []
     : [];
-
-  const groupedServices = services
-    .filter((s) => s.chofer || s.custodio)
-    .reduce<Map<string, ServiceEntry[]>>((map, service) => {
-      const serviceKey = getServiceKey(service);
-      map.set(serviceKey, [...(map.get(serviceKey) || []), service]);
-      return map;
-    }, new Map());
 
   const getSortValue = (group: ServiceEntry[], key: SortKey): string | number => {
     const first = group[0];
@@ -100,18 +135,18 @@ export default function ServiceTable({ services, onDelete }: Props) {
     return String(first[key] || "");
   };
 
-  const displayedServices = [...groupedServices.values()]
+  const displayedServices = [...pairGroups]
     .sort((a, b) => {
-      const aValue = getSortValue(a, sortConfig.key);
-      const bValue = getSortValue(b, sortConfig.key);
+      const aValue = getSortValue(a.rows, sortConfig.key);
+      const bValue = getSortValue(b.rows, sortConfig.key);
       const result = typeof aValue === "number" && typeof bValue === "number"
         ? aValue - bValue
         : collator.compare(String(aValue), String(bValue));
 
       if (result !== 0) return sortConfig.direction === "asc" ? result : -result;
-      return collator.compare(getServiceKey(a[0]), getServiceKey(b[0]));
+      return collator.compare(a.key, b.key);
     })
-    .flatMap((group) => group);
+    .flatMap((group) => group.rows);
 
   const handleSort = (key: SortKey) => {
     setSortConfig((current) => ({
