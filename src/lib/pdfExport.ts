@@ -412,9 +412,10 @@ export async function exportDownloadReportPDF(report: DownloadReport) {
   const doc = new jsPDF({ orientation: report.columns.length > 6 ? "landscape" : "portrait" });
   const logoDataUrl = await loadImageAsDataUrl(AM_LOGO_PATH);
   addHeader(doc, report.title, `${report.description} | ${report.totalLabel}: ${report.totalValue}`, logoDataUrl);
+  const chartEndY = drawBarChart(doc, `Gráfico — ${report.metricLabel}`, report.chartData, 58, 10);
 
   autoTable(doc, {
-    startY: 56,
+    startY: chartEndY,
     head: [report.columns],
     body: report.rows.length ? report.rows : [["Sin datos para los filtros seleccionados"]],
     ...tableStyle(),
