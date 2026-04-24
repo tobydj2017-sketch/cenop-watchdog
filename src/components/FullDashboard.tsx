@@ -2,13 +2,14 @@ import { useState, useMemo } from "react";
 import { ServiceEntry, FuelEntry, getAdjustedHours, getServiceKey, normalizeClientName, getCenopEnOperacionesMinutes } from "@/lib/types";
 import { formatHoursMinutes } from "@/lib/formatTime";
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, PieChart, Pie, Cell, Legend } from "recharts";
-import { Users, Truck, Building2, CalendarDays, ArrowLeft, TrendingUp, LayoutDashboard, Clock, Download } from "lucide-react";
+import { Users, Truck, Building2, CalendarDays, ArrowLeft, TrendingUp, LayoutDashboard, Clock, Download, FileText } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import DashboardFilters from "@/components/DashboardFilters";
 import DashboardResumen from "@/components/dashboard/DashboardResumen";
 import DashboardDiario from "@/components/dashboard/DashboardDiario";
 import DashboardRendimiento from "@/components/dashboard/DashboardRendimiento";
 import DashboardJornada from "@/components/dashboard/DashboardJornada";
+import DashboardReportes from "@/components/dashboard/DashboardReportes";
 import { DataTable } from "@/components/dashboard/DataTable";
 import { exportResumenPDF, exportPersonalPDF, exportMovilesPDF, exportClientesPDF } from "@/lib/pdfExport";
 
@@ -25,7 +26,7 @@ const COLORS = [
   "hsl(100, 50%, 45%)",
 ];
 
-type Tab = "resumen" | "diario" | "rendimiento" | "jornada" | "personal" | "moviles" | "clientes";
+type Tab = "resumen" | "diario" | "rendimiento" | "jornada" | "reportes" | "personal" | "moviles" | "clientes";
 
 export default function FullDashboard({ services, fuelEntries, onBack }: Props) {
   const [tab, setTab] = useState<Tab>("resumen");
@@ -98,6 +99,7 @@ export default function FullDashboard({ services, fuelEntries, onBack }: Props) 
     { id: "diario", label: "Día a Día", icon: CalendarDays },
     { id: "rendimiento", label: "Rendimiento", icon: TrendingUp },
     { id: "jornada", label: "Jornada", icon: Clock },
+    { id: "reportes", label: "Reportes", icon: FileText },
     { id: "personal", label: "Personal", icon: Users },
     { id: "moviles", label: "Móviles", icon: Truck },
     { id: "clientes", label: "Clientes", icon: Building2 },
@@ -170,6 +172,10 @@ export default function FullDashboard({ services, fuelEntries, onBack }: Props) 
 
       {tab === "jornada" && (
         <DashboardJornada services={filteredServices} />
+      )}
+
+      {tab === "reportes" && (
+        <DashboardReportes services={filteredServices} fuelEntries={filteredFuel} />
       )}
 
       {tab === "personal" && (
