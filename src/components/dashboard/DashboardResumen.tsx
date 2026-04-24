@@ -81,7 +81,7 @@ export default function DashboardResumen({ services, fuelEntries, byPerson, byMo
           <ResponsiveContainer width="100%" height={250}>
             <BarChart data={byPerson.slice(0, 10)} layout="vertical">
               <XAxis type="number" tickFormatter={(v) => `${Math.floor(v / 60)}h`} />
-              <YAxis type="category" dataKey="nombre" width={120} tick={{ fontSize: 11 }} />
+              <YAxis type="category" dataKey="nombre" width={120} interval={0} tick={{ fontSize: 11 }} />
               <Tooltip formatter={tooltipFormatter} />
               <Bar dataKey="prod" name="Productivas" fill="hsl(142, 70%, 45%)" stackId="a" />
               <Bar dataKey="improd" name="Improductivas" fill="hsl(0, 72%, 50%)" stackId="a" />
