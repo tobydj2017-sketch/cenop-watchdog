@@ -127,29 +127,28 @@ export default function ServiceTable({ services, onDelete }: Props) {
           <table className="w-full text-sm">
             <thead className="sticky top-0 z-10 bg-card">
               <tr className="border-b border-border">
-                {["#", "Cliente", "Destino", "Chofer", "Custodio", "Móvil", "Remito", "Salida", "Fin Serv.", "Peajes", "Hs Prod.", "Hs Improd.", "Hs Total", ""].map(
-                  (h) => (
-                    <th key={h} className="px-3 py-3 text-left text-xs text-muted-foreground uppercase tracking-wider font-semibold whitespace-nowrap">
-                      {h === "#" ? (
+                {TABLE_HEADERS.map((header) => (
+                    <th key={header.label || "actions"} className="px-3 py-3 text-left text-xs text-muted-foreground uppercase tracking-wider font-semibold whitespace-nowrap">
+                      {header.sortKey ? (
                         <Button
                           type="button"
                           variant="ghost"
                           size="sm"
-                          onClick={() => setSortDirection((current) => current === "asc" ? "desc" : "asc")}
+                          onClick={() => handleSort(header.sortKey)}
                           className="h-7 px-2 -ml-2 gap-1 text-xs uppercase tracking-wider text-muted-foreground hover:text-foreground"
                         >
-                          #
-                          <ArrowDownUp className="w-3 h-3" />
+                          {header.label}
+                          <ArrowDownUp className={`w-3 h-3 ${sortConfig.key === header.sortKey ? "text-foreground" : ""}`} />
                         </Button>
-                      ) : h}
+                      ) : header.label}
                     </th>
-                  )
-                )}
+                  ))}
               </tr>
             </thead>
             <tbody>
               {displayedServices.map((s) => {
-                const colorIdx = solicitudColorMap.get(s.solicitud) ?? 0;
+                const serviceKey = getServiceKey(s);
+                const colorIdx = serviceColorMap.get(serviceKey) ?? 0;
                 const rowColor = SERVICE_COLORS[colorIdx];
                 const badgeColor = SERVICE_BADGE_COLORS[colorIdx];
 
@@ -157,13 +156,14 @@ export default function ServiceTable({ services, onDelete }: Props) {
                   <tr
                     key={s.id}
                     className={`border-b border-border/50 border-l-[6px] hover:brightness-130 transition-all cursor-pointer ${rowColor}`}
-                    onClick={() => setSelectedSolicitud(s.solicitud)}
+                    onClick={() => setSelectedServiceKey(serviceKey)}
                   >
                     <td className="px-3 py-2.5">
                       <span className={`inline-flex items-center justify-center w-7 h-7 rounded-md font-mono text-xs font-bold ${badgeColor}`}>
                         {s.solicitud}
                       </span>
                     </td>
+                    <td className="px-3 py-2.5 font-mono text-xs text-muted-foreground">{formatDate(s.fecha)}</td>
                     <td className="px-3 py-2.5 font-semibold">{s.cliente}</td>
                     <td className="px-3 py-2.5 text-muted-foreground">{s.destino}</td>
                     <td className="px-3 py-2.5">{s.chofer || "—"}</td>
