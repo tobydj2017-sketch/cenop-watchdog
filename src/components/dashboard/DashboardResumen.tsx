@@ -196,11 +196,80 @@ export default function DashboardResumen({ services, fuelEntries, byPerson, byMo
   );
 }
 
-export function StatCard({ label, value, className = "" }: { label: string; value: string | number; className?: string }) {
+function KpiDetailPanel({ detail, totalHoras, totalServicios }: { detail: KpiDetail; totalHoras: number; totalServicios: number }) {
+  const xKey = detail.xKey || "name";
+  const formatter = detail.formatter || tooltipFormatter;
+  const chartHeight = Math.max(280, Math.min(520, detail.data.length * 34));
+
   return (
-    <div className="glass-card p-4 flex flex-col gap-1">
+    <div className="glass-card p-5 space-y-5 border-primary/40">
+      <div className="flex flex-col gap-2 md:flex-row md:items-start md:justify-between">
+        <div>
+          <h3 className="text-sm font-semibold text-foreground uppercase tracking-wider">{detail.title}</h3>
+          <p className="text-sm text-muted-foreground mt-1 max-w-3xl">{detail.description}</p>
+        </div>
+        <div className="text-xs text-muted-foreground">{formatHoursMinutes(totalHoras)} · {totalServicios} servicios</div>
+      </div>
+
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+        {detail.metrics.map((metric) => (
+          <div key={metric.label} className="rounded-md border border-border/70 bg-muted/20 p-3">
+            <div className="text-[11px] uppercase tracking-wider text-muted-foreground">{metric.label}</div>
+            <div className={`stat-value text-lg mt-1 ${metric.tone || ""}`}>{metric.value}</div>
+          </div>
+        ))}
+      </div>
+
+      <div className="grid xl:grid-cols-[1.2fr_0.8fr] gap-4">
+        <div className="rounded-md border border-border/70 p-4 min-h-[320px]">
+          <h4 className="text-xs font-semibold text-muted-foreground mb-4 uppercase tracking-wider">{detail.chartTitle}</h4>
+          <ResponsiveContainer width="100%" height={chartHeight}>
+            {detail.chartType === "line" ? (
+              <LineChart data={detail.data}>
+                <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
+                <XAxis dataKey={xKey} tick={{ fontSize: 11 }} />
+                <YAxis tickFormatter={(v) => detail.valueKey === "eficiencia" ? `${v}%` : `${Math.floor(Number(v) / 60)}h`} />
+                <Tooltip formatter={(value: number) => detail.bars?.[0]?.key === "eficiencia" ? `${value}%` : formatter(value)} />
+                {detail.bars?.map((bar, index) => <Line key={bar.key} type="monotone" dataKey={bar.key} name={bar.name} stroke={bar.color || chartColor(index)} strokeWidth={2} dot={{ r: 3 }} />)}
+              </LineChart>
+            ) : (
+              <BarChart data={detail.data} layout="vertical">
+                <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
+                <XAxis type="number" tickFormatter={(v) => detail.formatter === moneyFormatter ? moneyFormatter(Number(v)) : `${Math.floor(Number(v) / 60)}h`} />
+                <YAxis type="category" dataKey={xKey} width={130} interval={0} tick={{ fontSize: 11 }} />
+                <Tooltip formatter={(value: number) => formatter(value)} />
+                <Legend />
+                {detail.bars?.map((bar, index) => <Bar key={bar.key} dataKey={bar.key} name={bar.name} fill={bar.color || chartColor(index)} stackId={detail.bars && detail.bars.length > 1 ? "a" : undefined} />)}
+              </BarChart>
+            )}
+          </ResponsiveContainer>
+        </div>
+
+        <div className="rounded-md border border-border/70 p-4 overflow-auto">
+          <h4 className="text-xs font-semibold text-muted-foreground mb-4 uppercase tracking-wider">{detail.tableTitle}</h4>
+          <table className="w-full text-sm">
+            <thead className="text-xs uppercase tracking-wider text-muted-foreground">
+              <tr>{detail.columns.map((column) => <th key={column} className="text-left py-2 pr-3 font-medium">{column}</th>)}</tr>
+            </thead>
+            <tbody>
+              {detail.rows.map((row, index) => (
+                <tr key={index} className="border-t border-border/60">
+                  {row.map((cell, cellIndex) => <td key={cellIndex} className="py-2 pr-3 text-foreground/90 whitespace-nowrap">{cell}</td>)}
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+export function StatCard({ label, value, className = "", active = false, onClick }: { label: string; value: string | number; className?: string; active?: boolean; onClick?: () => void }) {
+  return (
+    <button type="button" onClick={onClick} className={`glass-card p-4 flex flex-col gap-1 text-left transition-all hover:border-primary/50 hover:bg-primary/5 ${active ? "border-primary/70 bg-primary/10" : ""}`}>
       <span className="text-xs text-muted-foreground uppercase tracking-wider">{label}</span>
       <span className={`stat-value text-xl ${className}`}>{value}</span>
-    </div>
+    </button>
   );
 }
