@@ -231,205 +231,203 @@ export default function ServiceForm({ onAdd, selectedDate, existingServices }: P
 
   if (!open) {
     return (
-      <Button onClick={() => setOpen(true)} className="w-full gap-2">
+      <Button onClick={() => setOpen(true)} className="w-full h-14 gap-3 text-base font-bold">
         <Plus className="w-4 h-4" /> Cargar Nuevo Servicio
       </Button>
     );
   }
 
   return (
-    <form onSubmit={handleSubmit} className="glass-card p-5 space-y-4">
+    <form onSubmit={handleSubmit} className="rounded-lg border border-primary/40 bg-foreground p-6 space-y-6 shadow-lg text-background">
       <div className="flex items-center justify-between">
-        <h3 className="section-title text-sm">Nuevo Servicio</h3>
-        <Button type="button" variant="ghost" size="sm" onClick={() => setOpen(false)}>
+        <div>
+          <h3 className="text-lg font-extrabold uppercase tracking-widest text-primary">Nuevo Servicio</h3>
+          <p className="text-sm font-semibold text-muted">Paso {step} de 5</p>
+        </div>
+        <Button type="button" variant="ghost" size="sm" onClick={closeForm} className="text-background hover:text-background">
           Cancelar
         </Button>
       </div>
 
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-        <Field label="N° Solicitud" field="solicitud" type="number" />
-        <Field label="Hora Solicitud" field="horaSolicitud" type="time" />
-        <SelectField label="Cliente" field="cliente" options={clientesList} />
-        <Field label="Lugar de Salida" field="lugarSalida" placeholder="Ej: Villa Celina" />
-      </div>
-
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-        <Field label="Destino" field="destino" />
-        <SelectField label="Móvil" field="movil" options={MOVILES} onCustomChange={setMovil} />
-        <div className="space-y-1">
-          <Label className="text-xs text-muted-foreground">Celular</Label>
-          <Input value={form.celular} readOnly className="h-9 text-sm bg-muted/50" />
-        </div>
-        <Field label="Orden de Carga" field="ordenCarga" />
-      </div>
-
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-        <div className="space-y-1">
-          <Label className="text-xs text-muted-foreground flex items-center gap-1.5">
-            Chofer
-            {form.chofer && opsBadgeMap[form.chofer] && (
-              <span className="px-1.5 py-0.5 rounded text-[10px] font-bold bg-purple-500/20 text-purple-400 border border-purple-500/30">OP</span>
-            )}
-          </Label>
-          <SearchableSelect options={allPersonal} value={form.chofer} onChange={(v) => set("chofer", v)} placeholder="Seleccionar..." badgeMap={roleBadgeMap} />
-        </div>
-        <Field label="Cita Chofer" field="citaChofer" type="time" />
-        <div className="space-y-1">
-          <Label className="text-xs text-muted-foreground flex items-center gap-1.5">
-            Custodio
-            {form.custodio && opsBadgeMap[form.custodio] && (
-              <span className="px-1.5 py-0.5 rounded text-[10px] font-bold bg-purple-500/20 text-purple-400 border border-purple-500/30">OP</span>
-            )}
-          </Label>
-          <SearchableSelect options={allPersonal} value={form.custodio} onChange={(v) => set("custodio", v)} placeholder="Seleccionar..." badgeMap={roleBadgeMap} />
-        </div>
-        <Field label="Cita Custodio" field="citaCustodio" type="time" />
-      </div>
-
-      <div className="border-t border-border pt-3">
-        <p className="text-xs text-muted-foreground mb-2 uppercase tracking-wider">Horarios del Servicio</p>
-        <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-7 gap-3">
-          <Field label="Salida CENOP" field="salidaCenop" type="time" />
-          <Field label="Llegada Servicio" field="llegadaServicio" type="time" />
-          <Field label="Inicia Servicio" field="iniciaServicio" type="time" />
-          <Field label="Llegada Destino" field="llegadaDestino" type="time" />
-          <Field label="Finaliza Servicio" field="finalizaServicio" type="time" />
-          <Field label="Llegada CENOP" field="llegadaCenop" type="time" />
-          <Field label="Franco Chofer" field="horaFrancoChofer" type="time" />
-        </div>
-      </div>
-
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-        <Field label="Franco Custodio" field="horaFrancoCustodio" type="time" />
-        <Field label="N° Remito" field="remito" />
-        <Field label="Continúa Orden N°" field="continuaOrden" />
-        <Field label="Observaciones" field="observaciones" />
-      </div>
-
-      {/* Peajes */}
-      <div className="border-t border-border pt-3">
-        <div className="flex items-center justify-between mb-2">
-          <p className="text-xs text-muted-foreground uppercase tracking-wider">Peajes</p>
-          <div className="flex items-center gap-3">
-            {peajes.length > 0 && (
-              <span className="text-xs font-semibold text-primary">
-                Total: ${totalPeajes.toLocaleString("es-AR")}
-              </span>
-            )}
-            <Button type="button" variant="outline" size="sm" onClick={addPeaje} className="h-7 gap-1 text-xs">
-              <CircleDollarSign className="w-3.5 h-3.5" /> Agregar Peaje
-            </Button>
-          </div>
-        </div>
-        {peajes.map((peaje, idx) => (
-          <div key={peaje.id} className="flex items-end gap-2 mb-2">
-            <div className="flex-1 space-y-1">
-              <Label className="text-xs text-muted-foreground">Ubicación #{idx + 1}</Label>
-              <Input
-                value={peaje.ubicacion}
-                onChange={(e) => updatePeaje(peaje.id, "ubicacion", e.target.value)}
-                placeholder="Ej: Peaje Dock Sud"
-                className="h-9 text-sm"
-              />
-            </div>
-            <div className="w-32 space-y-1">
-              <Label className="text-xs text-muted-foreground">Monto ($)</Label>
-              <Input
-                type="number"
-                value={peaje.monto || ""}
-                onChange={(e) => updatePeaje(peaje.id, "monto", Number(e.target.value))}
-                className="h-9 text-sm"
-              />
-            </div>
-            <Button type="button" variant="ghost" size="icon" className="h-9 w-9 text-destructive" onClick={() => removePeaje(peaje.id)}>
-              <Trash2 className="w-3.5 h-3.5" />
-            </Button>
+      <div className="grid grid-cols-5 gap-2" aria-label="Progreso de carga de servicio">
+        {["Solicitud", "Destino", "Personal", "Horarios", "Extras"].map((label, index) => (
+          <div
+            key={label}
+            className={`rounded-md border px-2 py-3 text-center text-sm font-extrabold ${
+              step === index + 1
+                ? "border-primary bg-primary text-primary-foreground"
+                : "border-border bg-background text-muted-foreground"
+            }`}
+          >
+            {label}
           </div>
         ))}
       </div>
 
-      {/* Comisiones */}
-      <div className="border-t border-border pt-3">
-        <div className="flex items-center justify-between mb-2">
-          <p className="text-xs text-muted-foreground uppercase tracking-wider">Comisiones (Productivas)</p>
-          <Button type="button" variant="outline" size="sm" onClick={addComision} className="h-7 gap-1 text-xs">
-            <Briefcase className="w-3.5 h-3.5" /> Agregar Comisión
-          </Button>
+      {step === 1 && (
+        <div className="grid md:grid-cols-2 gap-5">
+          <Field label="N° Solicitud" field="solicitud" type="number" />
+          <Field label="Hora Solicitud" field="horaSolicitud" type="time" />
+          <SelectField label="Cliente" field="cliente" options={clientesList} />
+          <Field label="Lugar de Salida" field="lugarSalida" placeholder="Ej: Villa Celina" />
         </div>
-        {comisiones.map((comision, idx) => (
-          <div key={comision.id} className="flex items-end gap-2 mb-2">
-            <div className="flex-1 space-y-1">
-              <Label className="text-xs text-muted-foreground">Descripción #{idx + 1}</Label>
-              <Input
-                value={comision.descripcion}
-                onChange={(e) => updateComision(comision.id, "descripcion", e.target.value)}
-                placeholder="Ej: Comisión de entrega"
-                className="h-9 text-sm"
-              />
-            </div>
-            <div className="w-32 space-y-1">
-              <Label className="text-xs text-muted-foreground">Hora</Label>
-              <div data-timefield={`comision-${comision.id}`}>
-                <TimeInput
-                  value={comision.hora}
-                  onChange={(v) => updateComision(comision.id, "hora", v)}
-                />
+      )}
+
+      {step === 2 && (
+        <div className="grid md:grid-cols-2 gap-5">
+          <Field label="Destino" field="destino" />
+          <SelectField label="Móvil" field="movil" options={MOVILES} onCustomChange={setMovil} />
+          <div className="space-y-2">
+            <Label className="text-base font-bold text-background">Celular</Label>
+            <Input value={form.celular} readOnly className="h-12 text-lg bg-background text-foreground border-input" />
+          </div>
+          <Field label="Orden de Carga" field="ordenCarga" />
+        </div>
+      )}
+
+      {step === 3 && (
+        <div className="grid md:grid-cols-2 gap-5">
+          <div className="space-y-2">
+            <Label className="text-base font-bold text-background flex items-center gap-2">
+              Chofer
+              {form.chofer && opsBadgeMap[form.chofer] && (
+                <span className="px-2 py-0.5 rounded text-xs font-bold bg-secondary text-secondary-foreground border border-border">OP</span>
+              )}
+            </Label>
+            <SearchableSelect options={allPersonal} value={form.chofer} onChange={(v) => set("chofer", v)} placeholder="Seleccionar..." badgeMap={roleBadgeMap} inputClassName="h-12 text-lg bg-background text-foreground border-input" />
+          </div>
+          <Field label="Cita Chofer" field="citaChofer" type="time" />
+          <div className="space-y-2">
+            <Label className="text-base font-bold text-background flex items-center gap-2">
+              Custodio
+              {form.custodio && opsBadgeMap[form.custodio] && (
+                <span className="px-2 py-0.5 rounded text-xs font-bold bg-secondary text-secondary-foreground border border-border">OP</span>
+              )}
+            </Label>
+            <SearchableSelect options={allPersonal} value={form.custodio} onChange={(v) => set("custodio", v)} placeholder="Seleccionar..." badgeMap={roleBadgeMap} inputClassName="h-12 text-lg bg-background text-foreground border-input" />
+          </div>
+          <Field label="Cita Custodio" field="citaCustodio" type="time" />
+        </div>
+      )}
+
+      {step === 4 && (
+        <div className="space-y-5">
+          <p className="text-sm font-extrabold uppercase tracking-wider text-muted">Horarios del Servicio</p>
+          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-5">
+            <Field label="Salida CENOP" field="salidaCenop" type="time" />
+            <Field label="Llegada Servicio" field="llegadaServicio" type="time" />
+            <Field label="Inicia Servicio" field="iniciaServicio" type="time" />
+            <Field label="Llegada Destino" field="llegadaDestino" type="time" />
+            <Field label="Finaliza Servicio" field="finalizaServicio" type="time" />
+            <Field label="Llegada CENOP" field="llegadaCenop" type="time" />
+            <Field label="Franco Chofer" field="horaFrancoChofer" type="time" />
+            <Field label="Franco Custodio" field="horaFrancoCustodio" type="time" />
+          </div>
+        </div>
+      )}
+
+      {step === 5 && (
+        <div className="space-y-5">
+          <div className="grid md:grid-cols-3 gap-5">
+            <Field label="N° Remito" field="remito" />
+            <Field label="Continúa Orden N°" field="continuaOrden" />
+            <Field label="Observaciones" field="observaciones" />
+          </div>
+          <div className="grid gap-4">
+            <div className="rounded-md border border-border bg-background p-4 text-foreground">
+              <div className="flex items-center justify-between gap-3 mb-3">
+                <p className="text-sm font-extrabold uppercase tracking-wider text-muted-foreground">Peajes</p>
+                <div className="flex items-center gap-3">
+                  {peajes.length > 0 && <span className="text-sm font-bold text-primary">Total: ${totalPeajes.toLocaleString("es-AR")}</span>}
+                  <Button type="button" variant="outline" onClick={addPeaje} className="h-10 gap-2 text-sm">
+                    <CircleDollarSign className="w-4 h-4" /> Agregar Peaje
+                  </Button>
+                </div>
               </div>
+              {peajes.map((peaje, idx) => (
+                <div key={peaje.id} className="grid md:grid-cols-[1fr_9rem_3rem] items-end gap-3 mb-3">
+                  <div className="space-y-2">
+                    <Label className="text-sm font-bold">Ubicación #{idx + 1}</Label>
+                    <Input value={peaje.ubicacion} onChange={(e) => updatePeaje(peaje.id, "ubicacion", e.target.value)} placeholder="Ej: Peaje Dock Sud" className="h-11 text-base" />
+                  </div>
+                  <div className="space-y-2">
+                    <Label className="text-sm font-bold">Monto ($)</Label>
+                    <Input type="number" value={peaje.monto || ""} onChange={(e) => updatePeaje(peaje.id, "monto", Number(e.target.value))} className="h-11 text-base" />
+                  </div>
+                  <Button type="button" variant="ghost" size="icon" className="h-11 w-11 text-destructive" onClick={() => removePeaje(peaje.id)}>
+                    <Trash2 className="w-4 h-4" />
+                  </Button>
+                </div>
+              ))}
             </div>
-            <Button type="button" variant="ghost" size="icon" className="h-9 w-9 text-destructive" onClick={() => removeComision(comision.id)}>
-              <Trash2 className="w-3.5 h-3.5" />
-            </Button>
-          </div>
-        ))}
-      </div>
-
-      {/* Servicios Operaciones (CENOP en Operaciones) */}
-      <div className="border-t border-border pt-3">
-        <div className="flex items-center justify-between mb-2">
-          <p className="text-xs text-muted-foreground uppercase tracking-wider">Servicios Operaciones</p>
-          <Button type="button" variant="outline" size="sm" onClick={addServicioOp} className="h-7 gap-1 text-xs">
-            <Building2 className="w-3.5 h-3.5" /> Agregar Servicio OP
-          </Button>
-        </div>
-        {serviciosOp.map((sop, idx) => (
-          <div key={sop.id} className="flex items-end gap-2 mb-2">
-            <div className="w-40 space-y-1">
-              <Label className="text-xs text-muted-foreground">Cliente #{idx + 1}</Label>
-              <SearchableSelect
-                options={clientesList}
-                value={sop.cliente}
-                onChange={(v) => updateServicioOp(sop.id, "cliente", v)}
-                placeholder="Cliente..."
-              />
-            </div>
-            <div className="flex-1 space-y-1">
-              <Label className="text-xs text-muted-foreground">Descripción</Label>
-              <Input
-                value={sop.descripcion}
-                onChange={(e) => updateServicioOp(sop.id, "descripcion", e.target.value)}
-                placeholder="Ej: Apoyo operativo"
-                className="h-9 text-sm"
-              />
-            </div>
-            <div className="w-32 space-y-1">
-              <Label className="text-xs text-muted-foreground">Hora</Label>
-              <div data-timefield={`sop-${sop.id}`}>
-                <TimeInput
-                  value={sop.hora}
-                  onChange={(v) => updateServicioOp(sop.id, "hora", v)}
-                />
+            <div className="rounded-md border border-border bg-background p-4 text-foreground">
+              <div className="flex items-center justify-between gap-3 mb-3">
+                <p className="text-sm font-extrabold uppercase tracking-wider text-muted-foreground">Comisiones Productivas</p>
+                <Button type="button" variant="outline" onClick={addComision} className="h-10 gap-2 text-sm">
+                  <Briefcase className="w-4 h-4" /> Agregar Comisión
+                </Button>
               </div>
+              {comisiones.map((comision, idx) => (
+                <div key={comision.id} className="grid md:grid-cols-[1fr_9rem_3rem] items-end gap-3 mb-3">
+                  <div className="space-y-2">
+                    <Label className="text-sm font-bold">Descripción #{idx + 1}</Label>
+                    <Input value={comision.descripcion} onChange={(e) => updateComision(comision.id, "descripcion", e.target.value)} placeholder="Ej: Comisión de entrega" className="h-11 text-base" />
+                  </div>
+                  <div className="space-y-2">
+                    <Label className="text-sm font-bold">Hora</Label>
+                    <TimeInput value={comision.hora} onChange={(v) => updateComision(comision.id, "hora", v)} className="h-11 text-base" />
+                  </div>
+                  <Button type="button" variant="ghost" size="icon" className="h-11 w-11 text-destructive" onClick={() => removeComision(comision.id)}>
+                    <Trash2 className="w-4 h-4" />
+                  </Button>
+                </div>
+              ))}
             </div>
-            <Button type="button" variant="ghost" size="icon" className="h-9 w-9 text-destructive" onClick={() => removeServicioOp(sop.id)}>
-              <Trash2 className="w-3.5 h-3.5" />
-            </Button>
+            <div className="rounded-md border border-border bg-background p-4 text-foreground">
+              <div className="flex items-center justify-between gap-3 mb-3">
+                <p className="text-sm font-extrabold uppercase tracking-wider text-muted-foreground">Servicios Operaciones</p>
+                <Button type="button" variant="outline" onClick={addServicioOp} className="h-10 gap-2 text-sm">
+                  <Building2 className="w-4 h-4" /> Agregar Servicio OP
+                </Button>
+              </div>
+              {serviciosOp.map((sop, idx) => (
+                <div key={sop.id} className="grid md:grid-cols-[12rem_1fr_9rem_3rem] items-end gap-3 mb-3">
+                  <div className="space-y-2">
+                    <Label className="text-sm font-bold">Cliente #{idx + 1}</Label>
+                    <SearchableSelect options={clientesList} value={sop.cliente} onChange={(v) => updateServicioOp(sop.id, "cliente", v)} placeholder="Cliente..." inputClassName="h-11 text-base" />
+                  </div>
+                  <div className="space-y-2">
+                    <Label className="text-sm font-bold">Descripción</Label>
+                    <Input value={sop.descripcion} onChange={(e) => updateServicioOp(sop.id, "descripcion", e.target.value)} placeholder="Ej: Apoyo operativo" className="h-11 text-base" />
+                  </div>
+                  <div className="space-y-2">
+                    <Label className="text-sm font-bold">Hora</Label>
+                    <TimeInput value={sop.hora} onChange={(v) => updateServicioOp(sop.id, "hora", v)} className="h-11 text-base" />
+                  </div>
+                  <Button type="button" variant="ghost" size="icon" className="h-11 w-11 text-destructive" onClick={() => removeServicioOp(sop.id)}>
+                    <Trash2 className="w-4 h-4" />
+                  </Button>
+                </div>
+              ))}
+            </div>
           </div>
-        ))}
-      </div>
+        </div>
+      )}
 
-      <Button type="submit" className="w-full gap-2">
-        <Plus className="w-4 h-4" /> Guardar Servicio
-      </Button>
+      <div className="flex items-center justify-between gap-3 pt-2">
+        <Button type="button" variant="outline" onClick={() => setStep((current) => Math.max(1, current - 1))} disabled={step === 1} className="h-12 px-5 text-base gap-2 bg-background text-foreground">
+          <ChevronLeft className="w-5 h-5" /> Anterior
+        </Button>
+        {step < 5 ? (
+          <Button type="button" onClick={() => setStep((current) => Math.min(5, current + 1))} className="h-12 px-6 text-base gap-2">
+            Siguiente <ChevronRight className="w-5 h-5" />
+          </Button>
+        ) : (
+          <Button type="submit" className="h-12 px-6 text-base gap-2">
+            <Plus className="w-5 h-5" /> Guardar Servicio
+          </Button>
+        )}
+      </div>
     </form>
   );
 }
