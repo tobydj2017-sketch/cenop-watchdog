@@ -215,9 +215,10 @@ export async function exportPersonalPDF(
   const doc = new jsPDF();
   const logoDataUrl = await loadImageAsDataUrl(AM_LOGO_PATH);
   addHeader(doc, "Reporte de Personal", `${byPerson.length} personas | Generado con filtros activos`, logoDataUrl);
+  const chartEndY = drawBarChart(doc, "Gráfico — Top personal por horas totales", byPerson.map((p) => ({ name: p.nombre, value: p.total, label: formatHoursMinutes(p.total) })), 58);
 
   autoTable(doc, {
-    startY: 56,
+    startY: chartEndY,
     head: [["Personal", "Clientes", "Servicios", "Hs Prod.", "Hs Improd.", "Hs Total", "Eficiencia"]],
     body: byPerson.map((p) => [
       p.nombre,
@@ -242,9 +243,10 @@ export async function exportMovilesPDF(
   const doc = new jsPDF();
   const logoDataUrl = await loadImageAsDataUrl(AM_LOGO_PATH);
   addHeader(doc, "Reporte de Móviles", `${byMovil.length} móviles | Generado con filtros activos`, logoDataUrl);
+  const chartEndY = drawBarChart(doc, "Gráfico — Top móviles por horas totales", byMovil.map((m) => ({ name: m.patente, value: m.total, label: formatHoursMinutes(m.total) })), 58);
 
   autoTable(doc, {
-    startY: 56,
+    startY: chartEndY,
     head: [["Patente", "Servicios", "Hs Prod.", "Hs Improd.", "Hs Total", "Eficiencia"]],
     body: byMovil.map((m) => [
       m.patente,
@@ -268,9 +270,10 @@ export async function exportClientesPDF(
   const doc = new jsPDF();
   const logoDataUrl = await loadImageAsDataUrl(AM_LOGO_PATH);
   addHeader(doc, "Reporte de Clientes", `${byCliente.length} clientes | Generado con filtros activos`, logoDataUrl);
+  const chartEndY = drawBarChart(doc, "Gráfico — Top clientes por horas totales", byCliente.map((c) => ({ name: c.cliente, value: c.total, label: formatHoursMinutes(c.total) })), 58);
 
   autoTable(doc, {
-    startY: 56,
+    startY: chartEndY,
     head: [["Cliente", "Servicios", "Hs Prod.", "Hs Improd.", "Hs Total", "Eficiencia"]],
     body: byCliente.map((c) => [
       c.cliente,
