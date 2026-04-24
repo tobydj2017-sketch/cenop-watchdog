@@ -4,6 +4,7 @@ import { ServiceEntry, FuelEntry, getAdjustedHours, getServiceKey, normalizeClie
 import { cleanTime, formatHoursMinutes } from "./formatTime";
 import { getPersonal, PersonalEntry, ROLE_LABELS } from "./personalStore";
 import { getClients, ClientEntry } from "./clientStore";
+import { DownloadReport } from "./reportAnalytics";
 
 const BRAND = "CENOP — AM Seguridad";
 const PRIMARY_COLOR: [number, number, number] = [30, 30, 30];
@@ -334,4 +335,20 @@ export function exportClientManagerPDF() {
 
   addFooter(doc);
   doc.save(`CENOP_Clientes_Gestion_${new Date().toISOString().slice(0, 10)}.pdf`);
+}
+
+// ========== CENTRO DE REPORTES ==========
+export function exportDownloadReportPDF(report: DownloadReport) {
+  const doc = new jsPDF({ orientation: report.columns.length > 6 ? "landscape" : "portrait" });
+  addHeader(doc, report.title, `${report.description} | ${report.totalLabel}: ${report.totalValue}`);
+
+  autoTable(doc, {
+    startY: 50,
+    head: [report.columns],
+    body: report.rows.length ? report.rows : [["Sin datos para los filtros seleccionados"]],
+    ...tableStyle(),
+  });
+
+  addFooter(doc);
+  doc.save(`CENOP_${report.title.replace(/\s+/g, "_")}_${new Date().toISOString().slice(0, 10)}.pdf`);
 }
