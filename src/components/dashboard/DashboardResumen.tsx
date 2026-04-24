@@ -44,6 +44,7 @@ export default function DashboardResumen({ services, fuelEntries, byPerson, byMo
   totalFuel: number;
   cenopEnOps: number;
 }) {
+  const [selectedKpi, setSelectedKpi] = useState<KpiId | null>(null);
   const topPersonalCount = Math.min(10, byPerson.length);
   const pieData = [
     { name: "Productivas", value: totalProd },
@@ -51,23 +52,30 @@ export default function DashboardResumen({ services, fuelEntries, byPerson, byMo
   ];
 
   const totalHoras = totalProd + totalImprod;
+  const uniqueServices = useMemo(() => new Set(services.map(getServiceKey)).size, [services]);
+  const detailData = useMemo(() => buildKpiDetailData(services, fuelEntries, byPerson, byMovil, byCliente), [services, fuelEntries, byPerson, byMovil, byCliente]);
+  const selectedDetail = selectedKpi ? detailData[selectedKpi] : null;
 
   return (
     <div className="space-y-5">
       {/* KPI Cards */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-        <StatCard label="Total Servicios" value={totalServicios} />
-        <StatCard label="Días Operados" value={uniqueDays} />
-        <StatCard label="Hs Productivas" value={formatHoursMinutes(totalProd)} className="text-success" />
-        <StatCard label="Hs Improductivas" value={formatHoursMinutes(totalImprod)} className="text-destructive" />
-        <StatCard label="CENOP en Operaciones" value={formatHoursMinutes(cenopEnOps)} className="text-chart-4" />
-        <StatCard label="Eficiencia General" value={totalHoras > 0 ? `${Math.round((totalProd / totalHoras) * 100)}%` : "—"} />
-        <StatCard label="Total Horas" value={formatHoursMinutes(totalHoras)} />
-        <StatCard label="Personal Activo" value={byPerson.length} />
-        <StatCard label="Móviles Utilizados" value={byMovil.length} />
-        <StatCard label="Clientes Atendidos" value={byCliente.length} />
-        <StatCard label="Combustible Total" value={`$${totalFuel.toLocaleString("es-AR")}`} />
+        <StatCard label="Total Servicios" value={totalServicios} active={selectedKpi === "servicios"} onClick={() => setSelectedKpi(selectedKpi === "servicios" ? null : "servicios")} />
+        <StatCard label="Días Operados" value={uniqueDays} active={selectedKpi === "dias"} onClick={() => setSelectedKpi(selectedKpi === "dias" ? null : "dias")} />
+        <StatCard label="Hs Productivas" value={formatHoursMinutes(totalProd)} className="text-success" active={selectedKpi === "prod"} onClick={() => setSelectedKpi(selectedKpi === "prod" ? null : "prod")} />
+        <StatCard label="Hs Improductivas" value={formatHoursMinutes(totalImprod)} className="text-destructive" active={selectedKpi === "improd"} onClick={() => setSelectedKpi(selectedKpi === "improd" ? null : "improd")} />
+        <StatCard label="CENOP en Operaciones" value={formatHoursMinutes(cenopEnOps)} className="text-chart-4" active={selectedKpi === "cenop"} onClick={() => setSelectedKpi(selectedKpi === "cenop" ? null : "cenop")} />
+        <StatCard label="Eficiencia General" value={totalHoras > 0 ? `${Math.round((totalProd / totalHoras) * 100)}%` : "—"} active={selectedKpi === "eficiencia"} onClick={() => setSelectedKpi(selectedKpi === "eficiencia" ? null : "eficiencia")} />
+        <StatCard label="Total Horas" value={formatHoursMinutes(totalHoras)} active={selectedKpi === "total-horas"} onClick={() => setSelectedKpi(selectedKpi === "total-horas" ? null : "total-horas")} />
+        <StatCard label="Personal Activo" value={byPerson.length} active={selectedKpi === "personal"} onClick={() => setSelectedKpi(selectedKpi === "personal" ? null : "personal")} />
+        <StatCard label="Móviles Utilizados" value={byMovil.length} active={selectedKpi === "moviles"} onClick={() => setSelectedKpi(selectedKpi === "moviles" ? null : "moviles")} />
+        <StatCard label="Clientes Atendidos" value={byCliente.length} active={selectedKpi === "clientes"} onClick={() => setSelectedKpi(selectedKpi === "clientes" ? null : "clientes")} />
+        <StatCard label="Combustible Total" value={`$${totalFuel.toLocaleString("es-AR")}`} active={selectedKpi === "combustible"} onClick={() => setSelectedKpi(selectedKpi === "combustible" ? null : "combustible")} />
       </div>
+
+      {selectedDetail && (
+        <KpiDetailPanel detail={selectedDetail} totalHoras={totalHoras} totalServicios={uniqueServices} />
+      )}
 
       {/* Charts row */}
       <div className="grid lg:grid-cols-2 gap-4">
