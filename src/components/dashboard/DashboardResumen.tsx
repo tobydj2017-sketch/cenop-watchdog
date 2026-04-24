@@ -34,6 +34,7 @@ export default function DashboardResumen({ services, fuelEntries, byPerson, byMo
   totalFuel: number;
   cenopEnOps: number;
 }) {
+  const topPersonalCount = Math.min(10, byPerson.length);
   const pieData = [
     { name: "Productivas", value: totalProd },
     { name: "Improductivas", value: totalImprod },
@@ -74,7 +75,9 @@ export default function DashboardResumen({ services, fuelEntries, byPerson, byMo
         </div>
 
         <div className="glass-card p-5">
-          <h3 className="text-sm font-semibold text-muted-foreground mb-4 uppercase tracking-wider">Top 10 Personal por Horas</h3>
+          <h3 className="text-sm font-semibold text-muted-foreground mb-4 uppercase tracking-wider">
+            {topPersonalCount > 0 ? `Top ${topPersonalCount} Personal por Horas` : "Personal por Horas"}
+          </h3>
           <ResponsiveContainer width="100%" height={250}>
             <BarChart data={byPerson.slice(0, 10)} layout="vertical">
               <XAxis type="number" tickFormatter={(v) => `${Math.floor(v / 60)}h`} />
