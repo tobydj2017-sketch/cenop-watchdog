@@ -22,6 +22,23 @@ interface Props {
 }
 
 type KpiId = "servicios" | "dias" | "prod" | "improd" | "cenop" | "eficiencia" | "total-horas" | "personal" | "moviles" | "clientes" | "combustible";
+type ChartRow = Record<string, string | number>;
+type DetailMetric = { label: string; value: string; tone?: string };
+type KpiDetail = {
+  title: string;
+  description: string;
+  metrics: DetailMetric[];
+  chartTitle: string;
+  chartType: "bar" | "line" | "pie";
+  data: ChartRow[];
+  bars?: { key: string; name: string; color?: string }[];
+  xKey?: string;
+  valueKey?: string;
+  tableTitle: string;
+  rows: (string | number)[][];
+  columns: string[];
+  formatter?: (value: number) => string;
+};
 
 const tooltipFormatter = (value: number) => formatHoursMinutes(value);
 const moneyFormatter = (value: number) => `$${value.toLocaleString("es-AR")}`;
@@ -31,6 +48,74 @@ function shortDate(fecha: string) {
   if (!fecha) return "Sin fecha";
   const [, month, day] = fecha.split("-");
   return day && month ? `${day}/${month}` : fecha;
+}
+
+function buildKpiDetailData(
+  services: ServiceEntry[],
+  fuelEntries: FuelEntry[],
+  byPerson: { nombre: string; prod: number; improd: number; servicios: number; total: number }[],
+  byMovil: { patente: string; prod: number; improd: number; servicios: number; total: number }[],
+  byCliente: { cliente: string; prod: number; improd: number; servicios: number; total: number }[],
+): Record<KpiId, KpiDetail> {
+  const totalProd = byPerson.reduce((sum, person) => sum + person.prod, 0);
+  const totalImprod = byPerson.reduce((sum, person) => sum + person.improd, 0);
+  const totalHoras = totalProd + totalImprod;
+  const totalServicios = new Set(services.map(getServiceKey)).size;
+  const daysMap = new Map<string, { fecha: string; servicios: Set<string>; prod: number; improd: number }>();
+  const cenopPersonMap = new Map<string, { prod: number; servicios: Set<string> }>();
+  const fuelByMovil = new Map<string, { monto: number; litros: number; cargas: number }>();
+
+  services.forEach((service) => {
+    const hours = getAdjustedHours(service);
+    const day = daysMap.get(service.fecha) || { fecha: service.fecha, servicios: new Set<string>(), prod: 0, improd: 0 };
+    day.servicios.add(getServiceKey(service));
+    day.prod += hours.prod;
+    day.improd += hours.improd;
+    daysMap.set(service.fecha, day);
+
+    [
+      { nombre: service.chofer, activo: service.choferEsOperaciones },
+      { nombre: service.custodio, activo: service.custodioEsOperaciones },
+    ].forEach((worker) => {
+      if (!worker.nombre || !worker.activo) return;
+      const current = cenopPersonMap.get(worker.nombre) || { prod: 0, servicios: new Set<string>() };
+      current.prod += hours.prod;
+      current.servicios.add(getServiceKey(service));
+      cenopPersonMap.set(worker.nombre, current);
+    });
+  });
+
+  fuelEntries.forEach((fuel) => {
+    const current = fuelByMovil.get(fuel.movil) || { monto: 0, litros: 0, cargas: 0 };
+    current.monto += fuel.monto;
+    current.litros += fuel.litros;
+    current.cargas += 1;
+    fuelByMovil.set(fuel.movil, current);
+  });
+
+  const dailyData = [...daysMap.values()]
+    .sort((a, b) => a.fecha.localeCompare(b.fecha))
+    .map((day) => ({ fecha: shortDate(day.fecha), servicios: day.servicios.size, prod: day.prod, improd: day.improd, total: day.prod + day.improd, eficiencia: day.prod + day.improd > 0 ? Math.round((day.prod / (day.prod + day.improd)) * 100) : 0 }));
+
+  const personalData = byPerson.map((p) => ({ name: p.nombre, prod: p.prod, improd: p.improd, total: p.total, servicios: p.servicios, eficiencia: p.total > 0 ? Math.round((p.prod / p.total) * 100) : 0 }));
+  const movilData = byMovil.map((m) => ({ name: m.patente, prod: m.prod, improd: m.improd, total: m.total, servicios: m.servicios }));
+  const clienteData = byCliente.map((c) => ({ name: c.cliente, prod: c.prod, improd: c.improd, total: c.total, servicios: c.servicios }));
+  const cenopData = [...cenopPersonMap.entries()].map(([name, value]) => ({ name, prod: value.prod, servicios: value.servicios.size })).sort((a, b) => b.prod - a.prod);
+  const fuelData = [...fuelByMovil.entries()].map(([name, value]) => ({ name, monto: value.monto, litros: value.litros, cargas: value.cargas })).sort((a, b) => b.monto - a.monto);
+
+  return {
+    servicios: { title: "Detalle de Total Servicios", description: "Servicios únicos agrupados por fecha y solicitud, con evolución diaria y carga operativa.", metrics: [{ label: "Servicios únicos", value: totalServicios.toString() }, { label: "Promedio diario", value: daysMap.size ? Math.round(totalServicios / daysMap.size).toString() : "0" }, { label: "Días con actividad", value: daysMap.size.toString() }], chartTitle: "Servicios por día", chartType: "line", data: dailyData, xKey: "fecha", bars: [{ key: "servicios", name: "Servicios" }], tableTitle: "Días con mayor movimiento", columns: ["Fecha", "Servicios", "Hs Prod.", "Hs Improd.", "Hs Total"], rows: dailyData.slice().sort((a, b) => Number(b.servicios) - Number(a.servicios)).slice(0, 12).map((d) => [d.fecha, d.servicios, formatHoursMinutes(Number(d.prod)), formatHoursMinutes(Number(d.improd)), formatHoursMinutes(Number(d.total))]) },
+    dias: { title: "Detalle de Días Operados", description: "Cantidad de días con registros, intensidad diaria, horas acumuladas y eficiencia por jornada.", metrics: [{ label: "Días operados", value: daysMap.size.toString() }, { label: "Día más cargado", value: dailyData.length ? String(dailyData.slice().sort((a, b) => Number(b.total) - Number(a.total))[0].fecha) : "—" }, { label: "Horas por día", value: daysMap.size ? formatHoursMinutes(Math.round(totalHoras / daysMap.size)) : "—" }], chartTitle: "Horas por día", chartType: "bar", data: dailyData, xKey: "fecha", bars: [{ key: "prod", name: "Productivas" }, { key: "improd", name: "Improductivas" }], tableTitle: "Detalle por jornada", columns: ["Fecha", "Servicios", "Eficiencia", "Hs Total"], rows: dailyData.map((d) => [d.fecha, d.servicios, `${d.eficiencia}%`, formatHoursMinutes(Number(d.total))]) },
+    prod: { title: "Detalle de Horas Productivas", description: "Horas efectivas de servicio desglosadas por personal para detectar mayor aporte operativo.", metrics: [{ label: "Hs productivas", value: formatHoursMinutes(totalProd), tone: "text-success" }, { label: "Participación", value: totalHoras ? `${Math.round((totalProd / totalHoras) * 100)}%` : "—" }, { label: "Top personal", value: personalData[0]?.name || "—" }], chartTitle: "Productivas por personal", chartType: "bar", data: personalData.slice(0, 12), xKey: "name", bars: [{ key: "prod", name: "Hs Productivas" }], formatter: tooltipFormatter, tableTitle: "Ranking productivo", columns: ["Personal", "Hs Productivas", "Servicios", "Eficiencia"], rows: personalData.slice(0, 15).map((p) => [p.name, formatHoursMinutes(Number(p.prod)), p.servicios, `${p.eficiencia}%`]) },
+    improd: { title: "Detalle de Horas Improductivas", description: "Tiempos no productivos acumulados para identificar esperas, base y oportunidades de mejora.", metrics: [{ label: "Hs improductivas", value: formatHoursMinutes(totalImprod), tone: "text-destructive" }, { label: "Participación", value: totalHoras ? `${Math.round((totalImprod / totalHoras) * 100)}%` : "—" }, { label: "Mayor impacto", value: personalData.slice().sort((a, b) => Number(b.improd) - Number(a.improd))[0]?.name || "—" }], chartTitle: "Improductivas por personal", chartType: "bar", data: personalData.slice().sort((a, b) => Number(b.improd) - Number(a.improd)).slice(0, 12), xKey: "name", bars: [{ key: "improd", name: "Hs Improductivas" }], formatter: tooltipFormatter, tableTitle: "Ranking improductivo", columns: ["Personal", "Hs Improd.", "Hs Total", "Servicios"], rows: personalData.slice().sort((a, b) => Number(b.improd) - Number(a.improd)).slice(0, 15).map((p) => [p.name, formatHoursMinutes(Number(p.improd)), formatHoursMinutes(Number(p.total)), p.servicios]) },
+    cenop: { title: "Detalle de CENOP en Operaciones", description: "Personal marcado para operaciones externas, con horas productivas y cantidad de servicios asociados.", metrics: [{ label: "Horas CENOP en OP", value: formatHoursMinutes(cenopData.reduce((s, r) => s + Number(r.prod), 0)), tone: "text-chart-4" }, { label: "Personas", value: cenopData.length.toString() }, { label: "Servicios", value: cenopData.reduce((s, r) => s + Number(r.servicios), 0).toString() }], chartTitle: "Aporte por persona", chartType: "bar", data: cenopData, xKey: "name", bars: [{ key: "prod", name: "Hs Productivas" }], formatter: tooltipFormatter, tableTitle: "Detalle por personal", columns: ["Personal", "Hs Productivas", "Servicios"], rows: cenopData.map((r) => [r.name, formatHoursMinutes(Number(r.prod)), r.servicios]) },
+    eficiencia: { title: "Detalle de Eficiencia General", description: "Relación entre horas productivas y horas totales, con lectura diaria para ubicar desvíos.", metrics: [{ label: "Eficiencia", value: totalHoras ? `${Math.round((totalProd / totalHoras) * 100)}%` : "—" }, { label: "Hs Productivas", value: formatHoursMinutes(totalProd), tone: "text-success" }, { label: "Hs Improductivas", value: formatHoursMinutes(totalImprod), tone: "text-destructive" }], chartTitle: "Eficiencia por día", chartType: "line", data: dailyData, xKey: "fecha", bars: [{ key: "eficiencia", name: "Eficiencia %" }], tableTitle: "Eficiencia diaria", columns: ["Fecha", "Eficiencia", "Hs Prod.", "Hs Improd."], rows: dailyData.map((d) => [d.fecha, `${d.eficiencia}%`, formatHoursMinutes(Number(d.prod)), formatHoursMinutes(Number(d.improd))]) },
+    "total-horas": { title: "Detalle de Total Horas", description: "Composición completa entre horas productivas e improductivas por personal, móvil y cliente.", metrics: [{ label: "Horas totales", value: formatHoursMinutes(totalHoras) }, { label: "Productivas", value: formatHoursMinutes(totalProd), tone: "text-success" }, { label: "Improductivas", value: formatHoursMinutes(totalImprod), tone: "text-destructive" }], chartTitle: "Composición por personal", chartType: "bar", data: personalData.slice(0, 12), xKey: "name", bars: [{ key: "prod", name: "Productivas" }, { key: "improd", name: "Improductivas" }], formatter: tooltipFormatter, tableTitle: "Totales por personal", columns: ["Personal", "Hs Prod.", "Hs Improd.", "Hs Total"], rows: personalData.slice(0, 15).map((p) => [p.name, formatHoursMinutes(Number(p.prod)), formatHoursMinutes(Number(p.improd)), formatHoursMinutes(Number(p.total))]) },
+    personal: { title: "Detalle de Personal Activo", description: "Personal con participación en servicios, volumen asignado, horas y eficiencia individual.", metrics: [{ label: "Personal activo", value: byPerson.length.toString() }, { label: "Servicios asignados", value: byPerson.reduce((s, p) => s + p.servicios, 0).toString() }, { label: "Mayor carga", value: personalData[0]?.name || "—" }], chartTitle: "Carga por personal", chartType: "bar", data: personalData.slice(0, 12), xKey: "name", bars: [{ key: "total", name: "Hs Total" }], formatter: tooltipFormatter, tableTitle: "Personal activo", columns: ["Personal", "Servicios", "Hs Total", "Eficiencia"], rows: personalData.slice(0, 15).map((p) => [p.name, p.servicios, formatHoursMinutes(Number(p.total)), `${p.eficiencia}%`]) },
+    moviles: { title: "Detalle de Móviles Utilizados", description: "Uso de móviles por patente, cantidad de servicios y horas vinculadas.", metrics: [{ label: "Móviles", value: byMovil.length.toString() }, { label: "Servicios", value: byMovil.reduce((s, m) => s + m.servicios, 0).toString() }, { label: "Mayor uso", value: movilData[0]?.name || "—" }], chartTitle: "Horas por móvil", chartType: "bar", data: movilData.slice(0, 12), xKey: "name", bars: [{ key: "total", name: "Hs Total" }], formatter: tooltipFormatter, tableTitle: "Uso por móvil", columns: ["Móvil", "Servicios", "Hs Prod.", "Hs Improd.", "Hs Total"], rows: movilData.slice(0, 15).map((m) => [m.name, m.servicios, formatHoursMinutes(Number(m.prod)), formatHoursMinutes(Number(m.improd)), formatHoursMinutes(Number(m.total))]) },
+    clientes: { title: "Detalle de Clientes Atendidos", description: "Clientes con servicios registrados, horas consumidas y peso operativo dentro del período.", metrics: [{ label: "Clientes", value: byCliente.length.toString() }, { label: "Servicios", value: byCliente.reduce((s, c) => s + c.servicios, 0).toString() }, { label: "Principal", value: clienteData[0]?.name || "—" }], chartTitle: "Horas por cliente", chartType: "bar", data: clienteData.slice(0, 12), xKey: "name", bars: [{ key: "total", name: "Hs Total" }], formatter: tooltipFormatter, tableTitle: "Carga por cliente", columns: ["Cliente", "Servicios", "Hs Prod.", "Hs Improd.", "Hs Total"], rows: clienteData.slice(0, 15).map((c) => [c.name, c.servicios, formatHoursMinutes(Number(c.prod)), formatHoursMinutes(Number(c.improd)), formatHoursMinutes(Number(c.total))]) },
+    combustible: { title: "Detalle de Combustible Total", description: "Cargas de combustible agrupadas por móvil, monto, litros y cantidad de registros.", metrics: [{ label: "Monto total", value: moneyFormatter(fuelEntries.reduce((s, f) => s + f.monto, 0)) }, { label: "Litros", value: fuelEntries.reduce((s, f) => s + f.litros, 0).toLocaleString("es-AR") }, { label: "Cargas", value: fuelEntries.length.toString() }], chartTitle: "Gasto por móvil", chartType: "bar", data: fuelData, xKey: "name", bars: [{ key: "monto", name: "Monto" }], formatter: moneyFormatter, tableTitle: "Consumo por móvil", columns: ["Móvil", "Cargas", "Litros", "Monto"], rows: fuelData.map((f) => [f.name, f.cargas, Number(f.litros).toLocaleString("es-AR"), moneyFormatter(Number(f.monto))]) },
+  };
 }
 
 export default function DashboardResumen({ services, fuelEntries, byPerson, byMovil, byCliente, totalProd, totalImprod, totalServicios, uniqueDays, totalFuel, cenopEnOps }: Props & {
