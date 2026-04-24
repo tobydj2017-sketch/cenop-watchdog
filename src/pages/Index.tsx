@@ -3,6 +3,23 @@ import { Shield, CalendarDays, BarChart3, ClipboardList, Users, Building2, Downl
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
+import {
+  Sidebar,
+  SidebarContent,
+  SidebarFooter,
+  SidebarGroup,
+  SidebarGroupContent,
+  SidebarHeader,
+  SidebarInset,
+  SidebarMenu,
+  SidebarMenuButton,
+  SidebarMenuItem,
+  SidebarProvider,
+  SidebarRail,
+  SidebarSeparator,
+  SidebarTrigger,
+  useSidebar,
+} from "@/components/ui/sidebar";
 import DashboardStats from "@/components/DashboardStats";
 import ServiceForm from "@/components/ServiceForm";
 import ServiceTable from "@/components/ServiceTable";
@@ -20,12 +37,70 @@ import {
 import { exportCargaDiaPDF, exportPersonalManagerPDF, exportClientManagerPDF } from "@/lib/pdfExport";
 
 const today = "2025-12-01";
+type AppTab = "carga" | "dashboard" | "personal" | "clientes" | "reportes";
+
+const navigationItems = [
+  { key: "carga", label: "Carga de Datos", icon: ClipboardList },
+  { key: "dashboard", label: "Panel de Análisis", icon: BarChart3 },
+  { key: "personal", label: "Personal", icon: Users },
+  { key: "clientes", label: "Clientes", icon: Building2 },
+  { key: "reportes", label: "Reportes", icon: FileText },
+] as const;
+
+function AppSidebar({ activeTab, setActiveTab }: { activeTab: AppTab; setActiveTab: (tab: AppTab) => void }) {
+  const { state } = useSidebar();
+  const collapsed = state === "collapsed";
+
+  return (
+    <Sidebar collapsible="icon" className="border-sidebar-border">
+      <SidebarHeader className="p-3">
+        <div className="flex items-center gap-3 rounded-lg px-1 py-2">
+          <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-sidebar-primary/10 glow-amber">
+            <Shield className="h-5 w-5 text-sidebar-primary" />
+          </div>
+          {!collapsed && (
+            <div className="min-w-0">
+              <h1 className="text-base font-bold tracking-tight text-sidebar-foreground">CENOP</h1>
+              <p className="truncate text-xs text-sidebar-foreground/65">AM Seguridad</p>
+            </div>
+          )}
+        </div>
+      </SidebarHeader>
+      <SidebarSeparator />
+      <SidebarContent>
+        <SidebarGroup>
+          <SidebarGroupContent>
+            <SidebarMenu>
+              {navigationItems.map(({ key, label, icon: Icon }) => (
+                <SidebarMenuItem key={key}>
+                  <SidebarMenuButton
+                    tooltip={label}
+                    isActive={activeTab === key}
+                    onClick={() => setActiveTab(key)}
+                    className="h-10 text-sidebar-foreground data-[active=true]:bg-sidebar-primary data-[active=true]:text-sidebar-primary-foreground"
+                  >
+                    <Icon className="h-4 w-4" />
+                    <span>{label}</span>
+                  </SidebarMenuButton>
+                </SidebarMenuItem>
+              ))}
+            </SidebarMenu>
+          </SidebarGroupContent>
+        </SidebarGroup>
+      </SidebarContent>
+      <SidebarFooter className="p-3 text-xs text-sidebar-foreground/60">
+        {!collapsed && <span>Control Operativo</span>}
+      </SidebarFooter>
+      <SidebarRail />
+    </Sidebar>
+  );
+}
 
 export default function Index() {
   const [services, setServices] = useState<ServiceEntry[]>(getServices);
   const [fuelEntries, setFuelEntries] = useState<FuelEntry[]>(getFuelEntries);
   const [selectedDate, setSelectedDate] = useState("");
-  const [activeTab, setActiveTab] = useState<"carga" | "dashboard" | "personal" | "clientes" | "reportes">("carga");
+  const [activeTab, setActiveTab] = useState<AppTab>("carga");
   const [amLightTheme, setAmLightTheme] = useState(() => localStorage.getItem("cenop-theme") === "am-light");
 
   useEffect(() => {
@@ -61,19 +136,22 @@ export default function Index() {
   const dayFuel = selectedDate ? fuelEntries.filter((f) => f.fecha === selectedDate) : fuelEntries;
 
   return (
-    <div className="min-h-screen bg-background">
-      {/* Encabezado */}
-      <header className="border-b border-border bg-card/50 backdrop-blur-sm sticky top-0 z-40">
-        <div className="container max-w-7xl mx-auto px-4 py-3 flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            <div className="w-9 h-9 rounded-lg bg-primary/10 flex items-center justify-center glow-amber">
-              <Shield className="w-5 h-5 text-primary" />
-            </div>
-            <div>
-              <h1 className="text-base font-bold tracking-tight">CENOP</h1>
-              <p className="text-xs text-muted-foreground">AM Seguridad — Control Operativo</p>
-            </div>
-          </div>
+    <SidebarProvider>
+      <div className="min-h-screen w-full bg-background">
+        <AppSidebar activeTab={activeTab} setActiveTab={setActiveTab} />
+        <SidebarInset>
+          {/* Encabezado */}
+          <header className="sticky top-0 z-40 border-b border-border bg-card/50 backdrop-blur-sm">
+            <div className="mx-auto flex max-w-7xl items-center justify-between px-4 py-3">
+              <div className="flex items-center gap-3">
+                <SidebarTrigger className="h-9 w-9" />
+                <div>
+                  <h2 className="text-base font-bold tracking-tight">
+                    {navigationItems.find((item) => item.key === activeTab)?.label}
+                  </h2>
+                  <p className="text-xs text-muted-foreground">CENOP — AM Seguridad</p>
+                </div>
+              </div>
           <div className="flex items-center gap-2">
             <div className="flex items-center gap-2 rounded-lg border border-border bg-card px-3 py-2">
               <Moon className="w-4 h-4 text-muted-foreground" />
@@ -111,36 +189,11 @@ export default function Index() {
               </Button>
             )}
           </div>
-        </div>
-        {/* Navegación principal */}
-        <div className="container max-w-7xl mx-auto px-4">
-          <nav className="flex gap-1 -mb-px">
-            {([
-              { key: "carga", label: "Carga de Datos", icon: ClipboardList },
-              { key: "dashboard", label: "Panel de Análisis", icon: BarChart3 },
-              { key: "personal", label: "Personal", icon: Users },
-              { key: "clientes", label: "Clientes", icon: Building2 },
-              { key: "reportes", label: "Reportes", icon: FileText },
-            ] as const).map(({ key, label, icon: Icon }) => (
-              <button
-                key={key}
-                onClick={() => setActiveTab(key)}
-                className={`flex items-center gap-2 px-4 py-2.5 text-sm font-semibold border-b-2 transition-colors ${
-                  activeTab === key
-                    ? "border-primary text-primary"
-                    : "border-transparent text-muted-foreground hover:text-foreground hover:border-border"
-                }`}
-              >
-                <Icon className="w-4 h-4" />
-                {label}
-              </button>
-            ))}
-          </nav>
-        </div>
-      </header>
+            </div>
+          </header>
 
-      {/* Principal */}
-      <main className="container max-w-7xl mx-auto px-4 py-6 space-y-5">
+          {/* Principal */}
+          <main className="container max-w-7xl mx-auto px-4 py-6 space-y-5">
         {activeTab === "dashboard" ? (
           <FullDashboard
             services={cleanServices}
@@ -166,7 +219,9 @@ export default function Index() {
             <FuelTable entries={dayFuel} onDelete={handleDeleteFuel} />
           </>
         )}
-      </main>
-    </div>
+          </main>
+        </SidebarInset>
+      </div>
+    </SidebarProvider>
   );
 }
