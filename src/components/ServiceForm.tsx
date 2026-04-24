@@ -266,22 +266,22 @@ export default function ServiceForm({ onAdd, selectedDate, existingServices }: P
 
       {step === 1 && (
         <div className="grid md:grid-cols-2 gap-5">
-          <Field label="N° Solicitud" field="solicitud" type="number" />
-          <Field label="Hora Solicitud" field="horaSolicitud" type="time" />
-          <SelectField label="Cliente" field="cliente" options={clientesList} />
-          <Field label="Lugar de Salida" field="lugarSalida" placeholder="Ej: Villa Celina" />
+          {renderField({ label: "N° Solicitud", field: "solicitud", type: "number" })}
+          {renderField({ label: "Hora Solicitud", field: "horaSolicitud", type: "time" })}
+          {renderSelectField({ label: "Cliente", field: "cliente", options: clientesList })}
+          {renderField({ label: "Lugar de Salida", field: "lugarSalida", placeholder: "Ej: Villa Celina" })}
         </div>
       )}
 
       {step === 2 && (
         <div className="grid md:grid-cols-2 gap-5">
-          <Field label="Destino" field="destino" />
-          <SelectField label="Móvil" field="movil" options={MOVILES} onCustomChange={setMovil} />
+          {renderField({ label: "Destino", field: "destino" })}
+          {renderSelectField({ label: "Móvil", field: "movil", options: MOVILES, onCustomChange: setMovil })}
           <div className="space-y-2">
             <Label className="text-base font-bold text-background">Celular</Label>
             <Input value={form.celular} readOnly className="h-12 text-lg bg-background text-foreground border-input" />
           </div>
-          <Field label="Orden de Carga" field="ordenCarga" />
+          {renderField({ label: "Orden de Carga", field: "ordenCarga" })}
         </div>
       )}
 
