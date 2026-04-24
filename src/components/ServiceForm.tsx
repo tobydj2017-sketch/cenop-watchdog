@@ -52,6 +52,7 @@ export default function ServiceForm({ onAdd, selectedDate, existingServices }: P
   const [peajes, setPeajes] = useState<PeajeEntry[]>([]);
   const [comisiones, setComisiones] = useState<ComisionEntry[]>([]);
   const [serviciosOp, setServiciosOp] = useState<ServicioOperacionesEntry[]>([]);
+  const [tipoCenopOp, setTipoCenopOp] = useState<"ninguno" | "cenop_en_op" | "op_en_cenop">("ninguno");
 
   const allPersonalEntries = getPersonal();
   const allPersonal = getActivePersonalNames();
