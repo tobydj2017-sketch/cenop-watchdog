@@ -1,5 +1,5 @@
-import { useMemo } from "react";
-import { ServiceEntry, FuelEntry } from "@/lib/types";
+import { useMemo, useState } from "react";
+import { ServiceEntry, FuelEntry, getAdjustedHours, getServiceKey, normalizeClientName } from "@/lib/types";
 import { formatHoursMinutes } from "@/lib/formatTime";
 import {
   BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer,
@@ -21,7 +21,17 @@ interface Props {
   fuelEntries: FuelEntry[];
 }
 
+type KpiId = "servicios" | "dias" | "prod" | "improd" | "cenop" | "eficiencia" | "total-horas" | "personal" | "moviles" | "clientes" | "combustible";
+
 const tooltipFormatter = (value: number) => formatHoursMinutes(value);
+const moneyFormatter = (value: number) => `$${value.toLocaleString("es-AR")}`;
+const chartColor = (index: number) => `hsl(var(--chart-${(index % 5) + 1}))`;
+
+function shortDate(fecha: string) {
+  if (!fecha) return "Sin fecha";
+  const [, month, day] = fecha.split("-");
+  return day && month ? `${day}/${month}` : fecha;
+}
 
 export default function DashboardResumen({ services, fuelEntries, byPerson, byMovil, byCliente, totalProd, totalImprod, totalServicios, uniqueDays, totalFuel, cenopEnOps }: Props & {
   byPerson: { nombre: string; prod: number; improd: number; servicios: number; total: number }[];
