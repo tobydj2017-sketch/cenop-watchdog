@@ -241,7 +241,7 @@ export async function exportClientesPDF(
 }
 
 // ========== DASHBOARD RESUMEN ==========
-export function exportResumenPDF(
+export async function exportResumenPDF(
   services: ServiceEntry[],
   fuelEntries: FuelEntry[],
   stats: { totalProd: number; totalImprod: number; totalServicios: number; uniqueDays: number; totalFuel: number; cenopEnOps: number },
@@ -250,9 +250,10 @@ export function exportResumenPDF(
   byCliente: { cliente: string; prod: number; improd: number; servicios: number; total: number }[]
 ) {
   const doc = new jsPDF();
-  addHeader(doc, "Resumen General", `${stats.totalServicios} servicios en ${stats.uniqueDays} días`);
+  const logoDataUrl = await loadImageAsDataUrl(AM_LOGO_PATH);
+  addHeader(doc, "Resumen General", `${stats.totalServicios} servicios en ${stats.uniqueDays} días`, logoDataUrl);
 
-  let y = 52;
+  let y = 58;
 
   // Summary cards as a table
   doc.setFontSize(10);
@@ -322,13 +323,14 @@ export function exportResumenPDF(
 }
 
 // ========== GESTIÓN PERSONAL ==========
-export function exportPersonalManagerPDF() {
+export async function exportPersonalManagerPDF() {
   const personal = getPersonal();
   const doc = new jsPDF();
-  addHeader(doc, "Gestión de Personal", `${personal.length} registros`);
+  const logoDataUrl = await loadImageAsDataUrl(AM_LOGO_PATH);
+  addHeader(doc, "Gestión de Personal", `${personal.length} registros`, logoDataUrl);
 
   autoTable(doc, {
-    startY: 50,
+    startY: 56,
     head: [["Nombre", "Roles", "Estado"]],
     body: personal.map((p) => [
       p.nombre,
@@ -343,13 +345,14 @@ export function exportPersonalManagerPDF() {
 }
 
 // ========== GESTIÓN CLIENTES ==========
-export function exportClientManagerPDF() {
+export async function exportClientManagerPDF() {
   const clients = getClients();
   const doc = new jsPDF();
-  addHeader(doc, "Gestión de Clientes", `${clients.length} registros`);
+  const logoDataUrl = await loadImageAsDataUrl(AM_LOGO_PATH);
+  addHeader(doc, "Gestión de Clientes", `${clients.length} registros`, logoDataUrl);
 
   autoTable(doc, {
-    startY: 50,
+    startY: 56,
     head: [["Nombre", "Estado"]],
     body: clients.map((c) => [c.nombre, c.activo ? "Activo" : "Inactivo"]),
     ...tableStyle(),
@@ -360,12 +363,13 @@ export function exportClientManagerPDF() {
 }
 
 // ========== CENTRO DE REPORTES ==========
-export function exportDownloadReportPDF(report: DownloadReport) {
+export async function exportDownloadReportPDF(report: DownloadReport) {
   const doc = new jsPDF({ orientation: report.columns.length > 6 ? "landscape" : "portrait" });
-  addHeader(doc, report.title, `${report.description} | ${report.totalLabel}: ${report.totalValue}`);
+  const logoDataUrl = await loadImageAsDataUrl(AM_LOGO_PATH);
+  addHeader(doc, report.title, `${report.description} | ${report.totalLabel}: ${report.totalValue}`, logoDataUrl);
 
   autoTable(doc, {
-    startY: 50,
+    startY: 56,
     head: [report.columns],
     body: report.rows.length ? report.rows : [["Sin datos para los filtros seleccionados"]],
     ...tableStyle(),
