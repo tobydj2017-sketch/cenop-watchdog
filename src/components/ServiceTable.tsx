@@ -61,7 +61,7 @@ const getPeajesTotal = (service: ServiceEntry) =>
 
 export default function ServiceTable({ services, onDelete }: Props) {
   const [selectedSolicitud, setSelectedSolicitud] = useState<number | null>(null);
-  const [sortDirection, setSortDirection] = useState<"asc" | "desc">("asc");
+  const [sortConfig, setSortConfig] = useState<{ key: SortKey; direction: "asc" | "desc" }>({ key: "fecha", direction: "asc" });
 
   if (services.length === 0) {
     return (
@@ -71,26 +71,54 @@ export default function ServiceTable({ services, onDelete }: Props) {
     );
   }
 
-  const uniqueSolicitudes = [...new Set(services.map((s) => s.solicitud))];
-  const solicitudColorMap = new Map<number, number>();
-  uniqueSolicitudes.forEach((sol, i) => {
-    solicitudColorMap.set(sol, i % SERVICE_COLORS.length);
+  const uniqueServiceKeys = [...new Set(services.map((s) => getServiceKey(s)))];
+  const serviceColorMap = new Map<string, number>();
+  uniqueServiceKeys.forEach((serviceKey, i) => {
+    serviceColorMap.set(serviceKey, i % SERVICE_COLORS.length);
   });
 
   const selectedServices = selectedSolicitud !== null
     ? services.filter((s) => s.solicitud === selectedSolicitud)
     : [];
 
-  const displayedServices = services
+  const groupedServices = services
     .filter((s) => s.chofer || s.custodio)
-    .sort((a, b) => {
-      const solicitudDiff = sortDirection === "asc"
-        ? a.solicitud - b.solicitud
-        : b.solicitud - a.solicitud;
+    .reduce<Map<string, ServiceEntry[]>>((map, service) => {
+      const serviceKey = getServiceKey(service);
+      map.set(serviceKey, [...(map.get(serviceKey) || []), service]);
+      return map;
+    }, new Map());
 
-      if (solicitudDiff !== 0) return solicitudDiff;
-      return (a.chofer || a.custodio || "").localeCompare(b.chofer || b.custodio || "", "es");
-    });
+  const getSortValue = (group: ServiceEntry[], key: SortKey): string | number => {
+    const first = group[0];
+    const textValues = group.flatMap((service) => key === "chofer" || key === "custodio" ? [service[key]] : []);
+
+    if (key === "chofer" || key === "custodio") return textValues.filter(Boolean).sort((a, b) => collator.compare(a, b))[0] || "";
+    if (key === "peajes") return group.reduce((sum, service) => sum + getPeajesTotal(service), 0);
+    if (["salidaCenop", "finalizaServicio", "horasProductivas", "horasImproductivas", "horasTotales"].includes(key)) return timeToMinutes(first[key] || "");
+    if (key === "solicitud") return first.solicitud;
+    return String(first[key] || "");
+  };
+
+  const displayedServices = [...groupedServices.values()]
+    .sort((a, b) => {
+      const aValue = getSortValue(a, sortConfig.key);
+      const bValue = getSortValue(b, sortConfig.key);
+      const result = typeof aValue === "number" && typeof bValue === "number"
+        ? aValue - bValue
+        : collator.compare(String(aValue), String(bValue));
+
+      if (result !== 0) return sortConfig.direction === "asc" ? result : -result;
+      return collator.compare(getServiceKey(a[0]), getServiceKey(b[0]));
+    })
+    .flatMap((group) => group);
+
+  const handleSort = (key: SortKey) => {
+    setSortConfig((current) => ({
+      key,
+      direction: current.key === key && current.direction === "asc" ? "desc" : "asc",
+    }));
+  };
 
   return (
     <>
