@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { ServiceEntry } from "@/lib/types";
-import { Trash2 } from "lucide-react";
+import { ArrowDownUp, Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { cleanTime } from "@/lib/formatTime";
 import ServiceDetailView from "@/components/ServiceDetailView";
@@ -34,6 +34,7 @@ const SERVICE_BADGE_COLORS = [
 
 export default function ServiceTable({ services, onDelete }: Props) {
   const [selectedSolicitud, setSelectedSolicitud] = useState<number | null>(null);
+  const [sortDirection, setSortDirection] = useState<"asc" | "desc">("asc");
 
   if (services.length === 0) {
     return (
@@ -53,6 +54,17 @@ export default function ServiceTable({ services, onDelete }: Props) {
     ? services.filter((s) => s.solicitud === selectedSolicitud)
     : [];
 
+  const displayedServices = services
+    .filter((s) => s.chofer || s.custodio)
+    .sort((a, b) => {
+      const solicitudDiff = sortDirection === "asc"
+        ? a.solicitud - b.solicitud
+        : b.solicitud - a.solicitud;
+
+      if (solicitudDiff !== 0) return solicitudDiff;
+      return (a.chofer || a.custodio || "").localeCompare(b.chofer || b.custodio || "", "es");
+    });
+
   return (
     <>
       <div className="glass-card overflow-hidden">
@@ -63,14 +75,25 @@ export default function ServiceTable({ services, onDelete }: Props) {
                 {["#", "Cliente", "Destino", "Chofer", "Custodio", "Móvil", "Remito", "Salida", "Fin Serv.", "Peajes", "Hs Prod.", "Hs Improd.", "Hs Total", ""].map(
                   (h) => (
                     <th key={h} className="px-3 py-3 text-left text-xs text-muted-foreground uppercase tracking-wider font-semibold whitespace-nowrap">
-                      {h}
+                      {h === "#" ? (
+                        <Button
+                          type="button"
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => setSortDirection((current) => current === "asc" ? "desc" : "asc")}
+                          className="h-7 px-2 -ml-2 gap-1 text-xs uppercase tracking-wider text-muted-foreground hover:text-foreground"
+                        >
+                          #
+                          <ArrowDownUp className="w-3 h-3" />
+                        </Button>
+                      ) : h}
                     </th>
                   )
                 )}
               </tr>
             </thead>
             <tbody>
-              {services.filter((s) => s.chofer || s.custodio).map((s) => {
+              {displayedServices.map((s) => {
                 const colorIdx = solicitudColorMap.get(s.solicitud) ?? 0;
                 const rowColor = SERVICE_COLORS[colorIdx];
                 const badgeColor = SERVICE_BADGE_COLORS[colorIdx];
