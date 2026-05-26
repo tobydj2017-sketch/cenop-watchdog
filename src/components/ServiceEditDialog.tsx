@@ -212,9 +212,9 @@ export default function ServiceEditDialog({ service, open, onClose, onSave, exis
             </div>
           </section>
 
-          {/* Tipo cruzado */}
-          <section className="space-y-3">
-            <h4 className="text-sm font-extrabold uppercase tracking-wider text-primary">Tipo de Servicio Cruzado</h4>
+          {/* Servicios Cruzados */}
+          <section className="space-y-3 rounded-md border border-border p-4">
+            <h4 className="text-sm font-extrabold uppercase tracking-wider text-primary">Servicios Cruzados</h4>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-2">
               {[
                 { value: "ninguno", label: "Ninguno" },
@@ -238,6 +238,35 @@ export default function ServiceEditDialog({ service, open, onClose, onSave, exis
                 );
               })}
             </div>
+            {(form.tipoCenopOp ?? "ninguno") !== "ninguno" && (
+              <div className="space-y-3 pt-3 border-t border-border">
+                <div className="flex items-center justify-between">
+                  <p className="text-xs font-extrabold uppercase tracking-wider text-muted-foreground">Detalle de servicios cruzados</p>
+                  <Button type="button" variant="outline" size="sm" onClick={() => setServiciosOp((p) => [...p, { id: generateId(), cliente: "", descripcion: "", hora: "" }])}>
+                    <Plus className="w-4 h-4" /> Agregar
+                  </Button>
+                </div>
+                {serviciosOp.map((s, idx) => (
+                  <div key={s.id} className="grid grid-cols-[10rem_1fr_8rem_3rem] gap-3 items-end">
+                    <div className="space-y-1.5">
+                      <Label className="text-xs">Cliente #{idx + 1}</Label>
+                      <SearchableSelect options={clientesList} value={s.cliente} onChange={(v) => setServiciosOp((prev) => prev.map((x) => x.id === s.id ? { ...x, cliente: v } : x))} inputClassName="h-10" />
+                    </div>
+                    <div className="space-y-1.5">
+                      <Label className="text-xs">Descripción</Label>
+                      <Input value={s.descripcion} onChange={(e) => setServiciosOp((prev) => prev.map((x) => x.id === s.id ? { ...x, descripcion: e.target.value } : x))} className="h-10" />
+                    </div>
+                    <div className="space-y-1.5">
+                      <Label className="text-xs">Hora</Label>
+                      <TimeInput value={s.hora} onChange={(v) => setServiciosOp((prev) => prev.map((x) => x.id === s.id ? { ...x, hora: v } : x))} className="h-10" />
+                    </div>
+                    <Button type="button" variant="ghost" size="icon" className="h-10 w-10 text-destructive" onClick={() => setServiciosOp((prev) => prev.filter((x) => x.id !== s.id))}>
+                      <Trash2 className="w-4 h-4" />
+                    </Button>
+                  </div>
+                ))}
+              </div>
+            )}
           </section>
           <section className="space-y-3 rounded-md border border-border p-4">
             <div className="flex items-center justify-between">
