@@ -351,28 +351,59 @@ export default function ServiceForm({ onAdd, selectedDate, existingServices }: P
             {renderField({ label: "Continúa Orden N°", field: "continuaOrden" })}
             {renderField({ label: "Observaciones", field: "observaciones" })}
           </div>
-          <div className="rounded-md border border-primary/40 bg-background p-4 text-foreground">
-            <p className="text-sm font-extrabold uppercase tracking-wider text-muted-foreground mb-3">Tipo de Servicio Cruzado</p>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-2">
-              {[
-                { value: "ninguno", label: "Ninguno" },
-                { value: "cenop_en_op", label: "CENOP en Operaciones" },
-                { value: "op_en_cenop", label: "Operaciones en CENOP" },
-              ].map((opt) => (
-                <button
-                  key={opt.value}
-                  type="button"
-                  onClick={() => setTipoCenopOp(opt.value as typeof tipoCenopOp)}
-                  className={`h-12 rounded-md border-2 px-4 text-sm font-bold transition-all ${
-                    tipoCenopOp === opt.value
-                      ? "border-primary bg-primary text-primary-foreground"
-                      : "border-border bg-background text-foreground hover:border-primary/50"
-                  }`}
-                >
-                  {opt.label}
-                </button>
-              ))}
+          <div className="rounded-md border border-primary/40 bg-background p-4 text-foreground space-y-4">
+            <div>
+              <p className="text-sm font-extrabold uppercase tracking-wider text-muted-foreground mb-3">Servicios Cruzados — Tipo</p>
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-2">
+                {[
+                  { value: "ninguno", label: "Ninguno" },
+                  { value: "cenop_en_op", label: "CENOP en Operaciones" },
+                  { value: "op_en_cenop", label: "Operaciones en CENOP" },
+                ].map((opt) => (
+                  <button
+                    key={opt.value}
+                    type="button"
+                    onClick={() => setTipoCenopOp(opt.value as typeof tipoCenopOp)}
+                    className={`h-12 rounded-md border-2 px-4 text-sm font-bold transition-all ${
+                      tipoCenopOp === opt.value
+                        ? "border-primary bg-primary text-primary-foreground"
+                        : "border-border bg-background text-foreground hover:border-primary/50"
+                    }`}
+                  >
+                    {opt.label}
+                  </button>
+                ))}
+              </div>
             </div>
+            {tipoCenopOp !== "ninguno" && (
+              <div className="pt-2 border-t border-border">
+                <div className="flex items-center justify-between gap-3 mb-3">
+                  <p className="text-sm font-extrabold uppercase tracking-wider text-muted-foreground">Detalle de servicios cruzados</p>
+                  <Button type="button" variant="outline" onClick={addServicioOp} className="h-10 gap-2 text-sm">
+                    <Building2 className="w-4 h-4" /> Agregar
+                  </Button>
+                </div>
+                {serviciosOp.map((sop, idx) => (
+                  <div key={sop.id} className="grid md:grid-cols-[12rem_1fr_9rem_3rem] items-end gap-3 mb-3">
+                    <div className="space-y-2">
+                      <Label className="text-sm font-bold">Cliente #{idx + 1}</Label>
+                      <SearchableSelect options={clientesList} value={sop.cliente} onChange={(v) => updateServicioOp(sop.id, "cliente", v)} placeholder="Cliente..." inputClassName="h-11 text-base" />
+                    </div>
+                    <div className="space-y-2">
+                      <Label className="text-sm font-bold">Descripción</Label>
+                      <Input value={sop.descripcion} onChange={(e) => updateServicioOp(sop.id, "descripcion", e.target.value)} placeholder="Ej: Apoyo operativo" className="h-11 text-base" />
+                    </div>
+                    <div className="space-y-2">
+                      <Label className="text-sm font-bold">Hora</Label>
+                      <TimeInput value={sop.hora} onChange={(v) => updateServicioOp(sop.id, "hora", v)} className="h-11 text-base" />
+                    </div>
+                    <Button type="button" variant="ghost" size="icon" className="h-11 w-11 text-destructive" onClick={() => removeServicioOp(sop.id)}>
+                      <Trash2 className="w-4 h-4" />
+                    </Button>
+                  </div>
+                ))}
+              </div>
+            )}
           </div>
           <div className="grid gap-4">
             <div className="rounded-md border border-border bg-background p-4 text-foreground">
