@@ -455,33 +455,6 @@ export default function ServiceForm({ onAdd, selectedDate, existingServices }: P
                 </div>
               ))}
             </div>
-            <div className="rounded-md border border-border bg-background p-4 text-foreground">
-              <div className="flex items-center justify-between gap-3 mb-3">
-                <p className="text-sm font-extrabold uppercase tracking-wider text-muted-foreground">Servicios Operaciones</p>
-                <Button type="button" variant="outline" onClick={addServicioOp} className="h-10 gap-2 text-sm">
-                  <Building2 className="w-4 h-4" /> Agregar Servicio OP
-                </Button>
-              </div>
-              {serviciosOp.map((sop, idx) => (
-                <div key={sop.id} className="grid md:grid-cols-[12rem_1fr_9rem_3rem] items-end gap-3 mb-3">
-                  <div className="space-y-2">
-                    <Label className="text-sm font-bold">Cliente #{idx + 1}</Label>
-                    <SearchableSelect options={clientesList} value={sop.cliente} onChange={(v) => updateServicioOp(sop.id, "cliente", v)} placeholder="Cliente..." inputClassName="h-11 text-base" />
-                  </div>
-                  <div className="space-y-2">
-                    <Label className="text-sm font-bold">Descripción</Label>
-                    <Input value={sop.descripcion} onChange={(e) => updateServicioOp(sop.id, "descripcion", e.target.value)} placeholder="Ej: Apoyo operativo" className="h-11 text-base" />
-                  </div>
-                  <div className="space-y-2">
-                    <Label className="text-sm font-bold">Hora</Label>
-                    <TimeInput value={sop.hora} onChange={(v) => updateServicioOp(sop.id, "hora", v)} className="h-11 text-base" />
-                  </div>
-                  <Button type="button" variant="ghost" size="icon" className="h-11 w-11 text-destructive" onClick={() => removeServicioOp(sop.id)}>
-                    <Trash2 className="w-4 h-4" />
-                  </Button>
-                </div>
-              ))}
-            </div>
           </div>
         </div>
       )}
