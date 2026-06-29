@@ -282,8 +282,8 @@ export default function ServiceForm({ onAdd, selectedDate, existingServices }: P
 
       {step === 1 && (
         <div className="grid md:grid-cols-2 gap-5">
-          {renderField({ label: "N° Solicitud", field: "solicitud", type: "number" })}
-          {renderField({ label: "Hora Solicitud", field: "horaSolicitud", type: "time" })}
+          {renderField({ label: "N°", field: "solicitud", type: "number" })}
+          {renderField({ label: "Solicitud de Custodia", field: "horaSolicitud", type: "time" })}
           {renderSelectField({ label: "Cliente", field: "cliente", options: clientesList })}
           {renderField({ label: "Lugar de Salida", field: "lugarSalida", placeholder: "Ej: Villa Celina" })}
         </div>
