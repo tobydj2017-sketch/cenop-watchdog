@@ -182,14 +182,15 @@ export default function ServiceTable({ services, onDelete, onUpdate, allServices
 
   const getSortValue = (group: ServiceEntry[], key: SortKey): string | number => {
     const first = group[0];
-    const textValues = group.flatMap((service) => key === "chofer" || key === "custodio" ? [service[key]] : []);
-
-    if (key === "chofer" || key === "custodio") return textValues.filter(Boolean).sort((a, b) => collator.compare(a, b))[0] || "";
+    if (key === "chofer" || key === "custodio") {
+      const values = group.map((s) => s[key]).filter(Boolean) as string[];
+      return values.sort((a, b) => collator.compare(a, b))[0] || "";
+    }
     if (key === "fecha") return parseDateValue(first.fecha || "");
-    if (key === "peajes") return group.reduce((sum, service) => sum + getPeajesTotal(service), 0);
-    if (key === "salidaCenop" || key === "finalizaServicio" || key === "horasProductivas" || key === "horasImproductivas" || key === "horasTotales") return timeToMinutes(first[key] || "");
+    if (key === "peajes") return group.reduce((sum, s) => sum + getPeajesTotal(s), 0);
     if (key === "solicitud") return first.solicitud;
-    return String(first[key] || "");
+    if (TIME_SORT_KEYS.includes(key)) return timeToMinutes((first as any)[key] || "");
+    return String((first as any)[key] || "");
   };
 
   const displayedServices = (sortConfig
