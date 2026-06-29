@@ -1,5 +1,5 @@
 import { FuelEntry, ServiceEntry, getAdjustedHours, getServiceKey, normalizeClientName } from "./types";
-import { formatHoursMinutes } from "./formatTime";
+import { cleanTime, formatHoursMinutes } from "./formatTime";
 import { getPersonal } from "./personalStore";
 
 export type ReportId =
