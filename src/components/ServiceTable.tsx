@@ -35,25 +35,55 @@ const SERVICE_BADGE_COLORS = [
   "bg-[hsl(60,70%,45%)]/25 text-[hsl(60,70%,45%)] ring-2 ring-[hsl(60,70%,45%)]/40",
 ];
 
-type SortKey = "solicitud" | "fecha" | "cliente" | "destino" | "chofer" | "custodio" | "movil" | "remito" | "salidaCenop" | "finalizaServicio" | "peajes" | "horasProductivas" | "horasImproductivas" | "horasTotales";
+type SortKey =
+  | "solicitud" | "fecha" | "horaSolicitud" | "cliente" | "lugarSalida" | "destino"
+  | "chofer" | "citaChofer" | "custodio" | "citaCustodio" | "movil" | "celular"
+  | "salidaCenop" | "llegadaServicio" | "iniciaServicio" | "llegadaDestino"
+  | "finalizaServicio" | "llegadaCenop" | "horaFrancoChofer" | "horaFrancoCustodio"
+  | "ordenCarga" | "remito" | "continuaOrden" | "observaciones"
+  | "horasProductivas" | "horasImproductivas1" | "horasImproductivas2"
+  | "horasImproductivas" | "horasTotales" | "peajes";
 type SortDirection = "asc" | "desc";
 
 const TABLE_HEADERS: { label: string; sortKey?: SortKey }[] = [
-  { label: "N°", sortKey: "solicitud" },
   { label: "Fecha", sortKey: "fecha" },
+  { label: "N°", sortKey: "solicitud" },
+  { label: "Solicitud de Custodia", sortKey: "horaSolicitud" },
   { label: "Cliente", sortKey: "cliente" },
+  { label: "Lugar de Salida", sortKey: "lugarSalida" },
   { label: "Destino", sortKey: "destino" },
   { label: "Chofer", sortKey: "chofer" },
+  { label: "Cita Chofer", sortKey: "citaChofer" },
   { label: "Custodio", sortKey: "custodio" },
+  { label: "Cita Custodio", sortKey: "citaCustodio" },
   { label: "Móvil", sortKey: "movil" },
-  { label: "N° Remito", sortKey: "remito" },
+  { label: "Celular", sortKey: "celular" },
   { label: "Salida de CENOP", sortKey: "salidaCenop" },
+  { label: "Llegada a Servicio", sortKey: "llegadaServicio" },
+  { label: "Inicia Servicio", sortKey: "iniciaServicio" },
+  { label: "Llegada a Destino", sortKey: "llegadaDestino" },
   { label: "Finaliza Servicio", sortKey: "finalizaServicio" },
-  { label: "Peajes", sortKey: "peajes" },
+  { label: "Llegada a CENOP", sortKey: "llegadaCenop" },
+  { label: "Hora Franco Chofer", sortKey: "horaFrancoChofer" },
+  { label: "Hora Franco Custodio", sortKey: "horaFrancoCustodio" },
+  { label: "Orden de Carga Cliente", sortKey: "ordenCarga" },
+  { label: "N° Remito", sortKey: "remito" },
+  { label: "Continúa Orden N°", sortKey: "continuaOrden" },
+  { label: "Observaciones", sortKey: "observaciones" },
   { label: "Horas Productivas", sortKey: "horasProductivas" },
+  { label: "Horas Improductivas 1", sortKey: "horasImproductivas1" },
+  { label: "Horas Improductivas 2", sortKey: "horasImproductivas2" },
   { label: "Horas Improductivas", sortKey: "horasImproductivas" },
   { label: "Horas Totales", sortKey: "horasTotales" },
+  { label: "Peajes", sortKey: "peajes" },
   { label: "" },
+];
+
+const TIME_SORT_KEYS: SortKey[] = [
+  "horaSolicitud", "citaChofer", "citaCustodio", "salidaCenop", "llegadaServicio",
+  "iniciaServicio", "llegadaDestino", "finalizaServicio", "llegadaCenop",
+  "horaFrancoChofer", "horaFrancoCustodio", "horasProductivas", "horasImproductivas1",
+  "horasImproductivas2", "horasImproductivas", "horasTotales",
 ];
 
 const collator = new Intl.Collator("es", { numeric: true, sensitivity: "base" });
@@ -152,14 +182,15 @@ export default function ServiceTable({ services, onDelete, onUpdate, allServices
 
   const getSortValue = (group: ServiceEntry[], key: SortKey): string | number => {
     const first = group[0];
-    const textValues = group.flatMap((service) => key === "chofer" || key === "custodio" ? [service[key]] : []);
-
-    if (key === "chofer" || key === "custodio") return textValues.filter(Boolean).sort((a, b) => collator.compare(a, b))[0] || "";
+    if (key === "chofer" || key === "custodio") {
+      const values = group.map((s) => s[key]).filter(Boolean) as string[];
+      return values.sort((a, b) => collator.compare(a, b))[0] || "";
+    }
     if (key === "fecha") return parseDateValue(first.fecha || "");
-    if (key === "peajes") return group.reduce((sum, service) => sum + getPeajesTotal(service), 0);
-    if (key === "salidaCenop" || key === "finalizaServicio" || key === "horasProductivas" || key === "horasImproductivas" || key === "horasTotales") return timeToMinutes(first[key] || "");
+    if (key === "peajes") return group.reduce((sum, s) => sum + getPeajesTotal(s), 0);
     if (key === "solicitud") return first.solicitud;
-    return String(first[key] || "");
+    if (TIME_SORT_KEYS.includes(key)) return timeToMinutes((first as any)[key] || "");
+    return String((first as any)[key] || "");
   };
 
   const displayedServices = (sortConfig
@@ -224,28 +255,44 @@ export default function ServiceTable({ services, onDelete, onUpdate, allServices
                     className={`border-b border-border/50 border-l-[6px] hover:brightness-130 transition-all cursor-pointer ${rowColor}`}
                     onClick={() => setSelectedServiceKey(serviceKey)}
                   >
+                    <td className="px-3 py-2.5 font-mono text-xs text-muted-foreground whitespace-nowrap">{formatDate(s.fecha)}</td>
                     <td className="px-3 py-2.5">
                       <span className={`inline-flex items-center justify-center w-7 h-7 rounded-md font-mono text-xs font-bold ${badgeColor}`}>
                         {s.solicitud}
                       </span>
                     </td>
-                    <td className="px-3 py-2.5 font-mono text-xs text-muted-foreground">{formatDate(s.fecha)}</td>
-                    <td className="px-3 py-2.5 font-semibold">{s.cliente}</td>
-                    <td className="px-3 py-2.5 text-muted-foreground">{s.destino}</td>
-                    <td className="px-3 py-2.5">{s.chofer || "—"}</td>
-                    <td className="px-3 py-2.5">{s.custodio || "—"}</td>
-                    <td className="px-3 py-2.5 font-mono text-xs">{s.movil}</td>
-                    <td className="px-3 py-2.5 font-mono text-xs">{s.remito || "—"}</td>
-                    <td className="px-3 py-2.5 font-mono text-xs">{cleanTime(s.salidaCenop)}</td>
-                    <td className="px-3 py-2.5 font-mono text-xs">{cleanTime(s.finalizaServicio)}</td>
-                    <td className="px-3 py-2.5 font-mono text-xs text-primary font-semibold">
+                    <td className="px-3 py-2.5 font-mono text-xs whitespace-nowrap">{cleanTime(s.horaSolicitud)}</td>
+                    <td className="px-3 py-2.5 font-semibold whitespace-nowrap">{s.cliente}</td>
+                    <td className="px-3 py-2.5 text-muted-foreground whitespace-nowrap">{s.lugarSalida || "—"}</td>
+                    <td className="px-3 py-2.5 text-muted-foreground whitespace-nowrap">{s.destino || "—"}</td>
+                    <td className="px-3 py-2.5 whitespace-nowrap">{s.chofer || "—"}</td>
+                    <td className="px-3 py-2.5 font-mono text-xs whitespace-nowrap">{cleanTime(s.citaChofer)}</td>
+                    <td className="px-3 py-2.5 whitespace-nowrap">{s.custodio || "—"}</td>
+                    <td className="px-3 py-2.5 font-mono text-xs whitespace-nowrap">{cleanTime(s.citaCustodio)}</td>
+                    <td className="px-3 py-2.5 font-mono text-xs whitespace-nowrap">{s.movil || "—"}</td>
+                    <td className="px-3 py-2.5 font-mono text-xs whitespace-nowrap">{s.celular || "—"}</td>
+                    <td className="px-3 py-2.5 font-mono text-xs whitespace-nowrap">{cleanTime(s.salidaCenop)}</td>
+                    <td className="px-3 py-2.5 font-mono text-xs whitespace-nowrap">{cleanTime(s.llegadaServicio)}</td>
+                    <td className="px-3 py-2.5 font-mono text-xs whitespace-nowrap">{cleanTime(s.iniciaServicio)}</td>
+                    <td className="px-3 py-2.5 font-mono text-xs whitespace-nowrap">{cleanTime(s.llegadaDestino)}</td>
+                    <td className="px-3 py-2.5 font-mono text-xs whitespace-nowrap">{cleanTime(s.finalizaServicio)}</td>
+                    <td className="px-3 py-2.5 font-mono text-xs whitespace-nowrap">{cleanTime(s.llegadaCenop)}</td>
+                    <td className="px-3 py-2.5 font-mono text-xs whitespace-nowrap">{cleanTime(s.horaFrancoChofer)}</td>
+                    <td className="px-3 py-2.5 font-mono text-xs whitespace-nowrap">{cleanTime(s.horaFrancoCustodio)}</td>
+                    <td className="px-3 py-2.5 font-mono text-xs whitespace-nowrap">{s.ordenCarga || "—"}</td>
+                    <td className="px-3 py-2.5 font-mono text-xs whitespace-nowrap">{s.remito || "—"}</td>
+                    <td className="px-3 py-2.5 font-mono text-xs whitespace-nowrap">{s.continuaOrden || "—"}</td>
+                    <td className="px-3 py-2.5 text-xs text-muted-foreground max-w-[16rem] truncate" title={s.observaciones}>{s.observaciones || "—"}</td>
+                    <td className="px-3 py-2.5 font-mono text-xs text-success font-semibold whitespace-nowrap">{cleanTime(s.horasProductivas)}</td>
+                    <td className="px-3 py-2.5 font-mono text-xs whitespace-nowrap">{cleanTime(s.horasImproductivas1)}</td>
+                    <td className="px-3 py-2.5 font-mono text-xs whitespace-nowrap">{cleanTime(s.horasImproductivas2)}</td>
+                    <td className="px-3 py-2.5 font-mono text-xs text-destructive font-semibold whitespace-nowrap">{cleanTime(s.horasImproductivas)}</td>
+                    <td className="px-3 py-2.5 font-mono text-xs font-semibold whitespace-nowrap">{cleanTime(s.horasTotales)}</td>
+                    <td className="px-3 py-2.5 font-mono text-xs text-primary font-semibold whitespace-nowrap">
                       {s.peajes && s.peajes.length > 0
                         ? `$${s.peajes.reduce((sum, p) => sum + (p.monto || 0), 0).toLocaleString("es-AR")}`
                         : "—"}
                     </td>
-                    <td className="px-3 py-2.5 font-mono text-xs text-success font-semibold">{cleanTime(s.horasProductivas)}</td>
-                    <td className="px-3 py-2.5 font-mono text-xs text-destructive font-semibold">{cleanTime(s.horasImproductivas)}</td>
-                    <td className="px-3 py-2.5 font-mono text-xs font-semibold">{cleanTime(s.horasTotales)}</td>
                     <td className="px-3 py-2.5">
                       <div className="flex items-center gap-1">
                         {onUpdate && (
