@@ -15,13 +15,13 @@ export default function ServiceDetailView({ services, onClose }: Props) {
   const solicitud = s.solicitud;
 
   const timelineSteps = [
-    { label: "Hora Solicitud", value: s.horaSolicitud },
-    { label: "Salida CENOP", value: s.salidaCenop },
-    { label: "Llegada Servicio", value: s.llegadaServicio },
+    { label: "Solicitud de Custodia", value: s.horaSolicitud },
+    { label: "Salida de CENOP", value: s.salidaCenop },
+    { label: "Llegada a Servicio", value: s.llegadaServicio },
     { label: "Inicia Servicio", value: s.iniciaServicio },
-    { label: "Llegada Destino", value: s.llegadaDestino },
+    { label: "Llegada a Destino", value: s.llegadaDestino },
     { label: "Finaliza Servicio", value: s.finalizaServicio },
-    { label: "Llegada CENOP", value: s.llegadaCenop },
+    { label: "Llegada a CENOP", value: s.llegadaCenop },
   ].filter((step) => step.value);
 
   return (
@@ -154,19 +154,19 @@ export default function ServiceDetailView({ services, onClose }: Props) {
             <div className="grid grid-cols-2 md:grid-cols-3 gap-2 text-sm">
               {s.ordenCarga && (
                 <div>
-                  <span className="text-xs text-muted-foreground">Orden de Carga</span>
+                  <span className="text-xs text-muted-foreground">Orden de Carga Cliente</span>
                   <p className="font-mono">{s.ordenCarga}</p>
                 </div>
               )}
               {s.remito && (
                 <div>
-                  <span className="text-xs text-muted-foreground">Remito</span>
+                  <span className="text-xs text-muted-foreground">N° Remito</span>
                   <p className="font-mono">{s.remito}</p>
                 </div>
               )}
               {s.continuaOrden && (
                 <div>
-                  <span className="text-xs text-muted-foreground">Continúa Orden</span>
+                  <span className="text-xs text-muted-foreground">Continúa Orden N°</span>
                   <p className="font-mono">{s.continuaOrden}</p>
                 </div>
               )}

@@ -141,8 +141,8 @@ export default function ServiceEditDialog({ service, open, onClose, onSave, exis
             <h4 className="text-sm font-extrabold uppercase tracking-wider text-primary">Datos generales</h4>
             <div className="grid md:grid-cols-3 gap-4">
               <Field label="Fecha" field="fecha" type="date" />
-              <Field label="N° Solicitud" field="solicitud" type="number" />
-              <Field label="Hora Solicitud" field="horaSolicitud" type="time" />
+              <Field label="N°" field="solicitud" type="number" />
+              <Field label="Solicitud de Custodia" field="horaSolicitud" type="time" />
               <div className="space-y-1.5">
                 <Label className="text-xs font-bold uppercase tracking-wider text-muted-foreground">Cliente</Label>
                 <SearchableSelect options={clientesList} value={form.cliente} onChange={(v) => set("cliente", v)} inputClassName="h-10" />
@@ -178,7 +178,7 @@ export default function ServiceEditDialog({ service, open, onClose, onSave, exis
                 <SearchableSelect options={MOVILES} value={form.movil} onChange={setMovil} inputClassName="h-10" />
               </div>
               <Field label="Celular" field="celular" />
-              <Field label="Orden de Carga" field="ordenCarga" />
+              <Field label="Orden de Carga Cliente" field="ordenCarga" />
             </div>
           </section>
 
@@ -186,14 +186,14 @@ export default function ServiceEditDialog({ service, open, onClose, onSave, exis
           <section className="space-y-3">
             <h4 className="text-sm font-extrabold uppercase tracking-wider text-primary">Horarios</h4>
             <div className="grid md:grid-cols-3 gap-4">
-              <Field label="Salida CENOP" field="salidaCenop" type="time" />
-              <Field label="Llegada Servicio" field="llegadaServicio" type="time" />
+              <Field label="Salida de CENOP" field="salidaCenop" type="time" />
+              <Field label="Llegada a Servicio" field="llegadaServicio" type="time" />
               <Field label="Inicia Servicio" field="iniciaServicio" type="time" />
-              <Field label="Llegada Destino" field="llegadaDestino" type="time" />
+              <Field label="Llegada a Destino" field="llegadaDestino" type="time" />
               <Field label="Finaliza Servicio" field="finalizaServicio" type="time" />
-              <Field label="Llegada CENOP" field="llegadaCenop" type="time" />
-              <Field label="Franco Chofer" field="horaFrancoChofer" type="time" />
-              <Field label="Franco Custodio" field="horaFrancoCustodio" type="time" />
+              <Field label="Llegada a CENOP" field="llegadaCenop" type="time" />
+              <Field label="Hora Franco Chofer" field="horaFrancoChofer" type="time" />
+              <Field label="Hora Franco Custodio" field="horaFrancoCustodio" type="time" />
             </div>
           </section>
 

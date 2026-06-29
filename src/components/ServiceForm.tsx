@@ -282,8 +282,8 @@ export default function ServiceForm({ onAdd, selectedDate, existingServices }: P
 
       {step === 1 && (
         <div className="grid md:grid-cols-2 gap-5">
-          {renderField({ label: "N° Solicitud", field: "solicitud", type: "number" })}
-          {renderField({ label: "Hora Solicitud", field: "horaSolicitud", type: "time" })}
+          {renderField({ label: "N°", field: "solicitud", type: "number" })}
+          {renderField({ label: "Solicitud de Custodia", field: "horaSolicitud", type: "time" })}
           {renderSelectField({ label: "Cliente", field: "cliente", options: clientesList })}
           {renderField({ label: "Lugar de Salida", field: "lugarSalida", placeholder: "Ej: Villa Celina" })}
         </div>
@@ -297,7 +297,7 @@ export default function ServiceForm({ onAdd, selectedDate, existingServices }: P
             <Label className="text-base font-bold text-background">Celular</Label>
             <Input value={form.celular} readOnly className="h-12 text-lg bg-background text-foreground border-input" />
           </div>
-          {renderField({ label: "Orden de Carga", field: "ordenCarga" })}
+          {renderField({ label: "Orden de Carga Cliente", field: "ordenCarga" })}
         </div>
       )}
 
@@ -330,14 +330,14 @@ export default function ServiceForm({ onAdd, selectedDate, existingServices }: P
         <div className="space-y-5">
           <p className="text-sm font-extrabold uppercase tracking-wider text-muted">Horarios del Servicio</p>
           <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-5">
-            {renderField({ label: "Salida CENOP", field: "salidaCenop", type: "time" })}
-            {renderField({ label: "Llegada Servicio", field: "llegadaServicio", type: "time" })}
+            {renderField({ label: "Salida de CENOP", field: "salidaCenop", type: "time" })}
+            {renderField({ label: "Llegada a Servicio", field: "llegadaServicio", type: "time" })}
             {renderField({ label: "Inicia Servicio", field: "iniciaServicio", type: "time" })}
-            {renderField({ label: "Llegada Destino", field: "llegadaDestino", type: "time" })}
+            {renderField({ label: "Llegada a Destino", field: "llegadaDestino", type: "time" })}
             {renderField({ label: "Finaliza Servicio", field: "finalizaServicio", type: "time" })}
-            {renderField({ label: "Llegada CENOP", field: "llegadaCenop", type: "time" })}
-            {renderField({ label: "Franco Chofer", field: "horaFrancoChofer", type: "time" })}
-            {renderField({ label: "Franco Custodio", field: "horaFrancoCustodio", type: "time" })}
+            {renderField({ label: "Llegada a CENOP", field: "llegadaCenop", type: "time" })}
+            {renderField({ label: "Hora Franco Chofer", field: "horaFrancoChofer", type: "time" })}
+            {renderField({ label: "Hora Franco Custodio", field: "horaFrancoCustodio", type: "time" })}
           </div>
         </div>
       )}

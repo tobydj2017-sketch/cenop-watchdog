@@ -39,20 +39,20 @@ type SortKey = "solicitud" | "fecha" | "cliente" | "destino" | "chofer" | "custo
 type SortDirection = "asc" | "desc";
 
 const TABLE_HEADERS: { label: string; sortKey?: SortKey }[] = [
-  { label: "#", sortKey: "solicitud" },
+  { label: "N°", sortKey: "solicitud" },
   { label: "Fecha", sortKey: "fecha" },
   { label: "Cliente", sortKey: "cliente" },
   { label: "Destino", sortKey: "destino" },
   { label: "Chofer", sortKey: "chofer" },
   { label: "Custodio", sortKey: "custodio" },
   { label: "Móvil", sortKey: "movil" },
-  { label: "Remito", sortKey: "remito" },
-  { label: "Salida", sortKey: "salidaCenop" },
-  { label: "Fin Serv.", sortKey: "finalizaServicio" },
+  { label: "N° Remito", sortKey: "remito" },
+  { label: "Salida de CENOP", sortKey: "salidaCenop" },
+  { label: "Finaliza Servicio", sortKey: "finalizaServicio" },
   { label: "Peajes", sortKey: "peajes" },
-  { label: "Hs Prod.", sortKey: "horasProductivas" },
-  { label: "Hs Improd.", sortKey: "horasImproductivas" },
-  { label: "Hs Total", sortKey: "horasTotales" },
+  { label: "Horas Productivas", sortKey: "horasProductivas" },
+  { label: "Horas Improductivas", sortKey: "horasImproductivas" },
+  { label: "Horas Totales", sortKey: "horasTotales" },
   { label: "" },
 ];
 
