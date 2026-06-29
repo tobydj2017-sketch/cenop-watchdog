@@ -141,8 +141,8 @@ export default function ServiceEditDialog({ service, open, onClose, onSave, exis
             <h4 className="text-sm font-extrabold uppercase tracking-wider text-primary">Datos generales</h4>
             <div className="grid md:grid-cols-3 gap-4">
               <Field label="Fecha" field="fecha" type="date" />
-              <Field label="N° Solicitud" field="solicitud" type="number" />
-              <Field label="Hora Solicitud" field="horaSolicitud" type="time" />
+              <Field label="N°" field="solicitud" type="number" />
+              <Field label="Solicitud de Custodia" field="horaSolicitud" type="time" />
               <div className="space-y-1.5">
                 <Label className="text-xs font-bold uppercase tracking-wider text-muted-foreground">Cliente</Label>
                 <SearchableSelect options={clientesList} value={form.cliente} onChange={(v) => set("cliente", v)} inputClassName="h-10" />
