@@ -15,13 +15,13 @@ export default function ServiceDetailView({ services, onClose }: Props) {
   const solicitud = s.solicitud;
 
   const timelineSteps = [
-    { label: "Hora Solicitud", value: s.horaSolicitud },
-    { label: "Salida CENOP", value: s.salidaCenop },
-    { label: "Llegada Servicio", value: s.llegadaServicio },
+    { label: "Solicitud de Custodia", value: s.horaSolicitud },
+    { label: "Salida de CENOP", value: s.salidaCenop },
+    { label: "Llegada a Servicio", value: s.llegadaServicio },
     { label: "Inicia Servicio", value: s.iniciaServicio },
-    { label: "Llegada Destino", value: s.llegadaDestino },
+    { label: "Llegada a Destino", value: s.llegadaDestino },
     { label: "Finaliza Servicio", value: s.finalizaServicio },
-    { label: "Llegada CENOP", value: s.llegadaCenop },
+    { label: "Llegada a CENOP", value: s.llegadaCenop },
   ].filter((step) => step.value);
 
   return (
