@@ -255,28 +255,44 @@ export default function ServiceTable({ services, onDelete, onUpdate, allServices
                     className={`border-b border-border/50 border-l-[6px] hover:brightness-130 transition-all cursor-pointer ${rowColor}`}
                     onClick={() => setSelectedServiceKey(serviceKey)}
                   >
+                    <td className="px-3 py-2.5 font-mono text-xs text-muted-foreground whitespace-nowrap">{formatDate(s.fecha)}</td>
                     <td className="px-3 py-2.5">
                       <span className={`inline-flex items-center justify-center w-7 h-7 rounded-md font-mono text-xs font-bold ${badgeColor}`}>
                         {s.solicitud}
                       </span>
                     </td>
-                    <td className="px-3 py-2.5 font-mono text-xs text-muted-foreground">{formatDate(s.fecha)}</td>
-                    <td className="px-3 py-2.5 font-semibold">{s.cliente}</td>
-                    <td className="px-3 py-2.5 text-muted-foreground">{s.destino}</td>
-                    <td className="px-3 py-2.5">{s.chofer || "—"}</td>
-                    <td className="px-3 py-2.5">{s.custodio || "—"}</td>
-                    <td className="px-3 py-2.5 font-mono text-xs">{s.movil}</td>
-                    <td className="px-3 py-2.5 font-mono text-xs">{s.remito || "—"}</td>
-                    <td className="px-3 py-2.5 font-mono text-xs">{cleanTime(s.salidaCenop)}</td>
-                    <td className="px-3 py-2.5 font-mono text-xs">{cleanTime(s.finalizaServicio)}</td>
-                    <td className="px-3 py-2.5 font-mono text-xs text-primary font-semibold">
+                    <td className="px-3 py-2.5 font-mono text-xs whitespace-nowrap">{cleanTime(s.horaSolicitud)}</td>
+                    <td className="px-3 py-2.5 font-semibold whitespace-nowrap">{s.cliente}</td>
+                    <td className="px-3 py-2.5 text-muted-foreground whitespace-nowrap">{s.lugarSalida || "—"}</td>
+                    <td className="px-3 py-2.5 text-muted-foreground whitespace-nowrap">{s.destino || "—"}</td>
+                    <td className="px-3 py-2.5 whitespace-nowrap">{s.chofer || "—"}</td>
+                    <td className="px-3 py-2.5 font-mono text-xs whitespace-nowrap">{cleanTime(s.citaChofer)}</td>
+                    <td className="px-3 py-2.5 whitespace-nowrap">{s.custodio || "—"}</td>
+                    <td className="px-3 py-2.5 font-mono text-xs whitespace-nowrap">{cleanTime(s.citaCustodio)}</td>
+                    <td className="px-3 py-2.5 font-mono text-xs whitespace-nowrap">{s.movil || "—"}</td>
+                    <td className="px-3 py-2.5 font-mono text-xs whitespace-nowrap">{s.celular || "—"}</td>
+                    <td className="px-3 py-2.5 font-mono text-xs whitespace-nowrap">{cleanTime(s.salidaCenop)}</td>
+                    <td className="px-3 py-2.5 font-mono text-xs whitespace-nowrap">{cleanTime(s.llegadaServicio)}</td>
+                    <td className="px-3 py-2.5 font-mono text-xs whitespace-nowrap">{cleanTime(s.iniciaServicio)}</td>
+                    <td className="px-3 py-2.5 font-mono text-xs whitespace-nowrap">{cleanTime(s.llegadaDestino)}</td>
+                    <td className="px-3 py-2.5 font-mono text-xs whitespace-nowrap">{cleanTime(s.finalizaServicio)}</td>
+                    <td className="px-3 py-2.5 font-mono text-xs whitespace-nowrap">{cleanTime(s.llegadaCenop)}</td>
+                    <td className="px-3 py-2.5 font-mono text-xs whitespace-nowrap">{cleanTime(s.horaFrancoChofer)}</td>
+                    <td className="px-3 py-2.5 font-mono text-xs whitespace-nowrap">{cleanTime(s.horaFrancoCustodio)}</td>
+                    <td className="px-3 py-2.5 font-mono text-xs whitespace-nowrap">{s.ordenCarga || "—"}</td>
+                    <td className="px-3 py-2.5 font-mono text-xs whitespace-nowrap">{s.remito || "—"}</td>
+                    <td className="px-3 py-2.5 font-mono text-xs whitespace-nowrap">{s.continuaOrden || "—"}</td>
+                    <td className="px-3 py-2.5 text-xs text-muted-foreground max-w-[16rem] truncate" title={s.observaciones}>{s.observaciones || "—"}</td>
+                    <td className="px-3 py-2.5 font-mono text-xs text-success font-semibold whitespace-nowrap">{cleanTime(s.horasProductivas)}</td>
+                    <td className="px-3 py-2.5 font-mono text-xs whitespace-nowrap">{cleanTime(s.horasImproductivas1)}</td>
+                    <td className="px-3 py-2.5 font-mono text-xs whitespace-nowrap">{cleanTime(s.horasImproductivas2)}</td>
+                    <td className="px-3 py-2.5 font-mono text-xs text-destructive font-semibold whitespace-nowrap">{cleanTime(s.horasImproductivas)}</td>
+                    <td className="px-3 py-2.5 font-mono text-xs font-semibold whitespace-nowrap">{cleanTime(s.horasTotales)}</td>
+                    <td className="px-3 py-2.5 font-mono text-xs text-primary font-semibold whitespace-nowrap">
                       {s.peajes && s.peajes.length > 0
                         ? `$${s.peajes.reduce((sum, p) => sum + (p.monto || 0), 0).toLocaleString("es-AR")}`
                         : "—"}
                     </td>
-                    <td className="px-3 py-2.5 font-mono text-xs text-success font-semibold">{cleanTime(s.horasProductivas)}</td>
-                    <td className="px-3 py-2.5 font-mono text-xs text-destructive font-semibold">{cleanTime(s.horasImproductivas)}</td>
-                    <td className="px-3 py-2.5 font-mono text-xs font-semibold">{cleanTime(s.horasTotales)}</td>
                     <td className="px-3 py-2.5">
                       <div className="flex items-center gap-1">
                         {onUpdate && (
