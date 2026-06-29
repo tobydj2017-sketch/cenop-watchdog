@@ -35,25 +35,55 @@ const SERVICE_BADGE_COLORS = [
   "bg-[hsl(60,70%,45%)]/25 text-[hsl(60,70%,45%)] ring-2 ring-[hsl(60,70%,45%)]/40",
 ];
 
-type SortKey = "solicitud" | "fecha" | "cliente" | "destino" | "chofer" | "custodio" | "movil" | "remito" | "salidaCenop" | "finalizaServicio" | "peajes" | "horasProductivas" | "horasImproductivas" | "horasTotales";
+type SortKey =
+  | "solicitud" | "fecha" | "horaSolicitud" | "cliente" | "lugarSalida" | "destino"
+  | "chofer" | "citaChofer" | "custodio" | "citaCustodio" | "movil" | "celular"
+  | "salidaCenop" | "llegadaServicio" | "iniciaServicio" | "llegadaDestino"
+  | "finalizaServicio" | "llegadaCenop" | "horaFrancoChofer" | "horaFrancoCustodio"
+  | "ordenCarga" | "remito" | "continuaOrden" | "observaciones"
+  | "horasProductivas" | "horasImproductivas1" | "horasImproductivas2"
+  | "horasImproductivas" | "horasTotales" | "peajes";
 type SortDirection = "asc" | "desc";
 
 const TABLE_HEADERS: { label: string; sortKey?: SortKey }[] = [
-  { label: "N°", sortKey: "solicitud" },
   { label: "Fecha", sortKey: "fecha" },
+  { label: "N°", sortKey: "solicitud" },
+  { label: "Solicitud de Custodia", sortKey: "horaSolicitud" },
   { label: "Cliente", sortKey: "cliente" },
+  { label: "Lugar de Salida", sortKey: "lugarSalida" },
   { label: "Destino", sortKey: "destino" },
   { label: "Chofer", sortKey: "chofer" },
+  { label: "Cita Chofer", sortKey: "citaChofer" },
   { label: "Custodio", sortKey: "custodio" },
+  { label: "Cita Custodio", sortKey: "citaCustodio" },
   { label: "Móvil", sortKey: "movil" },
-  { label: "N° Remito", sortKey: "remito" },
+  { label: "Celular", sortKey: "celular" },
   { label: "Salida de CENOP", sortKey: "salidaCenop" },
+  { label: "Llegada a Servicio", sortKey: "llegadaServicio" },
+  { label: "Inicia Servicio", sortKey: "iniciaServicio" },
+  { label: "Llegada a Destino", sortKey: "llegadaDestino" },
   { label: "Finaliza Servicio", sortKey: "finalizaServicio" },
-  { label: "Peajes", sortKey: "peajes" },
+  { label: "Llegada a CENOP", sortKey: "llegadaCenop" },
+  { label: "Hora Franco Chofer", sortKey: "horaFrancoChofer" },
+  { label: "Hora Franco Custodio", sortKey: "horaFrancoCustodio" },
+  { label: "Orden de Carga Cliente", sortKey: "ordenCarga" },
+  { label: "N° Remito", sortKey: "remito" },
+  { label: "Continúa Orden N°", sortKey: "continuaOrden" },
+  { label: "Observaciones", sortKey: "observaciones" },
   { label: "Horas Productivas", sortKey: "horasProductivas" },
+  { label: "Horas Improductivas 1", sortKey: "horasImproductivas1" },
+  { label: "Horas Improductivas 2", sortKey: "horasImproductivas2" },
   { label: "Horas Improductivas", sortKey: "horasImproductivas" },
   { label: "Horas Totales", sortKey: "horasTotales" },
+  { label: "Peajes", sortKey: "peajes" },
   { label: "" },
+];
+
+const TIME_SORT_KEYS: SortKey[] = [
+  "horaSolicitud", "citaChofer", "citaCustodio", "salidaCenop", "llegadaServicio",
+  "iniciaServicio", "llegadaDestino", "finalizaServicio", "llegadaCenop",
+  "horaFrancoChofer", "horaFrancoCustodio", "horasProductivas", "horasImproductivas1",
+  "horasImproductivas2", "horasImproductivas", "horasTotales",
 ];
 
 const collator = new Intl.Collator("es", { numeric: true, sensitivity: "base" });
