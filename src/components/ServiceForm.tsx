@@ -297,7 +297,7 @@ export default function ServiceForm({ onAdd, selectedDate, existingServices }: P
             <Label className="text-base font-bold text-background">Celular</Label>
             <Input value={form.celular} readOnly className="h-12 text-lg bg-background text-foreground border-input" />
           </div>
-          {renderField({ label: "Orden de Carga", field: "ordenCarga" })}
+          {renderField({ label: "Orden de Carga Cliente", field: "ordenCarga" })}
         </div>
       )}
 
