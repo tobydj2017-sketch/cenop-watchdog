@@ -186,14 +186,14 @@ export default function ServiceEditDialog({ service, open, onClose, onSave, exis
           <section className="space-y-3">
             <h4 className="text-sm font-extrabold uppercase tracking-wider text-primary">Horarios</h4>
             <div className="grid md:grid-cols-3 gap-4">
-              <Field label="Salida CENOP" field="salidaCenop" type="time" />
-              <Field label="Llegada Servicio" field="llegadaServicio" type="time" />
+              <Field label="Salida de CENOP" field="salidaCenop" type="time" />
+              <Field label="Llegada a Servicio" field="llegadaServicio" type="time" />
               <Field label="Inicia Servicio" field="iniciaServicio" type="time" />
-              <Field label="Llegada Destino" field="llegadaDestino" type="time" />
+              <Field label="Llegada a Destino" field="llegadaDestino" type="time" />
               <Field label="Finaliza Servicio" field="finalizaServicio" type="time" />
-              <Field label="Llegada CENOP" field="llegadaCenop" type="time" />
-              <Field label="Franco Chofer" field="horaFrancoChofer" type="time" />
-              <Field label="Franco Custodio" field="horaFrancoCustodio" type="time" />
+              <Field label="Llegada a CENOP" field="llegadaCenop" type="time" />
+              <Field label="Hora Franco Chofer" field="horaFrancoChofer" type="time" />
+              <Field label="Hora Franco Custodio" field="horaFrancoCustodio" type="time" />
             </div>
           </section>
 
