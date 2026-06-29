@@ -178,7 +178,7 @@ export default function ServiceEditDialog({ service, open, onClose, onSave, exis
                 <SearchableSelect options={MOVILES} value={form.movil} onChange={setMovil} inputClassName="h-10" />
               </div>
               <Field label="Celular" field="celular" />
-              <Field label="Orden de Carga" field="ordenCarga" />
+              <Field label="Orden de Carga Cliente" field="ordenCarga" />
             </div>
           </section>
 
