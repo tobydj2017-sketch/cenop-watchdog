@@ -330,14 +330,14 @@ export default function ServiceForm({ onAdd, selectedDate, existingServices }: P
         <div className="space-y-5">
           <p className="text-sm font-extrabold uppercase tracking-wider text-muted">Horarios del Servicio</p>
           <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-5">
-            {renderField({ label: "Salida CENOP", field: "salidaCenop", type: "time" })}
-            {renderField({ label: "Llegada Servicio", field: "llegadaServicio", type: "time" })}
+            {renderField({ label: "Salida de CENOP", field: "salidaCenop", type: "time" })}
+            {renderField({ label: "Llegada a Servicio", field: "llegadaServicio", type: "time" })}
             {renderField({ label: "Inicia Servicio", field: "iniciaServicio", type: "time" })}
-            {renderField({ label: "Llegada Destino", field: "llegadaDestino", type: "time" })}
+            {renderField({ label: "Llegada a Destino", field: "llegadaDestino", type: "time" })}
             {renderField({ label: "Finaliza Servicio", field: "finalizaServicio", type: "time" })}
-            {renderField({ label: "Llegada CENOP", field: "llegadaCenop", type: "time" })}
-            {renderField({ label: "Franco Chofer", field: "horaFrancoChofer", type: "time" })}
-            {renderField({ label: "Franco Custodio", field: "horaFrancoCustodio", type: "time" })}
+            {renderField({ label: "Llegada a CENOP", field: "llegadaCenop", type: "time" })}
+            {renderField({ label: "Hora Franco Chofer", field: "horaFrancoChofer", type: "time" })}
+            {renderField({ label: "Hora Franco Custodio", field: "horaFrancoCustodio", type: "time" })}
           </div>
         </div>
       )}
