@@ -38,20 +38,20 @@ export default function DashboardStats({ services, fuelEntries, selectedDate }: 
 
   return (
     <div className="space-y-3">
-      <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-7 gap-3">
+      <div className="grid grid-cols-7 gap-2">
         {stats.map((stat) => (
           <button
             key={stat.key}
             onClick={() => setActiveKey((prev) => prev === stat.key ? null : stat.key)}
-            className={`glass-card p-4 flex flex-col gap-2 text-left transition-all cursor-pointer hover:ring-2 hover:ring-primary/30 ${
+            className={`glass-card p-2 sm:p-3 flex flex-col gap-1 text-left transition-all cursor-pointer hover:ring-2 hover:ring-primary/30 min-w-0 ${
               activeKey === stat.key ? "ring-2 ring-primary shadow-lg shadow-primary/10" : ""
             }`}
           >
-            <div className="flex items-center gap-2">
-              <stat.icon className={`w-4 h-4 ${stat.color}`} />
-              <span className="text-xs text-muted-foreground uppercase tracking-wider">{stat.label}</span>
+            <div className="flex items-center gap-1.5 min-w-0">
+              <stat.icon className={`w-3.5 h-3.5 shrink-0 ${stat.color}`} />
+              <span className="text-[10px] sm:text-xs text-muted-foreground uppercase tracking-wider truncate">{stat.label}</span>
             </div>
-            <span className="stat-value text-xl">{stat.value}</span>
+            <span className="stat-value text-sm sm:text-lg lg:text-xl truncate">{stat.value}</span>
           </button>
         ))}
       </div>
