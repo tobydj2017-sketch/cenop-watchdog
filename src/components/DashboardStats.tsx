@@ -43,15 +43,15 @@ export default function DashboardStats({ services, fuelEntries, selectedDate }: 
           <button
             key={stat.key}
             onClick={() => setActiveKey((prev) => prev === stat.key ? null : stat.key)}
-            className={`rounded-xl border border-border bg-card p-3 flex flex-col gap-1.5 text-left transition-all cursor-pointer hover:border-primary/40 hover:shadow-sm min-w-0 ${
+            className={`rounded-xl border border-slate-200 bg-white p-3 flex flex-col gap-1 text-left transition-all cursor-pointer hover:border-slate-300 hover:shadow-sm min-w-0 ${
               activeKey === stat.key ? "ring-2 ring-primary shadow-sm" : ""
             }`}
           >
             <div className="flex items-center gap-1.5 min-w-0">
-              <stat.icon className={`w-4 h-4 shrink-0 ${stat.color}`} />
-              <span className="text-[10px] sm:text-xs text-muted-foreground uppercase tracking-wider truncate">{stat.label}</span>
+              <stat.icon className={`w-4 h-4 shrink-0 text-emerald-600`} />
+              <span className="text-[10px] sm:text-xs text-slate-500 uppercase tracking-wider truncate">{stat.label}</span>
             </div>
-            <span className="font-semibold text-sm sm:text-base lg:text-lg text-card-foreground truncate pl-5.5">{stat.value}</span>
+            <span className="font-semibold text-sm sm:text-base lg:text-lg text-slate-900 truncate">{stat.value}</span>
           </button>
         ))}
       </div>
