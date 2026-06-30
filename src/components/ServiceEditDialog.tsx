@@ -313,25 +313,44 @@ export default function ServiceEditDialog({ service, open, onClose, onSave, exis
           <section className="space-y-3 rounded-md border border-border p-4">
             <div className="flex items-center justify-between">
               <h4 className="text-sm font-extrabold uppercase tracking-wider">Comisiones</h4>
-              <Button type="button" variant="outline" size="sm" onClick={() => setComisiones((p) => [...p, { id: generateId(), descripcion: "", hora: "" }])}>
+              <Button type="button" variant="outline" size="sm" onClick={() => setComisiones((p) => [...p, { id: generateId(), descripcion: "", persona: "", horaInicio: "", horaFin: "" }])}>
                 <Plus className="w-4 h-4" /> Agregar
               </Button>
             </div>
-            {comisiones.map((c, idx) => (
-              <div key={c.id} className="grid grid-cols-[1fr_8rem_3rem] gap-3 items-end">
-                <div className="space-y-1.5">
-                  <Label className="text-xs">Descripción #{idx + 1}</Label>
-                  <Input value={c.descripcion} onChange={(e) => setComisiones((prev) => prev.map((x) => x.id === c.id ? { ...x, descripcion: e.target.value } : x))} className="h-10" />
+            {comisiones.map((c, idx) => {
+              const dur = c.horaInicio && c.horaFin ? calcTimeDiff(c.horaInicio, c.horaFin) : "";
+              return (
+              <div key={c.id} className="rounded-md border border-border bg-card/40 p-3 space-y-3">
+                <div className="grid grid-cols-[1fr_3rem] gap-3 items-end">
+                  <div className="space-y-1.5">
+                    <Label className="text-xs">Descripción #{idx + 1}</Label>
+                    <Input value={c.descripcion} onChange={(e) => setComisiones((prev) => prev.map((x) => x.id === c.id ? { ...x, descripcion: e.target.value } : x))} className="h-10" />
+                  </div>
+                  <Button type="button" variant="ghost" size="icon" className="h-10 w-10 text-destructive" onClick={() => setComisiones((prev) => prev.filter((x) => x.id !== c.id))}>
+                    <Trash2 className="w-4 h-4" />
+                  </Button>
                 </div>
-                <div className="space-y-1.5">
-                  <Label className="text-xs">Hora</Label>
-                  <TimeInput value={c.hora} onChange={(v) => setComisiones((prev) => prev.map((x) => x.id === c.id ? { ...x, hora: v } : x))} className="h-10" />
+                <div className="grid grid-cols-[1fr_7rem_7rem_7rem] gap-3 items-end">
+                  <div className="space-y-1.5">
+                    <Label className="text-xs">Realizado por</Label>
+                    <SearchableSelect options={allPersonal} value={c.persona} onChange={(v) => setComisiones((prev) => prev.map((x) => x.id === c.id ? { ...x, persona: v } : x))} inputClassName="h-10" />
+                  </div>
+                  <div className="space-y-1.5">
+                    <Label className="text-xs">Inicio</Label>
+                    <TimeInput value={c.horaInicio} onChange={(v) => setComisiones((prev) => prev.map((x) => x.id === c.id ? { ...x, horaInicio: v } : x))} className="h-10" />
+                  </div>
+                  <div className="space-y-1.5">
+                    <Label className="text-xs">Fin</Label>
+                    <TimeInput value={c.horaFin} onChange={(v) => setComisiones((prev) => prev.map((x) => x.id === c.id ? { ...x, horaFin: v } : x))} className="h-10" />
+                  </div>
+                  <div className="space-y-1.5">
+                    <Label className="text-xs">Duración</Label>
+                    <div className="h-10 flex items-center justify-center rounded-md border border-border bg-muted/30 text-sm font-mono font-bold text-primary">{dur || "—"}</div>
+                  </div>
                 </div>
-                <Button type="button" variant="ghost" size="icon" className="h-10 w-10 text-destructive" onClick={() => setComisiones((prev) => prev.filter((x) => x.id !== c.id))}>
-                  <Trash2 className="w-4 h-4" />
-                </Button>
               </div>
-            ))}
+              );
+            })}
           </section>
 
         </div>
