@@ -7,6 +7,9 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import Index from "./pages/Index.tsx";
 import NotFound from "./pages/NotFound.tsx";
 import { bootstrapFromAzure, isAzureConfigured } from "./lib/azureBlob";
+import { getServices, getFuelEntries } from "./lib/store";
+import { getClients } from "./lib/clientStore";
+import { getPersonal } from "./lib/personalStore";
 
 const queryClient = new QueryClient();
 
