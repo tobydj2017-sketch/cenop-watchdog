@@ -32,6 +32,13 @@ export default function FullDashboard({ services, fuelEntries, onBack }: Props) 
   const [tab, setTab] = useState<Tab>("resumen");
   const [filteredServices, setFilteredServices] = useState<ServiceEntry[]>(services);
   const [filteredFuel, setFilteredFuel] = useState<FuelEntry[]>(fuelEntries);
+  const [drill, setDrill] = useState<{ entity: DrillDownEntity; name: string } | null>(null);
+
+  const openDrill = (entity: DrillDownEntity) => (data: any) => {
+    const payload = data?.activePayload?.[0]?.payload ?? data?.payload ?? data;
+    const name = payload?.nombre ?? payload?.patente ?? payload?.cliente ?? payload?.name;
+    if (name) setDrill({ entity, name: String(name) });
+  };
 
   const handleFilter = (s: ServiceEntry[], f: FuelEntry[]) => {
     setFilteredServices(s);
