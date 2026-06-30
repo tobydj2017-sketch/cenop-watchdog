@@ -166,11 +166,12 @@ export default function ServiceForm({ onAdd, selectedDate, existingServices }: P
       return;
     }
     const hours = calculateHours();
+    const fechaFinal = form.fechaServicio || selectedDate;
     onAdd({
       ...form,
       ...hours,
       id: generateId(),
-      fecha: selectedDate,
+      fecha: fechaFinal,
       peajes: peajes.length > 0 ? peajes : undefined,
       comisiones: comisiones.length > 0 ? comisiones : undefined,
       serviciosOperaciones: serviciosOp.length > 0 ? serviciosOp : undefined,
