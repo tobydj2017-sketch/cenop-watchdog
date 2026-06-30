@@ -42,8 +42,6 @@ export interface ServiceEntry {
   horaFrancoCustodio: string;
   ordenCarga: string;
   remito: string;
-  kmInicio?: string;
-  kmFinal?: string;
   continuaOrden: string;
   observaciones: string;
   horasProductivas: string;
@@ -62,16 +60,25 @@ export interface ServiceEntry {
 
 export interface FuelEntry {
   id: string;
-  fecha: string;
+  fecha: string; // YYYY-MM-DD
+  hora: string; // HH:MM
   movil: string;
-  chofer: string;
+  chofer: string; // asignación (auto desde móvil)
   monto: number;
   litros: number;
   precioPorLitro: number;
-  kilometraje: string;
+  kilometraje: string; // KM actual
+  kmAnterior: string;
+  kmRecorridos: string;
+  kmPorLitro: string;
   numeroRemito: string;
   lugarCarga: string;
   estacion: string;
+  marca: string;
+  modelo: string;
+  anio: string;
+  consumoIdeal: string;
+  tipoCombustible: string;
   ticketImage?: string;
   observaciones: string;
 }

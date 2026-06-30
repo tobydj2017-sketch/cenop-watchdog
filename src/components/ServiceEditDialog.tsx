@@ -202,8 +202,6 @@ export default function ServiceEditDialog({ service, open, onClose, onSave, exis
             <h4 className="text-sm font-extrabold uppercase tracking-wider text-primary">Documentación</h4>
             <div className="grid md:grid-cols-3 gap-4">
               <Field label="N° Remito" field="remito" />
-              <Field label="KM Inicio" field="kmInicio" type="number" />
-              <Field label="KM Final" field="kmFinal" type="number" />
               <Field label="Continúa Orden N°" field="continuaOrden" />
               <div className="space-y-1.5 md:col-span-3">
                 <Label className="text-xs font-bold uppercase tracking-wider text-muted-foreground">Observaciones</Label>
