@@ -242,7 +242,13 @@ export default function ServiceForm({ onAdd, selectedDate, existingServices }: P
 
   if (!open) {
     return (
-      <Button onClick={() => setOpen(true)} className="w-full h-12 gap-2 text-sm font-bold">
+      <Button
+        onClick={() => {
+          setForm({ ...defaultEntry, fechaServicio: selectedDate || new Date().toISOString().slice(0, 10) });
+          setOpen(true);
+        }}
+        className="w-full h-12 gap-2 text-sm font-bold"
+      >
         <Plus className="w-4 h-4" /> Cargar Nuevo Servicio
       </Button>
     );
