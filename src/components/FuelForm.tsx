@@ -4,7 +4,7 @@ import { Dialog, DialogContent } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { FuelEntry, generateId } from "@/lib/types";
-import { isValidDate, isFutureDate, isValidTime, findFuelDuplicate } from "@/lib/validation";
+import { isValidDate, isValidTime, findFuelDuplicate } from "@/lib/validation";
 import { MOVILES } from "@/lib/cenopData";
 import { MOVILES_INFO, LUGARES_CARGA, TIPOS_COMBUSTIBLE } from "@/lib/movilesData";
 import SearchableSelect from "@/components/SearchableSelect";
@@ -138,10 +138,6 @@ export default function FuelForm({ onAdd, selectedDate, existingEntries, allEntr
     }
     if (!isValidDate(form.fecha)) {
       toast.error("La fecha no es válida o no existe");
-      return;
-    }
-    if (isFutureDate(form.fecha)) {
-      toast.error("La fecha no puede ser futura");
       return;
     }
     if (form.hora && !isValidTime(form.hora)) {
