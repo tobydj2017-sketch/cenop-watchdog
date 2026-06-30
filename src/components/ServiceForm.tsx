@@ -388,25 +388,44 @@ export default function ServiceForm({ onAdd, selectedDate, existingServices }: P
                     <Building2 className="w-4 h-4" /> Agregar
                   </Button>
                 </div>
-                {serviciosOp.map((sop, idx) => (
-                  <div key={sop.id} className="grid md:grid-cols-[12rem_1fr_9rem_3rem] items-end gap-3 mb-3">
-                    <div className="space-y-2">
-                      <Label className="text-sm font-bold">Cliente #{idx + 1}</Label>
-                      <SearchableSelect options={clientesList} value={sop.cliente} onChange={(v) => updateServicioOp(sop.id, "cliente", v)} placeholder="Cliente..." inputClassName="h-11 text-base" />
+                {serviciosOp.map((sop, idx) => {
+                  const dur = sop.horaInicio && sop.horaFin ? calcTimeDiff(sop.horaInicio, sop.horaFin) : "";
+                  return (
+                  <div key={sop.id} className="rounded-md border border-border bg-card/40 p-3 mb-3 space-y-3">
+                    <div className="grid md:grid-cols-[12rem_1fr_3rem] items-end gap-3">
+                      <div className="space-y-2">
+                        <Label className="text-sm font-bold">Cliente #{idx + 1}</Label>
+                        <SearchableSelect options={clientesList} value={sop.cliente} onChange={(v) => updateServicioOp(sop.id, "cliente", v)} placeholder="Cliente..." inputClassName="h-11 text-base" />
+                      </div>
+                      <div className="space-y-2">
+                        <Label className="text-sm font-bold">Descripción</Label>
+                        <Input value={sop.descripcion} onChange={(e) => updateServicioOp(sop.id, "descripcion", e.target.value)} placeholder="Ej: Apoyo operativo" className="h-11 text-base" />
+                      </div>
+                      <Button type="button" variant="ghost" size="icon" className="h-11 w-11 text-destructive" onClick={() => removeServicioOp(sop.id)}>
+                        <Trash2 className="w-4 h-4" />
+                      </Button>
                     </div>
-                    <div className="space-y-2">
-                      <Label className="text-sm font-bold">Descripción</Label>
-                      <Input value={sop.descripcion} onChange={(e) => updateServicioOp(sop.id, "descripcion", e.target.value)} placeholder="Ej: Apoyo operativo" className="h-11 text-base" />
+                    <div className="grid md:grid-cols-[1fr_8rem_8rem_8rem] items-end gap-3">
+                      <div className="space-y-2">
+                        <Label className="text-sm font-bold">Realizado por</Label>
+                        <SearchableSelect options={allPersonal} value={sop.persona} onChange={(v) => updateServicioOp(sop.id, "persona", v)} placeholder="Chofer/Custodio..." inputClassName="h-11 text-base" />
+                      </div>
+                      <div className="space-y-2">
+                        <Label className="text-sm font-bold">Hora inicio</Label>
+                        <TimeInput value={sop.horaInicio} onChange={(v) => updateServicioOp(sop.id, "horaInicio", v)} className="h-11 text-base" />
+                      </div>
+                      <div className="space-y-2">
+                        <Label className="text-sm font-bold">Hora fin</Label>
+                        <TimeInput value={sop.horaFin} onChange={(v) => updateServicioOp(sop.id, "horaFin", v)} className="h-11 text-base" />
+                      </div>
+                      <div className="space-y-2">
+                        <Label className="text-sm font-bold">Duración</Label>
+                        <div className="h-11 flex items-center justify-center rounded-md border border-border bg-muted/30 text-sm font-mono font-bold text-primary">{dur || "—"}</div>
+                      </div>
                     </div>
-                    <div className="space-y-2">
-                      <Label className="text-sm font-bold">Hora</Label>
-                      <TimeInput value={sop.hora} onChange={(v) => updateServicioOp(sop.id, "hora", v)} className="h-11 text-base" />
-                    </div>
-                    <Button type="button" variant="ghost" size="icon" className="h-11 w-11 text-destructive" onClick={() => removeServicioOp(sop.id)}>
-                      <Trash2 className="w-4 h-4" />
-                    </Button>
                   </div>
-                ))}
+                  );
+                })}
               </div>
             )}
           </div>
