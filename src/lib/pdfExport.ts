@@ -270,18 +270,15 @@ export async function exportClientesPDF(
   const doc = new jsPDF();
   const logoDataUrl = await loadImageAsDataUrl(AM_LOGO_PATH);
   addHeader(doc, "Reporte de Clientes", `${byCliente.length} clientes | Generado con filtros activos`, logoDataUrl);
-  const chartEndY = drawBarChart(doc, "Gráfico — Top clientes por horas totales", byCliente.map((c) => ({ name: c.cliente, value: c.total, label: formatHoursMinutes(c.total) })), 58);
+  const chartEndY = drawBarChart(doc, "Gráfico — Top clientes por horas productivas", byCliente.map((c) => ({ name: c.cliente, value: c.prod, label: formatHoursMinutes(c.prod) })), 58);
 
   autoTable(doc, {
     startY: chartEndY,
-    head: [["Cliente", "Servicios", "Hs Prod.", "Hs Improd.", "Hs Total", "Eficiencia"]],
+    head: [["Cliente", "Servicios", "Hs Prod."]],
     body: byCliente.map((c) => [
       c.cliente,
       c.servicios,
       formatHoursMinutes(c.prod),
-      formatHoursMinutes(c.improd),
-      formatHoursMinutes(c.total),
-      c.total > 0 ? `${Math.round((c.prod / c.total) * 100)}%` : "—",
     ]),
     ...tableStyle(),
   });
@@ -329,7 +326,7 @@ export async function exportResumenPDF(
   y = (doc as any).lastAutoTable.finalY + 10;
 
   y = drawBarChart(doc, "Gráfico — Top personal por horas totales", byPerson.map((p) => ({ name: p.nombre, value: p.total, label: formatHoursMinutes(p.total) })), y, 6);
-  y = drawBarChart(doc, "Gráfico — Top clientes por horas totales", byCliente.map((c) => ({ name: c.cliente, value: c.total, label: formatHoursMinutes(c.total) })), y, 6);
+  y = drawBarChart(doc, "Gráfico — Top clientes por horas productivas", byCliente.map((c) => ({ name: c.cliente, value: c.prod, label: formatHoursMinutes(c.prod) })), y, 6);
 
   // Top 10 Personal
   y = ensureSpace(doc, y, 70);
@@ -350,15 +347,14 @@ export async function exportResumenPDF(
   if (y > doc.internal.pageSize.getHeight() - 60) { doc.addPage(); y = 30; }
 
   // Top 10 Clientes
-  addSectionTitle(doc, "Top 10 Clientes (por horas)", 14, y);
+  addSectionTitle(doc, "Top 10 Clientes (por horas productivas)", 14, y);
   y += 4;
 
   autoTable(doc, {
     startY: y,
-    head: [["Cliente", "Servicios", "Hs Prod.", "Hs Improd.", "Total", "Eficiencia"]],
+    head: [["Cliente", "Servicios", "Hs Prod."]],
     body: byCliente.slice(0, 10).map((c) => [
-      c.cliente, c.servicios, formatHoursMinutes(c.prod), formatHoursMinutes(c.improd),
-      formatHoursMinutes(c.total), c.total > 0 ? `${Math.round((c.prod / c.total) * 100)}%` : "—",
+      c.cliente, c.servicios, formatHoursMinutes(c.prod),
     ]),
     ...tableStyle(),
   });

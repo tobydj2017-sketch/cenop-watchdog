@@ -225,15 +225,14 @@ export default function FullDashboard({ services, fuelEntries, onBack }: Props) 
       {tab === "clientes" && (
         <div className="space-y-4">
           <div className="glass-card p-5">
-            <h3 className="text-sm font-semibold text-muted-foreground mb-4 uppercase tracking-wider">Horas por Cliente</h3>
+            <h3 className="text-sm font-semibold text-muted-foreground mb-4 uppercase tracking-wider">Horas productivas por Cliente</h3>
             <ResponsiveContainer width="100%" height={Math.max(250, byCliente.length * 40)}>
               <BarChart data={byCliente} layout="vertical">
                 <XAxis type="number" tickFormatter={(v) => `${Math.floor(v / 60)}h`} />
                 <YAxis type="category" dataKey="cliente" width={150} tick={{ fontSize: 11 }} />
                 <Tooltip formatter={tooltipFormatter} />
                 <Legend />
-                <Bar dataKey="prod" name="Hs Productivas" fill="hsl(142, 70%, 45%)" stackId="a" />
-                <Bar dataKey="improd" name="Hs Improductivas" fill="hsl(0, 72%, 50%)" stackId="a" />
+                <Bar dataKey="prod" name="Hs Productivas" fill="hsl(142, 70%, 45%)" />
               </BarChart>
             </ResponsiveContainer>
           </div>
@@ -253,10 +252,9 @@ export default function FullDashboard({ services, fuelEntries, onBack }: Props) 
           </div>
 
           <DataTable
-            columns={["Cliente", "Servicios", "Hs Prod.", "Hs Improd.", "Hs Total", "Eficiencia"]}
+            columns={["Cliente", "Servicios", "Hs Prod."]}
             rows={byCliente.map((c) => [
-              c.cliente, c.servicios, formatHoursMinutes(c.prod), formatHoursMinutes(c.improd),
-              formatHoursMinutes(c.total), c.total > 0 ? `${Math.round((c.prod / c.total) * 100)}%` : "—",
+              c.cliente, c.servicios, formatHoursMinutes(c.prod),
             ])}
           />
         </div>
