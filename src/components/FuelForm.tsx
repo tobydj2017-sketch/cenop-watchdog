@@ -91,16 +91,15 @@ export default function FuelForm({ onAdd, selectedDate, existingEntries }: Props
     setOpen(false);
   };
 
-  if (!open) {
-    return (
-      <Button variant="secondary" onClick={() => setOpen(true)} className="w-full h-14 gap-3 text-base font-bold bg-secondary/80">
+  return (
+    <>
+      <Button variant="outline" onClick={() => setOpen(true)} className="h-9 gap-2 text-sm font-semibold">
         <Plus className="w-4 h-4" /> Cargar Combustible
       </Button>
-    );
-  }
 
-  return (
-    <form onSubmit={handleSubmit} className="rounded-lg border border-primary/30 bg-secondary/70 p-6 space-y-6 shadow-lg">
+      <Dialog open={open} onOpenChange={(o) => { if (!o) closeForm(); }}>
+        <DialogContent className="max-w-2xl w-[95vw] max-h-[90vh] overflow-y-auto p-0 border-primary/40 bg-foreground text-background">
+          <form onSubmit={handleSubmit} className="p-5 space-y-4 text-sm">
       <div className="flex items-center justify-between">
         <div>
           <h3 className="section-title text-base">Carga de Combustible</h3>
