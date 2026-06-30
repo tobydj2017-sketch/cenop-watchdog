@@ -19,6 +19,7 @@ interface Props {
 
 const defaultEntry = {
   solicitud: 1,
+  fechaServicio: "",
   horaSolicitud: "",
   cliente: "",
   lugarSalida: "",
