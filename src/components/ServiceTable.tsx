@@ -11,6 +11,8 @@ interface Props {
   onDelete: (id: string) => void;
   onUpdate?: (entry: ServiceEntry) => void;
   allServices?: ServiceEntry[];
+  canEdit?: (s: ServiceEntry) => boolean;
+  canDelete?: (s: ServiceEntry) => boolean;
 }
 
 const SERVICE_COLORS = [
@@ -151,7 +153,7 @@ const buildPairGroups = (entries: ServiceEntry[]) => {
   return groups;
 };
 
-export default function ServiceTable({ services, onDelete, onUpdate, allServices }: Props) {
+export default function ServiceTable({ services, onDelete, onUpdate, allServices, canEdit, canDelete }: Props) {
   const [selectedServiceKey, setSelectedServiceKey] = useState<string | null>(null);
   const [editingService, setEditingService] = useState<ServiceEntry | null>(null);
   const [sortConfig, setSortConfig] = useState<{ key: SortKey; direction: SortDirection } | null>(null);
@@ -295,7 +297,7 @@ export default function ServiceTable({ services, onDelete, onUpdate, allServices
                     </td>
                     <td className="px-3 py-2.5">
                       <div className="flex items-center gap-1">
-                        {onUpdate && (
+                        {onUpdate && (!canEdit || canEdit(s)) && (
                           <Button
                             variant="ghost"
                             size="sm"
@@ -306,15 +308,17 @@ export default function ServiceTable({ services, onDelete, onUpdate, allServices
                             <Pencil className="w-3.5 h-3.5" />
                           </Button>
                         )}
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          onClick={(e) => { e.stopPropagation(); onDelete(s.id); }}
-                          className="h-7 w-7 p-0 text-muted-foreground hover:text-destructive"
-                          title="Eliminar"
-                        >
-                          <Trash2 className="w-3.5 h-3.5" />
-                        </Button>
+                        {(!canDelete || canDelete(s)) && (
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={(e) => { e.stopPropagation(); onDelete(s.id); }}
+                            className="h-7 w-7 p-0 text-muted-foreground hover:text-destructive"
+                            title="Eliminar"
+                          >
+                            <Trash2 className="w-3.5 h-3.5" />
+                          </Button>
+                        )}
                       </div>
                     </td>
                   </tr>
