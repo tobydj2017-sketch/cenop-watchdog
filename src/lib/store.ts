@@ -51,6 +51,7 @@ export function getFuelEntries(): FuelEntry[] {
 
 export function saveFuelEntries(entries: FuelEntry[]) {
   localStorage.setItem(FUEL_KEY, JSON.stringify(entries));
+  queueUpload(BLOB_KEYS.fuel, () => entries);
 }
 
 export function addFuelEntry(entry: FuelEntry) {
