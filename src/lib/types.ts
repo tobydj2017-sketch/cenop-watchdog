@@ -16,7 +16,10 @@ export interface ServicioOperacionesEntry {
   id: string;
   cliente: string;
   descripcion: string;
-  hora: string;
+  hora?: string; // legacy
+  persona: string;
+  horaInicio: string;
+  horaFin: string;
 }
 
 export interface ServiceEntry {
