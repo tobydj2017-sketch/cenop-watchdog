@@ -213,5 +213,8 @@ export default function FuelForm({ onAdd, selectedDate, existingEntries }: Props
         )}
       </div>
     </form>
+        </DialogContent>
+      </Dialog>
+    </>
   );
 }
