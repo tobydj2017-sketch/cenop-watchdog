@@ -18,6 +18,11 @@ const App = () => {
 
   useEffect(() => {
     if (!isAzureConfigured()) return;
+    // Ensure local seed data exists before trying to sync it to Azure
+    getServices();
+    getFuelEntries();
+    getClients();
+    getPersonal();
     bootstrapFromAzure().finally(() => setReady(true));
   }, []);
 
