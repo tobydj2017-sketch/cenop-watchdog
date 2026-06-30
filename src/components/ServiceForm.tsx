@@ -242,7 +242,8 @@ export default function ServiceForm({ onAdd, selectedDate, existingServices }: P
   );
 
   if (!open) {
-    return (
+  return (
+    <>
       <Button
         onClick={() => {
           setForm({ ...defaultEntry, fechaServicio: selectedDate || new Date().toISOString().slice(0, 10) });
@@ -252,12 +253,16 @@ export default function ServiceForm({ onAdd, selectedDate, existingServices }: P
       >
         <Plus className="w-4 h-4" /> Cargar Nuevo Servicio
       </Button>
-    );
-  }
 
-  return (
-    <form onSubmit={handleSubmit} className="rounded-lg border border-primary/40 bg-foreground p-4 space-y-4 shadow-lg text-background max-w-4xl mx-auto text-sm">
-      <div className="flex items-center justify-between">
+      <Dialog open={open} onOpenChange={(o) => { if (!o) closeForm(); }}>
+        <DialogContent className="max-w-3xl w-[95vw] max-h-[90vh] overflow-y-auto p-0 border-primary/40 bg-foreground text-background">
+          <form onSubmit={handleSubmit} className="p-5 space-y-4 text-sm">
+            <div className="flex items-center justify-between">
+              <div>
+                <h3 className="text-base font-extrabold uppercase tracking-widest text-primary">Nuevo Servicio</h3>
+                <p className="text-xs font-semibold text-muted">Paso {step} de 5</p>
+              </div>
+            </div>
         <div>
           <h3 className="text-base font-extrabold uppercase tracking-widest text-primary">Nuevo Servicio</h3>
           <p className="text-xs font-semibold text-muted">Paso {step} de 5</p>
