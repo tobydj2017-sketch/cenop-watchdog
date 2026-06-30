@@ -240,29 +240,48 @@ export default function ServiceEditDialog({ service, open, onClose, onSave, exis
               <div className="space-y-3 pt-3 border-t border-border">
                 <div className="flex items-center justify-between">
                   <p className="text-xs font-extrabold uppercase tracking-wider text-muted-foreground">Detalle de servicios cruzados</p>
-                  <Button type="button" variant="outline" size="sm" onClick={() => setServiciosOp((p) => [...p, { id: generateId(), cliente: "", descripcion: "", hora: "" }])}>
+                  <Button type="button" variant="outline" size="sm" onClick={() => setServiciosOp((p) => [...p, { id: generateId(), cliente: "", descripcion: "", persona: "", horaInicio: "", horaFin: "" }])}>
                     <Plus className="w-4 h-4" /> Agregar
                   </Button>
                 </div>
-                {serviciosOp.map((s, idx) => (
-                  <div key={s.id} className="grid grid-cols-[10rem_1fr_8rem_3rem] gap-3 items-end">
-                    <div className="space-y-1.5">
-                      <Label className="text-xs">Cliente #{idx + 1}</Label>
-                      <SearchableSelect options={clientesList} value={s.cliente} onChange={(v) => setServiciosOp((prev) => prev.map((x) => x.id === s.id ? { ...x, cliente: v } : x))} inputClassName="h-10" />
+                {serviciosOp.map((s, idx) => {
+                  const dur = s.horaInicio && s.horaFin ? calcTimeDiff(s.horaInicio, s.horaFin) : "";
+                  return (
+                  <div key={s.id} className="rounded-md border border-border bg-card/40 p-3 space-y-3">
+                    <div className="grid grid-cols-[10rem_1fr_3rem] gap-3 items-end">
+                      <div className="space-y-1.5">
+                        <Label className="text-xs">Cliente #{idx + 1}</Label>
+                        <SearchableSelect options={clientesList} value={s.cliente} onChange={(v) => setServiciosOp((prev) => prev.map((x) => x.id === s.id ? { ...x, cliente: v } : x))} inputClassName="h-10" />
+                      </div>
+                      <div className="space-y-1.5">
+                        <Label className="text-xs">Descripción</Label>
+                        <Input value={s.descripcion} onChange={(e) => setServiciosOp((prev) => prev.map((x) => x.id === s.id ? { ...x, descripcion: e.target.value } : x))} className="h-10" />
+                      </div>
+                      <Button type="button" variant="ghost" size="icon" className="h-10 w-10 text-destructive" onClick={() => setServiciosOp((prev) => prev.filter((x) => x.id !== s.id))}>
+                        <Trash2 className="w-4 h-4" />
+                      </Button>
                     </div>
-                    <div className="space-y-1.5">
-                      <Label className="text-xs">Descripción</Label>
-                      <Input value={s.descripcion} onChange={(e) => setServiciosOp((prev) => prev.map((x) => x.id === s.id ? { ...x, descripcion: e.target.value } : x))} className="h-10" />
+                    <div className="grid grid-cols-[1fr_7rem_7rem_7rem] gap-3 items-end">
+                      <div className="space-y-1.5">
+                        <Label className="text-xs">Realizado por</Label>
+                        <SearchableSelect options={allPersonal} value={s.persona} onChange={(v) => setServiciosOp((prev) => prev.map((x) => x.id === s.id ? { ...x, persona: v } : x))} inputClassName="h-10" />
+                      </div>
+                      <div className="space-y-1.5">
+                        <Label className="text-xs">Inicio</Label>
+                        <TimeInput value={s.horaInicio} onChange={(v) => setServiciosOp((prev) => prev.map((x) => x.id === s.id ? { ...x, horaInicio: v } : x))} className="h-10" />
+                      </div>
+                      <div className="space-y-1.5">
+                        <Label className="text-xs">Fin</Label>
+                        <TimeInput value={s.horaFin} onChange={(v) => setServiciosOp((prev) => prev.map((x) => x.id === s.id ? { ...x, horaFin: v } : x))} className="h-10" />
+                      </div>
+                      <div className="space-y-1.5">
+                        <Label className="text-xs">Duración</Label>
+                        <div className="h-10 flex items-center justify-center rounded-md border border-border bg-muted/30 text-sm font-mono font-bold text-primary">{dur || "—"}</div>
+                      </div>
                     </div>
-                    <div className="space-y-1.5">
-                      <Label className="text-xs">Hora</Label>
-                      <TimeInput value={s.hora} onChange={(v) => setServiciosOp((prev) => prev.map((x) => x.id === s.id ? { ...x, hora: v } : x))} className="h-10" />
-                    </div>
-                    <Button type="button" variant="ghost" size="icon" className="h-10 w-10 text-destructive" onClick={() => setServiciosOp((prev) => prev.filter((x) => x.id !== s.id))}>
-                      <Trash2 className="w-4 h-4" />
-                    </Button>
                   </div>
-                ))}
+                  );
+                })}
               </div>
             )}
           </section>
