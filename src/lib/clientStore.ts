@@ -1,4 +1,5 @@
 import { CLIENTES } from "./cenopData";
+import { BLOB_KEYS, queueUpload } from "./azureBlob";
 
 export interface ClientEntry {
   id: string;
@@ -43,6 +44,7 @@ export function getActiveClientNames(): string[] {
 
 export function saveClients(entries: ClientEntry[]) {
   localStorage.setItem(CLIENTS_KEY, JSON.stringify(entries));
+  queueUpload(BLOB_KEYS.clientes, () => entries);
 }
 
 export function addClient(nombre: string): ClientEntry {

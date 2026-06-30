@@ -1,5 +1,6 @@
 import { ServiceEntry, FuelEntry, isCountableServiceEntry } from "./types";
 import { DECEMBER_2025_DATA } from "./seedData";
+import { BLOB_KEYS, queueUpload } from "./azureBlob";
 
 const SERVICES_KEY = "cenop_services";
 const FUEL_KEY = "cenop_fuel";
@@ -23,7 +24,9 @@ export function getServices(): ServiceEntry[] {
 }
 
 export function saveServices(entries: ServiceEntry[]) {
-  localStorage.setItem(SERVICES_KEY, JSON.stringify(entries.filter(isCountableServiceEntry)));
+  const clean = entries.filter(isCountableServiceEntry);
+  localStorage.setItem(SERVICES_KEY, JSON.stringify(clean));
+  queueUpload(BLOB_KEYS.services, () => clean);
 }
 
 export function addService(entry: ServiceEntry) {
@@ -48,6 +51,7 @@ export function getFuelEntries(): FuelEntry[] {
 
 export function saveFuelEntries(entries: FuelEntry[]) {
   localStorage.setItem(FUEL_KEY, JSON.stringify(entries));
+  queueUpload(BLOB_KEYS.fuel, () => entries);
 }
 
 export function addFuelEntry(entry: FuelEntry) {

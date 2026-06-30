@@ -1,4 +1,5 @@
 import { PERSONAL } from "./cenopData";
+import { BLOB_KEYS, queueUpload } from "./azureBlob";
 
 export type PersonalRole = "chofer" | "custodio" | "playero" | "operaciones";
 
@@ -43,6 +44,7 @@ export function getPersonal(): PersonalEntry[] {
 
 export function savePersonal(entries: PersonalEntry[]) {
   localStorage.setItem(PERSONAL_KEY, JSON.stringify(entries));
+  queueUpload(BLOB_KEYS.personal, () => entries);
 }
 
 export function addPersonal(nombre: string, roles: PersonalRole[]): PersonalEntry {
