@@ -24,7 +24,9 @@ export function getServices(): ServiceEntry[] {
 }
 
 export function saveServices(entries: ServiceEntry[]) {
-  localStorage.setItem(SERVICES_KEY, JSON.stringify(entries.filter(isCountableServiceEntry)));
+  const clean = entries.filter(isCountableServiceEntry);
+  localStorage.setItem(SERVICES_KEY, JSON.stringify(clean));
+  queueUpload(BLOB_KEYS.services, () => clean);
 }
 
 export function addService(entry: ServiceEntry) {
