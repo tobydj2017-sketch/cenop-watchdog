@@ -304,34 +304,34 @@ export default function ServiceForm({ onAdd, selectedDate, existingServices }: P
       )}
 
       {step === 3 && (
-        <div className="grid md:grid-cols-2 gap-5">
-          <div className="space-y-2">
-            <Label className="text-base font-bold text-background flex items-center gap-2">
+        <div className="grid md:grid-cols-2 gap-3">
+          <div className="space-y-1.5">
+            <Label className="text-sm font-bold text-background flex items-center gap-2">
               Chofer
               {form.chofer && opsBadgeMap[form.chofer] && (
                 <span className="px-2 py-0.5 rounded text-xs font-bold bg-secondary text-secondary-foreground border border-border">OP</span>
               )}
             </Label>
-            <SearchableSelect options={allPersonal} value={form.chofer} onChange={(v) => set("chofer", v)} placeholder="Seleccionar..." badgeMap={roleBadgeMap} inputClassName="h-12 text-lg bg-background text-foreground border-input" />
+            <SearchableSelect options={allPersonal} value={form.chofer} onChange={(v) => set("chofer", v)} placeholder="Seleccionar..." badgeMap={roleBadgeMap} inputClassName="h-9 text-sm bg-background text-foreground border-input" />
           </div>
           {renderField({ label: "Cita Chofer", field: "citaChofer", type: "time" })}
-          <div className="space-y-2">
-            <Label className="text-base font-bold text-background flex items-center gap-2">
+          <div className="space-y-1.5">
+            <Label className="text-sm font-bold text-background flex items-center gap-2">
               Custodio
               {form.custodio && opsBadgeMap[form.custodio] && (
                 <span className="px-2 py-0.5 rounded text-xs font-bold bg-secondary text-secondary-foreground border border-border">OP</span>
               )}
             </Label>
-            <SearchableSelect options={allPersonal} value={form.custodio} onChange={(v) => set("custodio", v)} placeholder="Seleccionar..." badgeMap={roleBadgeMap} inputClassName="h-12 text-lg bg-background text-foreground border-input" />
+            <SearchableSelect options={allPersonal} value={form.custodio} onChange={(v) => set("custodio", v)} placeholder="Seleccionar..." badgeMap={roleBadgeMap} inputClassName="h-9 text-sm bg-background text-foreground border-input" />
           </div>
           {renderField({ label: "Cita Custodio", field: "citaCustodio", type: "time" })}
         </div>
       )}
 
       {step === 4 && (
-        <div className="space-y-5">
-          <p className="text-sm font-extrabold uppercase tracking-wider text-muted">Horarios del Servicio</p>
-          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-5">
+        <div className="space-y-3">
+          <p className="text-xs font-extrabold uppercase tracking-wider text-muted">Horarios del Servicio</p>
+          <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-3">
             {renderField({ label: "Salida de CENOP", field: "salidaCenop", type: "time" })}
             {renderField({ label: "Llegada a Servicio", field: "llegadaServicio", type: "time" })}
             {renderField({ label: "Inicia Servicio", field: "iniciaServicio", type: "time" })}
