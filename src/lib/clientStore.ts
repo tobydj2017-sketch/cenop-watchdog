@@ -44,6 +44,7 @@ export function getActiveClientNames(): string[] {
 
 export function saveClients(entries: ClientEntry[]) {
   localStorage.setItem(CLIENTS_KEY, JSON.stringify(entries));
+  queueUpload(BLOB_KEYS.clientes, () => entries);
 }
 
 export function addClient(nombre: string): ClientEntry {
