@@ -397,7 +397,7 @@ export default function DashboardRendimiento({ services }: Props) {
                               <table className="w-full text-xs">
                                 <thead>
                                   <tr className="border-b border-border/50">
-                                    {["Cliente", "Servicios", "Hs Prod.", "Hs Improd.", "Eficiencia"].map((c) => (
+                                    {["Cliente", "Servicios", "Hs Prod."].map((c) => (
                                       <th key={c} className="px-2 py-1.5 text-left text-muted-foreground uppercase tracking-wider font-semibold">{c}</th>
                                     ))}
                                   </tr>
@@ -408,10 +408,6 @@ export default function DashboardRendimiento({ services }: Props) {
                                       <td className="px-2 py-1.5 font-semibold">{cd.cliente}</td>
                                       <td className="px-2 py-1.5 font-mono">{cd.servicios}</td>
                                       <td className="px-2 py-1.5 font-mono text-success">{formatHoursMinutes(cd.prod)}</td>
-                                      <td className="px-2 py-1.5 font-mono text-destructive">{formatHoursMinutes(cd.improd)}</td>
-                                      <td className="px-2 py-1.5 font-mono font-semibold">
-                                        {cd.prod + cd.improd > 0 ? `${Math.round((cd.prod / (cd.prod + cd.improd)) * 100)}%` : "—"}
-                                      </td>
                                     </tr>
                                   ))}
                                 </tbody>
