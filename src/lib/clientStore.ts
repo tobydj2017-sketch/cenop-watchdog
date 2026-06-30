@@ -1,4 +1,5 @@
 import { CLIENTES } from "./cenopData";
+import { BLOB_KEYS, queueUpload } from "./azureBlob";
 
 export interface ClientEntry {
   id: string;
