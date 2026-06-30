@@ -7,7 +7,7 @@ import { Textarea } from "@/components/ui/textarea";
 import SearchableSelect from "@/components/SearchableSelect";
 import TimeInput from "@/components/TimeInput";
 import { ServiceEntry, PeajeEntry, ComisionEntry, ServicioOperacionesEntry, generateId, calcTimeDiff, timeToMinutes, minutesToTime } from "@/lib/types";
-import { isValidDate, isFutureDate, findServiceCollisions, formatCollisionMessages } from "@/lib/validation";
+import { isValidDate, findServiceCollisions, formatCollisionMessages } from "@/lib/validation";
 import { MOVILES, MOVIL_TELEFONO } from "@/lib/cenopData";
 import { getActiveClientNames } from "@/lib/clientStore";
 import { getPersonal, getActivePersonalNames } from "@/lib/personalStore";
@@ -100,10 +100,6 @@ export default function ServiceEditDialog({ service, open, onClose, onSave, exis
     }
     if (!isValidDate(form.fecha)) {
       toast.error("La fecha del servicio no es válida o no existe");
-      return;
-    }
-    if (isFutureDate(form.fecha)) {
-      toast.error("La fecha del servicio no puede ser futura");
       return;
     }
     const hours = computeHours(form);
