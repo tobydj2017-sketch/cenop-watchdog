@@ -241,7 +241,6 @@ export default function ServiceForm({ onAdd, selectedDate, existingServices }: P
     </div>
   );
 
-  if (!open) {
   return (
     <>
       <Button
@@ -262,15 +261,11 @@ export default function ServiceForm({ onAdd, selectedDate, existingServices }: P
                 <h3 className="text-base font-extrabold uppercase tracking-widest text-primary">Nuevo Servicio</h3>
                 <p className="text-xs font-semibold text-muted">Paso {step} de 5</p>
               </div>
+              <Button type="button" variant="ghost" size="sm" onClick={closeForm} className="h-8 text-background hover:text-background">
+                Cancelar
+              </Button>
             </div>
-        <div>
-          <h3 className="text-base font-extrabold uppercase tracking-widest text-primary">Nuevo Servicio</h3>
-          <p className="text-xs font-semibold text-muted">Paso {step} de 5</p>
-        </div>
-        <Button type="button" variant="ghost" size="sm" onClick={closeForm} className="h-8 text-background hover:text-background">
-          Cancelar
-        </Button>
-      </div>
+
 
       <div className="grid grid-cols-5 gap-1.5" aria-label="Progreso de carga de servicio">
         {["Solicitud", "Destino", "Personal", "Horarios", "Extras"].map((label, index) => {
