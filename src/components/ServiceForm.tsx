@@ -462,16 +462,16 @@ export default function ServiceForm({ onAdd, selectedDate, existingServices }: P
       )}
 
       <div className="flex items-center justify-between gap-3 pt-2">
-        <Button type="button" variant="outline" onClick={() => setStep((current) => Math.max(1, current - 1))} disabled={step === 1} className="h-12 px-5 text-base gap-2 bg-background text-foreground">
-          <ChevronLeft className="w-5 h-5" /> Anterior
+        <Button type="button" variant="outline" onClick={() => setStep((current) => Math.max(1, current - 1))} disabled={step === 1} className="h-9 px-4 text-sm gap-2 bg-background text-foreground">
+          <ChevronLeft className="w-4 h-4" /> Anterior
         </Button>
         {step < 5 ? (
-          <Button type="button" onClick={() => setStep((current) => Math.min(5, current + 1))} className="h-12 px-6 text-base gap-2">
-            Siguiente <ChevronRight className="w-5 h-5" />
+          <Button type="button" onClick={() => setStep((current) => Math.min(5, current + 1))} className="h-9 px-5 text-sm gap-2">
+            Siguiente <ChevronRight className="w-4 h-4" />
           </Button>
         ) : (
-          <Button type="submit" className="h-12 px-6 text-base gap-2">
-            <Plus className="w-5 h-5" /> Guardar Servicio
+          <Button type="submit" className="h-9 px-5 text-sm gap-2">
+            <Plus className="w-4 h-4" /> Guardar Servicio
           </Button>
         )}
       </div>
