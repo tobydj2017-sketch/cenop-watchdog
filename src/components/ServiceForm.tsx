@@ -249,18 +249,18 @@ export default function ServiceForm({ onAdd, selectedDate, existingServices }: P
   }
 
   return (
-    <form onSubmit={handleSubmit} className="rounded-lg border border-primary/40 bg-foreground p-6 space-y-6 shadow-lg text-background">
+    <form onSubmit={handleSubmit} className="rounded-lg border border-primary/40 bg-foreground p-4 space-y-4 shadow-lg text-background max-w-4xl mx-auto text-sm">
       <div className="flex items-center justify-between">
         <div>
-          <h3 className="text-lg font-extrabold uppercase tracking-widest text-primary">Nuevo Servicio</h3>
-          <p className="text-sm font-semibold text-muted">Paso {step} de 5</p>
+          <h3 className="text-base font-extrabold uppercase tracking-widest text-primary">Nuevo Servicio</h3>
+          <p className="text-xs font-semibold text-muted">Paso {step} de 5</p>
         </div>
-        <Button type="button" variant="ghost" size="sm" onClick={closeForm} className="text-background hover:text-background">
+        <Button type="button" variant="ghost" size="sm" onClick={closeForm} className="h-8 text-background hover:text-background">
           Cancelar
         </Button>
       </div>
 
-      <div className="grid grid-cols-5 gap-2" aria-label="Progreso de carga de servicio">
+      <div className="grid grid-cols-5 gap-1.5" aria-label="Progreso de carga de servicio">
         {["Solicitud", "Destino", "Personal", "Horarios", "Extras"].map((label, index) => {
           const targetStep = index + 1;
 
@@ -270,7 +270,7 @@ export default function ServiceForm({ onAdd, selectedDate, existingServices }: P
               type="button"
               onClick={() => setStep(targetStep)}
               aria-current={step === targetStep ? "step" : undefined}
-              className={`rounded-md border px-2 py-3 text-center text-sm font-extrabold transition-colors ${
+              className={`rounded-md border px-2 py-2 text-center text-xs font-extrabold transition-colors ${
                 step === targetStep
                   ? "border-primary bg-primary text-primary-foreground"
                   : "border-border bg-background text-muted-foreground hover:border-primary/50 hover:text-foreground"
@@ -283,8 +283,8 @@ export default function ServiceForm({ onAdd, selectedDate, existingServices }: P
       </div>
 
       {step === 1 && (
-        <div className="grid md:grid-cols-2 gap-5">
-          {renderField({ label: "N°", field: "solicitud", type: "number" })}
+        <div className="grid md:grid-cols-2 gap-3">
+          {renderField({ label: "Fecha del servicio", field: "fechaServicio", type: "date" })}
           {renderField({ label: "Solicitud de Custodia", field: "horaSolicitud", type: "time" })}
           {renderSelectField({ label: "Cliente", field: "cliente", options: clientesList })}
           {renderField({ label: "Lugar de Salida", field: "lugarSalida", placeholder: "Ej: Villa Celina" })}
@@ -292,12 +292,12 @@ export default function ServiceForm({ onAdd, selectedDate, existingServices }: P
       )}
 
       {step === 2 && (
-        <div className="grid md:grid-cols-2 gap-5">
+        <div className="grid md:grid-cols-2 gap-3">
           {renderField({ label: "Destino", field: "destino" })}
           {renderSelectField({ label: "Móvil", field: "movil", options: MOVILES, onCustomChange: setMovil })}
-          <div className="space-y-2">
-            <Label className="text-base font-bold text-background">Celular</Label>
-            <Input value={form.celular} readOnly className="h-12 text-lg bg-background text-foreground border-input" />
+          <div className="space-y-1.5">
+            <Label className="text-sm font-bold text-background">Celular</Label>
+            <Input value={form.celular} readOnly className="h-9 text-sm bg-background text-foreground border-input" />
           </div>
           {renderField({ label: "Orden de Carga Cliente", field: "ordenCarga" })}
         </div>
