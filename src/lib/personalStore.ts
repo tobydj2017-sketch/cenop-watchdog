@@ -44,6 +44,7 @@ export function getPersonal(): PersonalEntry[] {
 
 export function savePersonal(entries: PersonalEntry[]) {
   localStorage.setItem(PERSONAL_KEY, JSON.stringify(entries));
+  queueUpload(BLOB_KEYS.personal, () => entries);
 }
 
 export function addPersonal(nombre: string, roles: PersonalRole[]): PersonalEntry {
