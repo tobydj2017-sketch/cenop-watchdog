@@ -98,6 +98,14 @@ export default function ServiceEditDialog({ service, open, onClose, onSave, exis
       toast.error(`Ya existe un servicio con el remito "${trimmedRemito}"`);
       return;
     }
+    if (!isValidDate(form.fecha)) {
+      toast.error("La fecha del servicio no es válida o no existe");
+      return;
+    }
+    if (isFutureDate(form.fecha)) {
+      toast.error("La fecha del servicio no puede ser futura");
+      return;
+    }
     const hours = computeHours(form);
     const updated: ServiceEntry = {
       ...form,
@@ -108,6 +116,11 @@ export default function ServiceEditDialog({ service, open, onClose, onSave, exis
       choferEsOperaciones: !!opsBadgeMap[form.chofer],
       custodioEsOperaciones: !!opsBadgeMap[form.custodio],
     };
+    const collisions = findServiceCollisions(updated, existingServices);
+    if (collisions.length > 0) {
+      formatCollisionMessages(collisions).forEach((m) => toast.error(m));
+      return;
+    }
     onSave(updated);
     toast.success("Servicio actualizado");
     onClose();
