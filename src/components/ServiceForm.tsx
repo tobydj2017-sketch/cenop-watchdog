@@ -203,15 +203,15 @@ export default function ServiceForm({ onAdd, selectedDate, existingServices }: P
   };
 
   const renderField = ({ label, field, type = "text", placeholder = "" }: { label: string; field: string; type?: string; placeholder?: string }) => (
-    <div className="space-y-2">
-      <Label className="text-base font-bold text-background">{label}</Label>
+    <div className="space-y-1.5">
+      <Label className="text-sm font-bold text-background">{label}</Label>
       {type === "time" ? (
         <div data-timefield={field}>
           <TimeInput
             value={(form as any)[field]}
             onChange={(v) => set(field, v)}
             onComplete={() => focusNextTimeInput(field)}
-            className="h-12 text-lg bg-background text-foreground border-input"
+            className="h-9 text-sm bg-background text-foreground border-input"
           />
         </div>
       ) : (
@@ -220,21 +220,21 @@ export default function ServiceForm({ onAdd, selectedDate, existingServices }: P
           value={(form as any)[field]}
           onChange={(e) => set(field, type === "number" ? Number(e.target.value) : e.target.value)}
           placeholder={placeholder}
-          className="h-12 text-lg bg-background text-foreground border-input placeholder:text-muted-foreground"
+          className="h-9 text-sm bg-background text-foreground border-input placeholder:text-muted-foreground"
         />
       )}
     </div>
   );
 
   const renderSelectField = ({ label, field, options, onCustomChange, showBadges }: { label: string; field: string; options: string[]; onCustomChange?: (v: string) => void; showBadges?: boolean }) => (
-    <div className="space-y-2">
-      <Label className="text-base font-bold text-background">{label}</Label>
+    <div className="space-y-1.5">
+      <Label className="text-sm font-bold text-background">{label}</Label>
       <SearchableSelect
         options={options}
         value={(form as any)[field]}
         onChange={onCustomChange || ((v) => set(field, v))}
         placeholder={`Seleccionar...`}
-        inputClassName="h-12 text-lg bg-background text-foreground border-input"
+        inputClassName="h-9 text-sm bg-background text-foreground border-input"
         badgeMap={showBadges ? opsBadgeMap : undefined}
       />
     </div>
@@ -242,7 +242,7 @@ export default function ServiceForm({ onAdd, selectedDate, existingServices }: P
 
   if (!open) {
     return (
-      <Button onClick={() => setOpen(true)} className="w-full h-14 gap-3 text-base font-bold">
+      <Button onClick={() => setOpen(true)} className="w-full h-12 gap-2 text-sm font-bold">
         <Plus className="w-4 h-4" /> Cargar Nuevo Servicio
       </Button>
     );
