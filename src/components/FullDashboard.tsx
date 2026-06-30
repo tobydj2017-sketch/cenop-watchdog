@@ -267,6 +267,14 @@ export default function FullDashboard({ services, fuelEntries, onBack }: Props) 
           />
         </div>
       )}
+
+      <DrillDownDialog
+        open={!!drill}
+        onOpenChange={(v) => { if (!v) setDrill(null); }}
+        entity={drill?.entity ?? "cliente"}
+        name={drill?.name ?? null}
+        services={filteredServices}
+      />
     </div>
   );
 }
