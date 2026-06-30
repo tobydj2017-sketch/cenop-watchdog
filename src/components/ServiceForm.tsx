@@ -248,9 +248,9 @@ export default function ServiceForm({ onAdd, selectedDate, existingServices }: P
           setForm({ ...defaultEntry, fechaServicio: selectedDate || new Date().toISOString().slice(0, 10) });
           setOpen(true);
         }}
-        className="w-full h-12 gap-2 text-sm font-bold"
+        className="h-9 gap-2 text-sm font-semibold"
       >
-        <Plus className="w-4 h-4" /> Cargar Nuevo Servicio
+        <Plus className="w-4 h-4" /> Cargar Servicio
       </Button>
 
       <Dialog open={open} onOpenChange={(o) => { if (!o) closeForm(); }}>
