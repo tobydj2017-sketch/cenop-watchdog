@@ -482,6 +482,9 @@ export default function ServiceForm({ onAdd, selectedDate, existingServices }: P
           </Button>
         )}
       </div>
-    </form>
+          </form>
+        </DialogContent>
+      </Dialog>
+    </>
   );
 }
