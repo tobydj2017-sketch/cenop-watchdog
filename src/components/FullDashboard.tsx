@@ -10,6 +10,7 @@ import DashboardDiario from "@/components/dashboard/DashboardDiario";
 import DashboardRendimiento from "@/components/dashboard/DashboardRendimiento";
 import DashboardJornada from "@/components/dashboard/DashboardJornada";
 import { DataTable } from "@/components/dashboard/DataTable";
+import DrillDownDialog, { DrillDownEntity } from "@/components/dashboard/DrillDownDialog";
 import { exportResumenPDF, exportPersonalPDF, exportMovilesPDF, exportClientesPDF } from "@/lib/pdfExport";
 
 interface Props {
@@ -31,6 +32,13 @@ export default function FullDashboard({ services, fuelEntries, onBack }: Props) 
   const [tab, setTab] = useState<Tab>("resumen");
   const [filteredServices, setFilteredServices] = useState<ServiceEntry[]>(services);
   const [filteredFuel, setFilteredFuel] = useState<FuelEntry[]>(fuelEntries);
+  const [drill, setDrill] = useState<{ entity: DrillDownEntity; name: string } | null>(null);
+
+  const openDrill = (entity: DrillDownEntity) => (data: any) => {
+    const payload = data?.activePayload?.[0]?.payload ?? data?.payload ?? data;
+    const name = payload?.nombre ?? payload?.patente ?? payload?.cliente ?? payload?.name;
+    if (name) setDrill({ entity, name: String(name) });
+  };
 
   const handleFilter = (s: ServiceEntry[], f: FuelEntry[]) => {
     setFilteredServices(s);
@@ -177,13 +185,13 @@ export default function FullDashboard({ services, fuelEntries, onBack }: Props) 
           <div className="glass-card p-5">
             <h3 className="text-sm font-semibold text-muted-foreground mb-4 uppercase tracking-wider">Horas por Vigilador / Chofer</h3>
             <ResponsiveContainer width="100%" height={Math.max(400, byPerson.length * 30)}>
-              <BarChart data={byPerson} layout="vertical">
+              <BarChart data={byPerson} layout="vertical" onClick={openDrill("personal")}>
                 <XAxis type="number" tickFormatter={(v) => `${Math.floor(v / 60)}h`} />
-                <YAxis type="category" dataKey="nombre" width={160} tick={{ fontSize: 11 }} />
+                <YAxis type="category" dataKey="nombre" width={160} tick={{ fontSize: 11, cursor: "pointer" }} onClick={(e: any) => e?.value && setDrill({ entity: "personal", name: String(e.value) })} />
                 <Tooltip formatter={tooltipFormatter} />
                 <Legend />
-                <Bar dataKey="prod" name="Hs Productivas" fill="hsl(142, 70%, 45%)" stackId="a" />
-                <Bar dataKey="improd" name="Hs Improductivas" fill="hsl(0, 72%, 50%)" stackId="a" />
+                <Bar dataKey="prod" name="Hs Productivas" fill="hsl(142, 70%, 45%)" stackId="a" style={{ cursor: "pointer" }} />
+                <Bar dataKey="improd" name="Hs Improductivas" fill="hsl(0, 72%, 50%)" stackId="a" style={{ cursor: "pointer" }} />
               </BarChart>
             </ResponsiveContainer>
           </div>
@@ -202,13 +210,13 @@ export default function FullDashboard({ services, fuelEntries, onBack }: Props) 
           <div className="glass-card p-5">
             <h3 className="text-sm font-semibold text-muted-foreground mb-4 uppercase tracking-wider">Horas por Patente / Móvil</h3>
             <ResponsiveContainer width="100%" height={Math.max(300, byMovil.length * 35)}>
-              <BarChart data={byMovil} layout="vertical">
+              <BarChart data={byMovil} layout="vertical" onClick={openDrill("movil")}>
                 <XAxis type="number" tickFormatter={(v) => `${Math.floor(v / 60)}h`} />
-                <YAxis type="category" dataKey="patente" width={100} tick={{ fontSize: 11 }} />
+                <YAxis type="category" dataKey="patente" width={100} tick={{ fontSize: 11, cursor: "pointer" }} onClick={(e: any) => e?.value && setDrill({ entity: "movil", name: String(e.value) })} />
                 <Tooltip formatter={tooltipFormatter} />
                 <Legend />
-                <Bar dataKey="prod" name="Hs Productivas" fill="hsl(142, 70%, 45%)" stackId="a" />
-                <Bar dataKey="improd" name="Hs Improductivas" fill="hsl(0, 72%, 50%)" stackId="a" />
+                <Bar dataKey="prod" name="Hs Productivas" fill="hsl(142, 70%, 45%)" stackId="a" style={{ cursor: "pointer" }} />
+                <Bar dataKey="improd" name="Hs Improductivas" fill="hsl(0, 72%, 50%)" stackId="a" style={{ cursor: "pointer" }} />
               </BarChart>
             </ResponsiveContainer>
           </div>
@@ -227,12 +235,12 @@ export default function FullDashboard({ services, fuelEntries, onBack }: Props) 
           <div className="glass-card p-5">
             <h3 className="text-sm font-semibold text-muted-foreground mb-4 uppercase tracking-wider">Horas productivas por Cliente</h3>
             <ResponsiveContainer width="100%" height={Math.max(250, byCliente.length * 40)}>
-              <BarChart data={byCliente} layout="vertical">
+              <BarChart data={byCliente} layout="vertical" onClick={openDrill("cliente")}>
                 <XAxis type="number" tickFormatter={(v) => `${Math.floor(v / 60)}h`} />
-                <YAxis type="category" dataKey="cliente" width={150} tick={{ fontSize: 11 }} />
+                <YAxis type="category" dataKey="cliente" width={150} tick={{ fontSize: 11, cursor: "pointer" }} onClick={(e: any) => e?.value && setDrill({ entity: "cliente", name: String(e.value) })} />
                 <Tooltip formatter={tooltipFormatter} />
                 <Legend />
-                <Bar dataKey="prod" name="Hs Productivas" fill="hsl(142, 70%, 45%)" />
+                <Bar dataKey="prod" name="Hs Productivas" fill="hsl(142, 70%, 45%)" style={{ cursor: "pointer" }} />
               </BarChart>
             </ResponsiveContainer>
           </div>
@@ -241,7 +249,7 @@ export default function FullDashboard({ services, fuelEntries, onBack }: Props) 
             <h3 className="text-sm font-semibold text-muted-foreground mb-4 uppercase tracking-wider">Distribución de Servicios por Cliente</h3>
             <ResponsiveContainer width="100%" height={300}>
               <PieChart>
-                <Pie data={byCliente.map((c) => ({ name: c.cliente, value: c.servicios }))} cx="50%" cy="50%" outerRadius={100} dataKey="value" label={({ name, percent }) => `${name} ${(percent * 100).toFixed(0)}%`}>
+                <Pie data={byCliente.map((c) => ({ name: c.cliente, value: c.servicios }))} cx="50%" cy="50%" outerRadius={100} dataKey="value" label={({ name, percent }) => `${name} ${(percent * 100).toFixed(0)}%`} style={{ cursor: "pointer" }} onClick={(d: any) => d?.name && setDrill({ entity: "cliente", name: String(d.name) })}>
                   {byCliente.map((_, i) => (
                     <Cell key={i} fill={COLORS[i % COLORS.length]} />
                   ))}
@@ -259,6 +267,14 @@ export default function FullDashboard({ services, fuelEntries, onBack }: Props) 
           />
         </div>
       )}
+
+      <DrillDownDialog
+        open={!!drill}
+        onOpenChange={(v) => { if (!v) setDrill(null); }}
+        entity={drill?.entity ?? "cliente"}
+        name={drill?.name ?? null}
+        services={filteredServices}
+      />
     </div>
   );
 }
