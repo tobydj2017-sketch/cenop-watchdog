@@ -185,13 +185,13 @@ export default function FullDashboard({ services, fuelEntries, onBack }: Props) 
           <div className="glass-card p-5">
             <h3 className="text-sm font-semibold text-muted-foreground mb-4 uppercase tracking-wider">Horas por Vigilador / Chofer</h3>
             <ResponsiveContainer width="100%" height={Math.max(400, byPerson.length * 30)}>
-              <BarChart data={byPerson} layout="vertical">
+              <BarChart data={byPerson} layout="vertical" onClick={openDrill("personal")}>
                 <XAxis type="number" tickFormatter={(v) => `${Math.floor(v / 60)}h`} />
-                <YAxis type="category" dataKey="nombre" width={160} tick={{ fontSize: 11 }} />
+                <YAxis type="category" dataKey="nombre" width={160} tick={{ fontSize: 11, cursor: "pointer" }} onClick={(e: any) => e?.value && setDrill({ entity: "personal", name: String(e.value) })} />
                 <Tooltip formatter={tooltipFormatter} />
                 <Legend />
-                <Bar dataKey="prod" name="Hs Productivas" fill="hsl(142, 70%, 45%)" stackId="a" />
-                <Bar dataKey="improd" name="Hs Improductivas" fill="hsl(0, 72%, 50%)" stackId="a" />
+                <Bar dataKey="prod" name="Hs Productivas" fill="hsl(142, 70%, 45%)" stackId="a" style={{ cursor: "pointer" }} />
+                <Bar dataKey="improd" name="Hs Improductivas" fill="hsl(0, 72%, 50%)" stackId="a" style={{ cursor: "pointer" }} />
               </BarChart>
             </ResponsiveContainer>
           </div>
