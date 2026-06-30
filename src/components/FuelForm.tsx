@@ -4,6 +4,7 @@ import { Dialog, DialogContent } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { FuelEntry, generateId } from "@/lib/types";
+import { isValidDate, isFutureDate, isValidTime, findFuelDuplicate } from "@/lib/validation";
 import { MOVILES } from "@/lib/cenopData";
 import { MOVILES_INFO, LUGARES_CARGA, TIPOS_COMBUSTIBLE } from "@/lib/movilesData";
 import SearchableSelect from "@/components/SearchableSelect";
@@ -135,7 +136,19 @@ export default function FuelForm({ onAdd, selectedDate, existingEntries, allEntr
       toast.error("Seleccioná una patente");
       return;
     }
-    onAdd({
+    if (!isValidDate(form.fecha)) {
+      toast.error("La fecha no es válida o no existe");
+      return;
+    }
+    if (isFutureDate(form.fecha)) {
+      toast.error("La fecha no puede ser futura");
+      return;
+    }
+    if (form.hora && !isValidTime(form.hora)) {
+      toast.error("La hora no es válida");
+      return;
+    }
+    const candidate: FuelEntry = {
       id: generateId(),
       fecha: form.fecha,
       hora: form.hora,
@@ -158,7 +171,17 @@ export default function FuelForm({ onAdd, selectedDate, existingEntries, allEntr
       tipoCombustible: form.tipoCombustible,
       ticketImage,
       observaciones: form.observaciones,
-    });
+    };
+    const dup = findFuelDuplicate(candidate, historyEntries);
+    if (dup) {
+      toast.error(`Ya existe una carga del móvil ${dup.movil} el ${dup.fecha}${dup.hora ? ` a las ${dup.hora}` : ""}`);
+      return;
+    }
+    if (kmAnterior && Number(form.kilometraje) > 0 && Number(form.kilometraje) < Number(kmAnterior)) {
+      toast.error(`El KM actual (${form.kilometraje}) es menor que el KM anterior (${kmAnterior})`);
+      return;
+    }
+    onAdd(candidate);
     closeForm();
   };
 

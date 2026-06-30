@@ -4,6 +4,7 @@ import { Dialog, DialogContent } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { ServiceEntry, PeajeEntry, ComisionEntry, ServicioOperacionesEntry, generateId, calcTimeDiff, timeToMinutes, minutesToTime } from "@/lib/types";
+import { isValidDate, isFutureDate, findServiceCollisions, formatCollisionMessages } from "@/lib/validation";
 import { MOVILES, MOVIL_TELEFONO } from "@/lib/cenopData";
 import { getActiveClientNames } from "@/lib/clientStore";
 import { getPersonal, getActivePersonalNames } from "@/lib/personalStore";
@@ -164,9 +165,17 @@ export default function ServiceForm({ onAdd, selectedDate, existingServices }: P
       toast.error(`Ya existe un servicio con el remito "${trimmedRemito}"`);
       return;
     }
-    const hours = calculateHours();
     const fechaFinal = form.fechaServicio || selectedDate;
-    onAdd({
+    if (!isValidDate(fechaFinal)) {
+      toast.error("La fecha del servicio no es válida o no existe");
+      return;
+    }
+    if (isFutureDate(fechaFinal)) {
+      toast.error("La fecha del servicio no puede ser futura");
+      return;
+    }
+    const hours = calculateHours();
+    const candidate: ServiceEntry = {
       ...form,
       ...hours,
       id: generateId(),
@@ -177,7 +186,13 @@ export default function ServiceForm({ onAdd, selectedDate, existingServices }: P
       choferEsOperaciones: !!opsBadgeMap[form.chofer],
       custodioEsOperaciones: !!opsBadgeMap[form.custodio],
       tipoCenopOp,
-    });
+    };
+    const collisions = findServiceCollisions(candidate, existingServices);
+    if (collisions.length > 0) {
+      formatCollisionMessages(collisions).forEach((m) => toast.error(m));
+      return;
+    }
+    onAdd(candidate);
     setForm(defaultEntry);
     setPeajes([]);
     setComisiones([]);
