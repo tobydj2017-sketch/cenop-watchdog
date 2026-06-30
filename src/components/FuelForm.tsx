@@ -205,7 +205,7 @@ export default function FuelForm({ onAdd, selectedDate, existingEntries, allEntr
                 <h3 className="section-title text-base">Carga de Combustible</h3>
                 <p className="text-xs text-muted-foreground mt-1">Paso {step} de 3</p>
               </div>
-              <Button type="button" variant="ghost" size="sm" onClick={closeForm}>
+              <Button type="button" size="sm" onClick={closeForm} className="bg-background text-foreground hover:bg-background/90">
                 Cancelar
               </Button>
             </div>
@@ -293,7 +293,7 @@ export default function FuelForm({ onAdd, selectedDate, existingEntries, allEntr
             )}
 
             <div className="flex items-center justify-between gap-3 pt-2">
-              <Button type="button" variant="outline" onClick={() => setStep((s) => Math.max(1, s - 1))} disabled={step === 1} className="h-9 px-4 text-sm gap-2">
+              <Button type="button" onClick={() => setStep((s) => Math.max(1, s - 1))} disabled={step === 1} className="h-9 px-4 text-sm gap-2 bg-background text-foreground hover:bg-background/90 disabled:opacity-40">
                 <ChevronLeft className="w-4 h-4" /> Anterior
               </Button>
               {step < 3 ? (
