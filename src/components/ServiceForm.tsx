@@ -124,7 +124,7 @@ export default function ServiceForm({ onAdd, selectedDate, existingServices }: P
 
   // Comisiones
   const addComision = () => {
-    setComisiones((prev) => [...prev, { id: generateId(), descripcion: "", hora: "" }]);
+    setComisiones((prev) => [...prev, { id: generateId(), descripcion: "", persona: "", horaInicio: "", horaFin: "" }]);
   };
 
   const updateComision = (id: string, field: keyof Omit<ComisionEntry, "id">, value: string | number) => {
