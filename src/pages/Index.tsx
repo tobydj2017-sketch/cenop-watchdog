@@ -214,7 +214,7 @@ export default function Index() {
           <>
             <DashboardStats services={cleanServices} fuelEntries={fuelEntries} selectedDate={selectedDate} />
 
-            <div className="grid lg:grid-cols-2 gap-4">
+            <div className="flex flex-wrap items-center gap-3">
               <ServiceForm onAdd={handleAddService} selectedDate={selectedDate} existingServices={services} />
               <FuelForm onAdd={handleAddFuel} selectedDate={selectedDate} existingEntries={fuelEntries} />
             </div>
