@@ -347,15 +347,14 @@ export async function exportResumenPDF(
   if (y > doc.internal.pageSize.getHeight() - 60) { doc.addPage(); y = 30; }
 
   // Top 10 Clientes
-  addSectionTitle(doc, "Top 10 Clientes (por horas)", 14, y);
+  addSectionTitle(doc, "Top 10 Clientes (por horas productivas)", 14, y);
   y += 4;
 
   autoTable(doc, {
     startY: y,
-    head: [["Cliente", "Servicios", "Hs Prod.", "Hs Improd.", "Total", "Eficiencia"]],
+    head: [["Cliente", "Servicios", "Hs Prod."]],
     body: byCliente.slice(0, 10).map((c) => [
-      c.cliente, c.servicios, formatHoursMinutes(c.prod), formatHoursMinutes(c.improd),
-      formatHoursMinutes(c.total), c.total > 0 ? `${Math.round((c.prod / c.total) * 100)}%` : "—",
+      c.cliente, c.servicios, formatHoursMinutes(c.prod),
     ]),
     ...tableStyle(),
   });
