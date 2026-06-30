@@ -1,5 +1,6 @@
 import { useState, useRef, useMemo } from "react";
 import { Button } from "@/components/ui/button";
+import { Dialog, DialogContent } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { ServiceEntry, PeajeEntry, ComisionEntry, ServicioOperacionesEntry, generateId, calcTimeDiff, timeToMinutes, minutesToTime } from "@/lib/types";
@@ -240,8 +241,8 @@ export default function ServiceForm({ onAdd, selectedDate, existingServices }: P
     </div>
   );
 
-  if (!open) {
-    return (
+  return (
+    <>
       <Button
         onClick={() => {
           setForm({ ...defaultEntry, fechaServicio: selectedDate || new Date().toISOString().slice(0, 10) });
@@ -251,20 +252,20 @@ export default function ServiceForm({ onAdd, selectedDate, existingServices }: P
       >
         <Plus className="w-4 h-4" /> Cargar Nuevo Servicio
       </Button>
-    );
-  }
 
-  return (
-    <form onSubmit={handleSubmit} className="rounded-lg border border-primary/40 bg-foreground p-4 space-y-4 shadow-lg text-background max-w-4xl mx-auto text-sm">
-      <div className="flex items-center justify-between">
-        <div>
-          <h3 className="text-base font-extrabold uppercase tracking-widest text-primary">Nuevo Servicio</h3>
-          <p className="text-xs font-semibold text-muted">Paso {step} de 5</p>
-        </div>
-        <Button type="button" variant="ghost" size="sm" onClick={closeForm} className="h-8 text-background hover:text-background">
-          Cancelar
-        </Button>
-      </div>
+      <Dialog open={open} onOpenChange={(o) => { if (!o) closeForm(); }}>
+        <DialogContent className="max-w-3xl w-[95vw] max-h-[90vh] overflow-y-auto p-0 border-primary/40 bg-foreground text-background">
+          <form onSubmit={handleSubmit} className="p-5 space-y-4 text-sm">
+            <div className="flex items-center justify-between">
+              <div>
+                <h3 className="text-base font-extrabold uppercase tracking-widest text-primary">Nuevo Servicio</h3>
+                <p className="text-xs font-semibold text-muted">Paso {step} de 5</p>
+              </div>
+              <Button type="button" variant="ghost" size="sm" onClick={closeForm} className="h-8 text-background hover:text-background">
+                Cancelar
+              </Button>
+            </div>
+
 
       <div className="grid grid-cols-5 gap-1.5" aria-label="Progreso de carga de servicio">
         {["Solicitud", "Destino", "Personal", "Horarios", "Extras"].map((label, index) => {
@@ -481,6 +482,9 @@ export default function ServiceForm({ onAdd, selectedDate, existingServices }: P
           </Button>
         )}
       </div>
-    </form>
+          </form>
+        </DialogContent>
+      </Dialog>
+    </>
   );
 }
