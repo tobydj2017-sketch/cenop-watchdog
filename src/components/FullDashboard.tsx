@@ -10,6 +10,7 @@ import DashboardDiario from "@/components/dashboard/DashboardDiario";
 import DashboardRendimiento from "@/components/dashboard/DashboardRendimiento";
 import DashboardJornada from "@/components/dashboard/DashboardJornada";
 import { DataTable } from "@/components/dashboard/DataTable";
+import DrillDownDialog, { DrillDownEntity } from "@/components/dashboard/DrillDownDialog";
 import { exportResumenPDF, exportPersonalPDF, exportMovilesPDF, exportClientesPDF } from "@/lib/pdfExport";
 
 interface Props {
