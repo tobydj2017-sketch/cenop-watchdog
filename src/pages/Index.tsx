@@ -190,7 +190,7 @@ export default function Index() {
   return (
     <SidebarProvider>
       <AppSidebar activeTab={activeTab} setActiveTab={setActiveTab} navItems={navItems} />
-      <SidebarInset>
+      <SidebarInset className="min-w-0 overflow-hidden">
           {/* Encabezado */}
           <header className="sticky top-0 z-40 border-b border-border bg-card/50 backdrop-blur-sm">
             <div className="flex w-full items-center justify-between px-4 py-3">
@@ -254,7 +254,7 @@ export default function Index() {
           </header>
 
           {/* Principal */}
-          <main className="w-full mx-auto px-4 py-6 space-y-5">
+          <main className="w-full min-w-0 mx-auto px-4 py-6 space-y-5">
         {activeTab === "dashboard" ? (
           <FullDashboard
             services={cleanServices}
