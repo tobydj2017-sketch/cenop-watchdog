@@ -41,8 +41,6 @@ const defaultEntry = {
   horaFrancoCustodio: "",
   ordenCarga: "",
   remito: "",
-  kmInicio: "",
-  kmFinal: "",
   continuaOrden: "",
   observaciones: "",
 };
