@@ -109,7 +109,7 @@ export default function ServiceForm({ onAdd, selectedDate, existingServices }: P
 
   // Servicios Operaciones
   const addServicioOp = () => {
-    setServiciosOp((prev) => [...prev, { id: generateId(), cliente: "", descripcion: "", hora: "" }]);
+    setServiciosOp((prev) => [...prev, { id: generateId(), cliente: "", descripcion: "", persona: "", horaInicio: "", horaFin: "" }]);
   };
 
   const updateServicioOp = (id: string, field: keyof Omit<ServicioOperacionesEntry, "id">, value: string) => {
