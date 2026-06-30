@@ -235,12 +235,12 @@ export default function FullDashboard({ services, fuelEntries, onBack }: Props) 
           <div className="glass-card p-5">
             <h3 className="text-sm font-semibold text-muted-foreground mb-4 uppercase tracking-wider">Horas productivas por Cliente</h3>
             <ResponsiveContainer width="100%" height={Math.max(250, byCliente.length * 40)}>
-              <BarChart data={byCliente} layout="vertical">
+              <BarChart data={byCliente} layout="vertical" onClick={openDrill("cliente")}>
                 <XAxis type="number" tickFormatter={(v) => `${Math.floor(v / 60)}h`} />
-                <YAxis type="category" dataKey="cliente" width={150} tick={{ fontSize: 11 }} />
+                <YAxis type="category" dataKey="cliente" width={150} tick={{ fontSize: 11, cursor: "pointer" }} onClick={(e: any) => e?.value && setDrill({ entity: "cliente", name: String(e.value) })} />
                 <Tooltip formatter={tooltipFormatter} />
                 <Legend />
-                <Bar dataKey="prod" name="Hs Productivas" fill="hsl(142, 70%, 45%)" />
+                <Bar dataKey="prod" name="Hs Productivas" fill="hsl(142, 70%, 45%)" style={{ cursor: "pointer" }} />
               </BarChart>
             </ResponsiveContainer>
           </div>
@@ -249,7 +249,7 @@ export default function FullDashboard({ services, fuelEntries, onBack }: Props) 
             <h3 className="text-sm font-semibold text-muted-foreground mb-4 uppercase tracking-wider">Distribución de Servicios por Cliente</h3>
             <ResponsiveContainer width="100%" height={300}>
               <PieChart>
-                <Pie data={byCliente.map((c) => ({ name: c.cliente, value: c.servicios }))} cx="50%" cy="50%" outerRadius={100} dataKey="value" label={({ name, percent }) => `${name} ${(percent * 100).toFixed(0)}%`}>
+                <Pie data={byCliente.map((c) => ({ name: c.cliente, value: c.servicios }))} cx="50%" cy="50%" outerRadius={100} dataKey="value" label={({ name, percent }) => `${name} ${(percent * 100).toFixed(0)}%`} style={{ cursor: "pointer" }} onClick={(d: any) => d?.name && setDrill({ entity: "cliente", name: String(d.name) })}>
                   {byCliente.map((_, i) => (
                     <Cell key={i} fill={COLORS[i % COLORS.length]} />
                   ))}
