@@ -19,6 +19,7 @@ interface Props {
 
 const defaultEntry = {
   solicitud: 1,
+  fechaServicio: "",
   horaSolicitud: "",
   cliente: "",
   lugarSalida: "",
@@ -165,11 +166,12 @@ export default function ServiceForm({ onAdd, selectedDate, existingServices }: P
       return;
     }
     const hours = calculateHours();
+    const fechaFinal = form.fechaServicio || selectedDate;
     onAdd({
       ...form,
       ...hours,
       id: generateId(),
-      fecha: selectedDate,
+      fecha: fechaFinal,
       peajes: peajes.length > 0 ? peajes : undefined,
       comisiones: comisiones.length > 0 ? comisiones : undefined,
       serviciosOperaciones: serviciosOp.length > 0 ? serviciosOp : undefined,
@@ -201,15 +203,15 @@ export default function ServiceForm({ onAdd, selectedDate, existingServices }: P
   };
 
   const renderField = ({ label, field, type = "text", placeholder = "" }: { label: string; field: string; type?: string; placeholder?: string }) => (
-    <div className="space-y-2">
-      <Label className="text-base font-bold text-background">{label}</Label>
+    <div className="space-y-1.5">
+      <Label className="text-sm font-bold text-background">{label}</Label>
       {type === "time" ? (
         <div data-timefield={field}>
           <TimeInput
             value={(form as any)[field]}
             onChange={(v) => set(field, v)}
             onComplete={() => focusNextTimeInput(field)}
-            className="h-12 text-lg bg-background text-foreground border-input"
+            className="h-9 text-sm bg-background text-foreground border-input"
           />
         </div>
       ) : (
@@ -218,21 +220,21 @@ export default function ServiceForm({ onAdd, selectedDate, existingServices }: P
           value={(form as any)[field]}
           onChange={(e) => set(field, type === "number" ? Number(e.target.value) : e.target.value)}
           placeholder={placeholder}
-          className="h-12 text-lg bg-background text-foreground border-input placeholder:text-muted-foreground"
+          className="h-9 text-sm bg-background text-foreground border-input placeholder:text-muted-foreground"
         />
       )}
     </div>
   );
 
   const renderSelectField = ({ label, field, options, onCustomChange, showBadges }: { label: string; field: string; options: string[]; onCustomChange?: (v: string) => void; showBadges?: boolean }) => (
-    <div className="space-y-2">
-      <Label className="text-base font-bold text-background">{label}</Label>
+    <div className="space-y-1.5">
+      <Label className="text-sm font-bold text-background">{label}</Label>
       <SearchableSelect
         options={options}
         value={(form as any)[field]}
         onChange={onCustomChange || ((v) => set(field, v))}
         placeholder={`Seleccionar...`}
-        inputClassName="h-12 text-lg bg-background text-foreground border-input"
+        inputClassName="h-9 text-sm bg-background text-foreground border-input"
         badgeMap={showBadges ? opsBadgeMap : undefined}
       />
     </div>
@@ -240,25 +242,31 @@ export default function ServiceForm({ onAdd, selectedDate, existingServices }: P
 
   if (!open) {
     return (
-      <Button onClick={() => setOpen(true)} className="w-full h-14 gap-3 text-base font-bold">
+      <Button
+        onClick={() => {
+          setForm({ ...defaultEntry, fechaServicio: selectedDate || new Date().toISOString().slice(0, 10) });
+          setOpen(true);
+        }}
+        className="w-full h-12 gap-2 text-sm font-bold"
+      >
         <Plus className="w-4 h-4" /> Cargar Nuevo Servicio
       </Button>
     );
   }
 
   return (
-    <form onSubmit={handleSubmit} className="rounded-lg border border-primary/40 bg-foreground p-6 space-y-6 shadow-lg text-background">
+    <form onSubmit={handleSubmit} className="rounded-lg border border-primary/40 bg-foreground p-4 space-y-4 shadow-lg text-background max-w-4xl mx-auto text-sm">
       <div className="flex items-center justify-between">
         <div>
-          <h3 className="text-lg font-extrabold uppercase tracking-widest text-primary">Nuevo Servicio</h3>
-          <p className="text-sm font-semibold text-muted">Paso {step} de 5</p>
+          <h3 className="text-base font-extrabold uppercase tracking-widest text-primary">Nuevo Servicio</h3>
+          <p className="text-xs font-semibold text-muted">Paso {step} de 5</p>
         </div>
-        <Button type="button" variant="ghost" size="sm" onClick={closeForm} className="text-background hover:text-background">
+        <Button type="button" variant="ghost" size="sm" onClick={closeForm} className="h-8 text-background hover:text-background">
           Cancelar
         </Button>
       </div>
 
-      <div className="grid grid-cols-5 gap-2" aria-label="Progreso de carga de servicio">
+      <div className="grid grid-cols-5 gap-1.5" aria-label="Progreso de carga de servicio">
         {["Solicitud", "Destino", "Personal", "Horarios", "Extras"].map((label, index) => {
           const targetStep = index + 1;
 
@@ -268,7 +276,7 @@ export default function ServiceForm({ onAdd, selectedDate, existingServices }: P
               type="button"
               onClick={() => setStep(targetStep)}
               aria-current={step === targetStep ? "step" : undefined}
-              className={`rounded-md border px-2 py-3 text-center text-sm font-extrabold transition-colors ${
+              className={`rounded-md border px-2 py-2 text-center text-xs font-extrabold transition-colors ${
                 step === targetStep
                   ? "border-primary bg-primary text-primary-foreground"
                   : "border-border bg-background text-muted-foreground hover:border-primary/50 hover:text-foreground"
@@ -281,8 +289,8 @@ export default function ServiceForm({ onAdd, selectedDate, existingServices }: P
       </div>
 
       {step === 1 && (
-        <div className="grid md:grid-cols-2 gap-5">
-          {renderField({ label: "N°", field: "solicitud", type: "number" })}
+        <div className="grid md:grid-cols-2 gap-3">
+          {renderField({ label: "Fecha del servicio", field: "fechaServicio", type: "date" })}
           {renderField({ label: "Solicitud de Custodia", field: "horaSolicitud", type: "time" })}
           {renderSelectField({ label: "Cliente", field: "cliente", options: clientesList })}
           {renderField({ label: "Lugar de Salida", field: "lugarSalida", placeholder: "Ej: Villa Celina" })}
@@ -290,46 +298,46 @@ export default function ServiceForm({ onAdd, selectedDate, existingServices }: P
       )}
 
       {step === 2 && (
-        <div className="grid md:grid-cols-2 gap-5">
+        <div className="grid md:grid-cols-2 gap-3">
           {renderField({ label: "Destino", field: "destino" })}
           {renderSelectField({ label: "Móvil", field: "movil", options: MOVILES, onCustomChange: setMovil })}
-          <div className="space-y-2">
-            <Label className="text-base font-bold text-background">Celular</Label>
-            <Input value={form.celular} readOnly className="h-12 text-lg bg-background text-foreground border-input" />
+          <div className="space-y-1.5">
+            <Label className="text-sm font-bold text-background">Celular</Label>
+            <Input value={form.celular} readOnly className="h-9 text-sm bg-background text-foreground border-input" />
           </div>
           {renderField({ label: "Orden de Carga Cliente", field: "ordenCarga" })}
         </div>
       )}
 
       {step === 3 && (
-        <div className="grid md:grid-cols-2 gap-5">
-          <div className="space-y-2">
-            <Label className="text-base font-bold text-background flex items-center gap-2">
+        <div className="grid md:grid-cols-2 gap-3">
+          <div className="space-y-1.5">
+            <Label className="text-sm font-bold text-background flex items-center gap-2">
               Chofer
               {form.chofer && opsBadgeMap[form.chofer] && (
                 <span className="px-2 py-0.5 rounded text-xs font-bold bg-secondary text-secondary-foreground border border-border">OP</span>
               )}
             </Label>
-            <SearchableSelect options={allPersonal} value={form.chofer} onChange={(v) => set("chofer", v)} placeholder="Seleccionar..." badgeMap={roleBadgeMap} inputClassName="h-12 text-lg bg-background text-foreground border-input" />
+            <SearchableSelect options={allPersonal} value={form.chofer} onChange={(v) => set("chofer", v)} placeholder="Seleccionar..." badgeMap={roleBadgeMap} inputClassName="h-9 text-sm bg-background text-foreground border-input" />
           </div>
           {renderField({ label: "Cita Chofer", field: "citaChofer", type: "time" })}
-          <div className="space-y-2">
-            <Label className="text-base font-bold text-background flex items-center gap-2">
+          <div className="space-y-1.5">
+            <Label className="text-sm font-bold text-background flex items-center gap-2">
               Custodio
               {form.custodio && opsBadgeMap[form.custodio] && (
                 <span className="px-2 py-0.5 rounded text-xs font-bold bg-secondary text-secondary-foreground border border-border">OP</span>
               )}
             </Label>
-            <SearchableSelect options={allPersonal} value={form.custodio} onChange={(v) => set("custodio", v)} placeholder="Seleccionar..." badgeMap={roleBadgeMap} inputClassName="h-12 text-lg bg-background text-foreground border-input" />
+            <SearchableSelect options={allPersonal} value={form.custodio} onChange={(v) => set("custodio", v)} placeholder="Seleccionar..." badgeMap={roleBadgeMap} inputClassName="h-9 text-sm bg-background text-foreground border-input" />
           </div>
           {renderField({ label: "Cita Custodio", field: "citaCustodio", type: "time" })}
         </div>
       )}
 
       {step === 4 && (
-        <div className="space-y-5">
-          <p className="text-sm font-extrabold uppercase tracking-wider text-muted">Horarios del Servicio</p>
-          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-5">
+        <div className="space-y-3">
+          <p className="text-xs font-extrabold uppercase tracking-wider text-muted">Horarios del Servicio</p>
+          <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-3">
             {renderField({ label: "Salida de CENOP", field: "salidaCenop", type: "time" })}
             {renderField({ label: "Llegada a Servicio", field: "llegadaServicio", type: "time" })}
             {renderField({ label: "Inicia Servicio", field: "iniciaServicio", type: "time" })}
@@ -460,16 +468,16 @@ export default function ServiceForm({ onAdd, selectedDate, existingServices }: P
       )}
 
       <div className="flex items-center justify-between gap-3 pt-2">
-        <Button type="button" variant="outline" onClick={() => setStep((current) => Math.max(1, current - 1))} disabled={step === 1} className="h-12 px-5 text-base gap-2 bg-background text-foreground">
-          <ChevronLeft className="w-5 h-5" /> Anterior
+        <Button type="button" variant="outline" onClick={() => setStep((current) => Math.max(1, current - 1))} disabled={step === 1} className="h-9 px-4 text-sm gap-2 bg-background text-foreground">
+          <ChevronLeft className="w-4 h-4" /> Anterior
         </Button>
         {step < 5 ? (
-          <Button type="button" onClick={() => setStep((current) => Math.min(5, current + 1))} className="h-12 px-6 text-base gap-2">
-            Siguiente <ChevronRight className="w-5 h-5" />
+          <Button type="button" onClick={() => setStep((current) => Math.min(5, current + 1))} className="h-9 px-5 text-sm gap-2">
+            Siguiente <ChevronRight className="w-4 h-4" />
           </Button>
         ) : (
-          <Button type="submit" className="h-12 px-6 text-base gap-2">
-            <Plus className="w-5 h-5" /> Guardar Servicio
+          <Button type="submit" className="h-9 px-5 text-sm gap-2">
+            <Plus className="w-4 h-4" /> Guardar Servicio
           </Button>
         )}
       </div>
