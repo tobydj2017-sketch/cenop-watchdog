@@ -124,7 +124,7 @@ export default function ServiceForm({ onAdd, selectedDate, existingServices }: P
 
   // Comisiones
   const addComision = () => {
-    setComisiones((prev) => [...prev, { id: generateId(), descripcion: "", hora: "" }]);
+    setComisiones((prev) => [...prev, { id: generateId(), descripcion: "", persona: "", horaInicio: "", horaFin: "" }]);
   };
 
   const updateComision = (id: string, field: keyof Omit<ComisionEntry, "id">, value: string | number) => {
@@ -463,21 +463,40 @@ export default function ServiceForm({ onAdd, selectedDate, existingServices }: P
                   <Briefcase className="w-4 h-4" /> Agregar Comisión
                 </Button>
               </div>
-              {comisiones.map((comision, idx) => (
-                <div key={comision.id} className="grid md:grid-cols-[1fr_9rem_3rem] items-end gap-3 mb-3">
-                  <div className="space-y-2">
-                    <Label className="text-sm font-bold">Descripción #{idx + 1}</Label>
-                    <Input value={comision.descripcion} onChange={(e) => updateComision(comision.id, "descripcion", e.target.value)} placeholder="Ej: Comisión de entrega" className="h-11 text-base" />
+              {comisiones.map((comision, idx) => {
+                const dur = comision.horaInicio && comision.horaFin ? calcTimeDiff(comision.horaInicio, comision.horaFin) : "";
+                return (
+                <div key={comision.id} className="rounded-md border border-border bg-card/40 p-3 mb-3 space-y-3">
+                  <div className="grid md:grid-cols-[1fr_3rem] items-end gap-3">
+                    <div className="space-y-2">
+                      <Label className="text-sm font-bold">Descripción #{idx + 1}</Label>
+                      <Input value={comision.descripcion} onChange={(e) => updateComision(comision.id, "descripcion", e.target.value)} placeholder="Ej: Comisión de entrega" className="h-11 text-base" />
+                    </div>
+                    <Button type="button" variant="ghost" size="icon" className="h-11 w-11 text-destructive" onClick={() => removeComision(comision.id)}>
+                      <Trash2 className="w-4 h-4" />
+                    </Button>
                   </div>
-                  <div className="space-y-2">
-                    <Label className="text-sm font-bold">Hora</Label>
-                    <TimeInput value={comision.hora} onChange={(v) => updateComision(comision.id, "hora", v)} className="h-11 text-base" />
+                  <div className="grid md:grid-cols-[1fr_8rem_8rem_8rem] items-end gap-3">
+                    <div className="space-y-2">
+                      <Label className="text-sm font-bold">Realizado por</Label>
+                      <SearchableSelect options={allPersonal} value={comision.persona} onChange={(v) => updateComision(comision.id, "persona", v)} placeholder="Chofer/Custodio..." inputClassName="h-11 text-base" />
+                    </div>
+                    <div className="space-y-2">
+                      <Label className="text-sm font-bold">Hora inicio</Label>
+                      <TimeInput value={comision.horaInicio} onChange={(v) => updateComision(comision.id, "horaInicio", v)} className="h-11 text-base" />
+                    </div>
+                    <div className="space-y-2">
+                      <Label className="text-sm font-bold">Hora fin</Label>
+                      <TimeInput value={comision.horaFin} onChange={(v) => updateComision(comision.id, "horaFin", v)} className="h-11 text-base" />
+                    </div>
+                    <div className="space-y-2">
+                      <Label className="text-sm font-bold">Duración</Label>
+                      <div className="h-11 flex items-center justify-center rounded-md border border-border bg-muted/30 text-sm font-mono font-bold text-primary">{dur || "—"}</div>
+                    </div>
                   </div>
-                  <Button type="button" variant="ghost" size="icon" className="h-11 w-11 text-destructive" onClick={() => removeComision(comision.id)}>
-                    <Trash2 className="w-4 h-4" />
-                  </Button>
                 </div>
-              ))}
+                );
+              })}
             </div>
           </div>
         </div>

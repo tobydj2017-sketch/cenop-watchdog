@@ -9,7 +9,10 @@ export interface PeajeEntry {
 export interface ComisionEntry {
   id: string;
   descripcion: string;
-  hora: string;
+  hora?: string; // legacy
+  persona: string;
+  horaInicio: string;
+  horaFin: string;
 }
 
 export interface ServicioOperacionesEntry {
