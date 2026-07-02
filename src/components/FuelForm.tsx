@@ -67,7 +67,7 @@ export default function FuelForm({ onAdd, selectedDate, existingEntries, allEntr
 
   // Autocomplete al elegir móvil
   const handleMovil = (value: string) => {
-    const info = MOVILES_INFO[value];
+    const info = movilesList.find((m) => m.patente === value);
     setForm((p) => ({
       ...p,
       movil: value,
@@ -80,6 +80,7 @@ export default function FuelForm({ onAdd, selectedDate, existingEntries, allEntr
       lugarCarga: info?.lugarCarga || p.lugarCarga,
     }));
   };
+
 
   // KM anterior del móvil (última carga histórica antes de esta fecha/hora)
   const kmAnterior = useMemo(() => {
