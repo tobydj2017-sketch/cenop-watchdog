@@ -55,6 +55,7 @@ function AppGate() {
 const App = () => (
   <QueryClientProvider client={queryClient}>
     <TooltipProvider>
+      <WorldMapBackground />
       <Toaster />
       <Sonner />
       <AuthProvider>
