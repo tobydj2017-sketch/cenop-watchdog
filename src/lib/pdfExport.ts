@@ -406,14 +406,10 @@ export async function exportClientManagerPDF() {
 // ========== CENTRO DE REPORTES ==========
 export async function exportDownloadReportPDF(report: DownloadReport) {
   const numCols = report.columns.length;
-  // Elegir tamaño de página según cantidad de columnas para que el texto no se apile letra por letra
-  let format: string | [number, number] = "a4";
-  let orientation: "portrait" | "landscape" = "portrait";
-  if (numCols > 20) { format = "a2"; orientation = "landscape"; }
-  else if (numCols > 12) { format = "a3"; orientation = "landscape"; }
-  else if (numCols > 6) { orientation = "landscape"; }
-
-  const doc = new jsPDF({ orientation, format, unit: "mm" });
+  // Todos los reportes en A4 (formato de impresión de la empresa).
+  // Solo cambia la orientación según la cantidad de columnas.
+  const orientation: "portrait" | "landscape" = numCols > 6 ? "landscape" : "portrait";
+  const doc = new jsPDF({ orientation, format: "a4", unit: "mm" });
   const logoDataUrl = await loadImageAsDataUrl(AM_LOGO_PATH);
   addHeader(doc, report.title, `${report.description} | ${report.totalLabel}: ${report.totalValue}`, logoDataUrl);
 
@@ -448,6 +444,9 @@ export async function exportDownloadReportPDF(report: DownloadReport) {
     },
     bodyStyles: { ...base.bodyStyles, fontSize, cellPadding: 1.5 },
     tableWidth: "auto",
+    // Si la tabla es más ancha que la página A4, se parte en páginas horizontales
+    horizontalPageBreak: true,
+    horizontalPageBreakRepeat: 0,
   });
 
   addFooter(doc);
