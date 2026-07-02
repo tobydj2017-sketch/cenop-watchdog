@@ -321,21 +321,22 @@ export default function ServiceForm({ onAdd, selectedDate, existingServices }: P
           <div className="space-y-1.5">
             <Label className="text-sm font-bold text-background">Celular</Label>
             {(() => {
-              const info = movilesCatalog.find((m) => m.patente === form.movil);
-              const opts = (info?.telefono || "")
-                .split(/[,;/]| o /i)
-                .map((s) => s.trim())
-                .filter(Boolean);
+              const all = Array.from(new Set(
+                movilesCatalog.flatMap((m) =>
+                  (m.telefono || "").split(/[,;/]| o /i).map((s) => s.trim()).filter(Boolean)
+                )
+              )).sort();
               return (
                 <SearchableSelect
-                  options={opts}
+                  options={all}
                   value={form.celular}
                   onChange={(v) => set("celular", v)}
                   inputClassName="h-9 text-sm bg-background text-foreground border-input"
-                  placeholder={opts.length > 1 ? "Elegí un teléfono" : ""}
+                  placeholder="Elegí un teléfono"
                 />
               );
             })()}
+
           </div>
 
           {renderField({ label: "Orden de Carga Cliente", field: "ordenCarga" })}
