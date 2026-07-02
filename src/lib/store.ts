@@ -1,15 +1,16 @@
 import { ServiceEntry, FuelEntry, isCountableServiceEntry } from "./types";
 import { BLOB_KEYS, queueUpload, uploadJson } from "./azureBlob";
 
-// Purga única de todas las cargas de combustible (pedido del usuario)
+// Purga única de todas las cargas de combustible (pedido del usuario).
+// Se ejecuta DESPUÉS de bootstrapFromAzure para pisar también el remoto.
 const FUEL_WIPE_KEY = "cenop_fuel_wiped_v2";
-(function wipeFuelOnce() {
+export function wipeFuelIfNeeded() {
   if (typeof localStorage === "undefined") return;
   if (localStorage.getItem(FUEL_WIPE_KEY)) return;
   localStorage.setItem("cenop_fuel", JSON.stringify([]));
   void uploadJson(BLOB_KEYS.fuel, []);
   localStorage.setItem(FUEL_WIPE_KEY, "true");
-})();
+}
 
 // Renumerar servicios existentes por fecha (1..N ordenados por horaSolicitud)
 const RENUM_KEY = "cenop_services_renumbered_v1";
