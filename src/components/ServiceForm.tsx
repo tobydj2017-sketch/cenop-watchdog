@@ -88,12 +88,14 @@ export default function ServiceForm({ onAdd, selectedDate, existingServices }: P
 
   const setMovil = (value: string) => {
     const info = movilesCatalog.find((m) => m.patente === value);
+    const first = (info?.telefono || "").split(/[,;/]| o /i)[0]?.trim() || "";
     setForm((prev) => ({
       ...prev,
       movil: value,
-      celular: info?.telefono || prev.celular,
+      celular: first || prev.celular,
     }));
   };
+
 
 
   // Peajes
@@ -318,8 +320,24 @@ export default function ServiceForm({ onAdd, selectedDate, existingServices }: P
           {renderSelectField({ label: "Móvil", field: "movil", options: movilOptions, onCustomChange: setMovil })}
           <div className="space-y-1.5">
             <Label className="text-sm font-bold text-background">Celular</Label>
-            <Input value={form.celular} readOnly className="h-9 text-sm bg-background text-foreground border-input" />
+            {(() => {
+              const info = movilesCatalog.find((m) => m.patente === form.movil);
+              const opts = (info?.telefono || "")
+                .split(/[,;/]| o /i)
+                .map((s) => s.trim())
+                .filter(Boolean);
+              return (
+                <SearchableSelect
+                  options={opts}
+                  value={form.celular}
+                  onChange={(v) => set("celular", v)}
+                  inputClassName="h-9 text-sm bg-background text-foreground border-input"
+                  placeholder={opts.length > 1 ? "Elegí un teléfono" : ""}
+                />
+              );
+            })()}
           </div>
+
           {renderField({ label: "Orden de Carga Cliente", field: "ordenCarga" })}
         </div>
       )}

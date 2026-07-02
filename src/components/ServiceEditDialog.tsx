@@ -69,10 +69,12 @@ export default function ServiceEditDialog({ service, open, onClose, onSave, exis
 
   const setMovil = (value: string) => {
     const info = movilesCatalog.find((m) => m.patente === value);
+    const first = (info?.telefono || "").split(/[,;/]| o /i)[0]?.trim() || "";
     setForm((prev) =>
-      prev ? { ...prev, movil: value, celular: info?.telefono || prev.celular } : prev,
+      prev ? { ...prev, movil: value, celular: first || prev.celular } : prev,
     );
   };
+
 
 
   const computeHours = (f: ServiceEntry) => {
@@ -192,7 +194,26 @@ export default function ServiceEditDialog({ service, open, onClose, onSave, exis
                 <Label className="text-xs font-bold uppercase tracking-wider text-muted-foreground">Móvil</Label>
                 <SearchableSelect options={movilOptions} value={form.movil} onChange={setMovil} inputClassName="h-10" />
               </div>
-              <Field label="Celular" field="celular" />
+              <div className="space-y-1.5">
+                <Label className="text-xs font-bold uppercase tracking-wider text-muted-foreground">Celular</Label>
+                {(() => {
+                  const info = movilesCatalog.find((m) => m.patente === form.movil);
+                  const opts = (info?.telefono || "")
+                    .split(/[,;/]| o /i)
+                    .map((s) => s.trim())
+                    .filter(Boolean);
+                  return (
+                    <SearchableSelect
+                      options={opts}
+                      value={form.celular || ""}
+                      onChange={(v) => set("celular", v)}
+                      inputClassName="h-10"
+                      placeholder={opts.length > 1 ? "Elegí un teléfono" : ""}
+                    />
+                  );
+                })()}
+              </div>
+
               <Field label="Orden de Carga Cliente" field="ordenCarga" />
             </div>
           </section>
