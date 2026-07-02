@@ -183,6 +183,53 @@ export default function Index() {
     localStorage.setItem("cenop-theme", amLightTheme ? "am-light" : "dark");
   }, [amLightTheme]);
 
+  // Refrescar cuando otro navegador sube cargas nuevas y el merge las trae de vuelta.
+  useEffect(() => {
+    const onServices = () => setServices(getServices());
+    const onFuel = () => setFuelEntries(getFuelEntries());
+    window.addEventListener("cenop:services-synced", onServices);
+    window.addEventListener("cenop:fuel-synced", onFuel);
+    // También refresco periódico ligero por si otro navegador guardó recientemente.
+    const iv = setInterval(() => {
+      import("./../lib/azureBlob").then(async ({ downloadJson, BLOB_KEYS, isAzureConfigured }) => {
+        if (!isAzureConfigured()) return;
+        const [remoteSrv, remoteFuel] = await Promise.all([
+          downloadJson<any[]>(BLOB_KEYS.services),
+          downloadJson<any[]>(BLOB_KEYS.fuel),
+        ]);
+        if (Array.isArray(remoteSrv)) {
+          const localRaw = localStorage.getItem("cenop_services");
+          const local = localRaw ? JSON.parse(localRaw) : [];
+          const byId = new Map<string, any>();
+          for (const it of remoteSrv) if (it?.id) byId.set(it.id, it);
+          for (const it of local) if (it?.id) byId.set(it.id, it);
+          const merged = Array.from(byId.values());
+          if (merged.length !== local.length) {
+            localStorage.setItem("cenop_services", JSON.stringify(merged));
+            setServices(getServices());
+          }
+        }
+        if (Array.isArray(remoteFuel)) {
+          const localRaw = localStorage.getItem("cenop_fuel");
+          const local = localRaw ? JSON.parse(localRaw) : [];
+          const byId = new Map<string, any>();
+          for (const it of remoteFuel) if (it?.id) byId.set(it.id, it);
+          for (const it of local) if (it?.id) byId.set(it.id, it);
+          const merged = Array.from(byId.values());
+          if (merged.length !== local.length) {
+            localStorage.setItem("cenop_fuel", JSON.stringify(merged));
+            setFuelEntries(getFuelEntries());
+          }
+        }
+      });
+    }, 30000);
+    return () => {
+      window.removeEventListener("cenop:services-synced", onServices);
+      window.removeEventListener("cenop:fuel-synced", onFuel);
+      clearInterval(iv);
+    };
+  }, []);
+
   const handleAddService = useCallback((entry: ServiceEntry) => {
     addService(entry);
     setServices(getServices());
