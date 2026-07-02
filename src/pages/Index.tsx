@@ -43,6 +43,7 @@ import {
   getFuelEntries, addFuelEntry, deleteFuelEntry,
 } from "@/lib/store";
 import { exportCargaDiaPDF, exportPersonalManagerPDF, exportClientManagerPDF } from "@/lib/pdfExport";
+import { exportCargaDiaExcel } from "@/lib/excelExport";
 import { useAuth } from "@/lib/authContext";
 import { isOwnService } from "@/lib/authStore";
 
@@ -283,6 +284,9 @@ export default function Index() {
                 </div>
                 <Button variant="outline" size="sm" className="gap-1.5 text-xs" onClick={() => exportCargaDiaPDF(dayServices, dayFuel, selectedDate)}>
                   <Download className="w-3.5 h-3.5" /> PDF
+                </Button>
+                <Button variant="outline" size="sm" className="gap-1.5 text-xs" onClick={() => exportCargaDiaExcel(dayServices, selectedDate)}>
+                  <Download className="w-3.5 h-3.5" /> Excel
                 </Button>
               </>
             )}
