@@ -64,6 +64,22 @@ export default function ServiceDetailView({ services, onClose }: Props) {
             </h3>
             <p className="text-sm font-mono font-semibold">{s.movil || "—"}</p>
             {s.celular && <p className="text-xs text-muted-foreground">Cel: {s.celular}</p>}
+            {(s.kmSalida || s.kmLlegada || s.kmRecorridos) && (
+              <div className="grid grid-cols-3 gap-2 pt-2 border-t border-border/50 text-xs">
+                <div>
+                  <span className="text-muted-foreground block">KM Salida</span>
+                  <span className="font-mono font-semibold">{s.kmSalida || "—"}</span>
+                </div>
+                <div>
+                  <span className="text-muted-foreground block">KM Llegada</span>
+                  <span className="font-mono font-semibold">{s.kmLlegada || "—"}</span>
+                </div>
+                <div>
+                  <span className="text-muted-foreground block">KM Recorridos</span>
+                  <span className="font-mono font-semibold text-primary">{s.kmRecorridos || "—"}</span>
+                </div>
+              </div>
+            )}
           </div>
         </div>
 

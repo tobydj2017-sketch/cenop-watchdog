@@ -75,6 +75,20 @@ export default function ServiceEditDialog({ service, open, onClose, onSave, exis
     );
   };
 
+  const setKm = (field: "kmSalida" | "kmLlegada", value: string) => {
+    setForm((prev) => {
+      if (!prev) return prev;
+      const salida = field === "kmSalida" ? value : prev.kmSalida || "";
+      const llegada = field === "kmLlegada" ? value : prev.kmLlegada || "";
+      const salidaNum = parseFloat(salida);
+      const llegadaNum = parseFloat(llegada);
+      const recorridos = !isNaN(salidaNum) && !isNaN(llegadaNum) && llegadaNum >= salidaNum
+        ? String(Math.round(llegadaNum - salidaNum))
+        : "";
+      return { ...prev, [field]: value, kmRecorridos: recorridos };
+    });
+  };
+
 
 
   const computeHours = (f: ServiceEntry) => {
@@ -213,6 +227,39 @@ export default function ServiceEditDialog({ service, open, onClose, onSave, exis
                   );
                 })()}
 
+              </div>
+
+              <div className="space-y-1.5">
+                <Label className="text-xs font-bold uppercase tracking-wider text-muted-foreground">KM Salida</Label>
+                <Input
+                  type="number"
+                  min={0}
+                  value={form.kmSalida || ""}
+                  onChange={(e) => setKm("kmSalida", e.target.value)}
+                  placeholder="Ej: 45200"
+                  className="h-10"
+                />
+              </div>
+              <div className="space-y-1.5">
+                <Label className="text-xs font-bold uppercase tracking-wider text-muted-foreground">KM Llegada</Label>
+                <Input
+                  type="number"
+                  min={0}
+                  value={form.kmLlegada || ""}
+                  onChange={(e) => setKm("kmLlegada", e.target.value)}
+                  placeholder="Ej: 45680"
+                  className="h-10"
+                />
+              </div>
+              <div className="space-y-1.5">
+                <Label className="text-xs font-bold uppercase tracking-wider text-muted-foreground">KM Recorridos</Label>
+                <Input
+                  type="number"
+                  value={form.kmRecorridos || ""}
+                  readOnly
+                  placeholder="Auto"
+                  className="h-10 bg-muted font-mono font-bold"
+                />
               </div>
 
               <Field label="Orden de Carga Cliente" field="ordenCarga" />
