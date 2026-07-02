@@ -71,6 +71,44 @@ export function queueUpload(blobName: string, getData: () => unknown, delayMs = 
   pending.set(blobName, t);
 }
 
+// Sube MERGEANDO con lo remoto por id. Local pisa a remoto en conflictos,
+// pero jamás se pierde lo que otro navegador haya cargado.
+// Devuelve el array final mergeado (o el local si Azure no está configurado).
+export async function uploadMergedById<T extends { id?: string }>(
+  blobName: string,
+  local: T[],
+): Promise<T[]> {
+  if (!isAzureConfigured()) return local;
+  const remote = (await downloadJson<T[]>(blobName)) ?? [];
+  const byId = new Map<string, T>();
+  for (const item of remote) if (item && item.id) byId.set(item.id, item);
+  for (const item of local) if (item && item.id) byId.set(item.id, item);
+  const merged = Array.from(byId.values());
+  await uploadJson(blobName, merged);
+  return merged;
+}
+
+const pendingMerge = new Map<string, ReturnType<typeof setTimeout>>();
+export function queueUploadMerged<T extends { id?: string }>(
+  blobName: string,
+  getLocal: () => T[],
+  onMerged: (merged: T[]) => void,
+  delayMs = 600,
+) {
+  const existing = pendingMerge.get(blobName);
+  if (existing) clearTimeout(existing);
+  const t = setTimeout(async () => {
+    pendingMerge.delete(blobName);
+    try {
+      const merged = await uploadMergedById(blobName, getLocal());
+      onMerged(merged);
+    } catch (err) {
+      console.warn(`[Azure] merge upload ${blobName} falló:`, err);
+    }
+  }, delayMs);
+  pendingMerge.set(blobName, t);
+}
+
 // ----- Bootstrap: descarga inicial -----
 export const BLOB_KEYS = {
   services: "services.json",
