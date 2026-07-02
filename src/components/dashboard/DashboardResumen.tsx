@@ -199,7 +199,7 @@ export default function DashboardResumen({ services, fuelEntries, byPerson, byMo
 function KpiDetailPanel({ detail, totalHoras, totalServicios }: { detail: KpiDetail; totalHoras: number; totalServicios: number }) {
   const xKey = detail.xKey || "name";
   const formatter = detail.formatter || tooltipFormatter;
-  const chartHeight = Math.max(320, Math.min(800, detail.data.length * 32));
+  const chartHeight = Math.max(320, Math.min(900, detail.data.length * 42));
 
   return (
     <div className="glass-card p-5 space-y-5 border-primary/40">
