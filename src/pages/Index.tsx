@@ -30,6 +30,7 @@ import DashboardReportes from "@/components/dashboard/DashboardReportes";
 import PersonalManager from "@/components/PersonalManager";
 import ClientManager from "@/components/ClientManager";
 import UserManager from "@/components/UserManager";
+import amCustodiasAsset from "@/assets/am-custodias.png.asset.json";
 import { ServiceEntry, FuelEntry, isCountableServiceEntry } from "@/lib/types";
 import {
   getServices, addService, deleteService, updateService,
