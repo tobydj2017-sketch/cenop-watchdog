@@ -43,6 +43,7 @@ import {
   getFuelEntries, addFuelEntry, deleteFuelEntry,
 } from "@/lib/store";
 import { exportCargaDiaPDF, exportPersonalManagerPDF, exportClientManagerPDF } from "@/lib/pdfExport";
+import { exportCargaDiaExcel } from "@/lib/excelExport";
 import { useAuth } from "@/lib/authContext";
 import { isOwnService } from "@/lib/authStore";
 
