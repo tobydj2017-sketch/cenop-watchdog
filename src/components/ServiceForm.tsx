@@ -179,8 +179,9 @@ export default function ServiceForm({ onAdd, selectedDate, existingServices }: P
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
+    // Solo se guarda desde el paso final (Extras). En pasos previos, Enter no avanza
+    // ni guarda: el usuario debe usar el botón "Siguiente" para llegar a Extras.
     if (step < 5) {
-      setStep((current) => Math.min(5, current + 1));
       return;
     }
     const trimmedRemito = form.remito.trim();
