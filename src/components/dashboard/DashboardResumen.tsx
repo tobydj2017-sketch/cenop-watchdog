@@ -181,10 +181,10 @@ export default function DashboardResumen({ services, fuelEntries, byPerson, byMo
           <h3 className="text-sm font-semibold text-muted-foreground mb-4 uppercase tracking-wider">
             {topPersonalCount > 0 ? `Top ${topPersonalCount} Personal por Horas` : "Personal por Horas"}
           </h3>
-          <ResponsiveContainer width="100%" height={250}>
+          <ResponsiveContainer width="100%" height={300}>
             <BarChart data={byPerson.slice(0, 10)} layout="vertical">
               <XAxis type="number" tickFormatter={(v) => `${Math.floor(v / 60)}h`} />
-              <YAxis type="category" dataKey="nombre" width={120} interval={0} tick={{ fontSize: 11 }} />
+              <YAxis type="category" dataKey="nombre" width={200} interval={0} tick={{ fontSize: 9 }} tickFormatter={(name) => typeof name === "string" && name.length > 20 ? `${name.slice(0, 20)}…` : name} />
               <Tooltip formatter={tooltipFormatter} />
               <Bar dataKey="prod" name="Productivas" fill="hsl(142, 70%, 45%)" stackId="a" />
               <Bar dataKey="improd" name="Improductivas" fill="hsl(0, 72%, 50%)" stackId="a" />
