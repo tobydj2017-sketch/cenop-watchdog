@@ -1,5 +1,15 @@
 import { ServiceEntry, FuelEntry, isCountableServiceEntry } from "./types";
-import { BLOB_KEYS, queueUpload } from "./azureBlob";
+import { BLOB_KEYS, queueUpload, uploadJson } from "./azureBlob";
+
+// Purga única de todas las cargas de combustible (pedido del usuario)
+const FUEL_WIPE_KEY = "cenop_fuel_wiped_v1";
+(function wipeFuelOnce() {
+  if (typeof localStorage === "undefined") return;
+  if (localStorage.getItem(FUEL_WIPE_KEY)) return;
+  localStorage.setItem("cenop_fuel", JSON.stringify([]));
+  void uploadJson(BLOB_KEYS.fuel, []);
+  localStorage.setItem(FUEL_WIPE_KEY, "true");
+})();
 
 const SERVICES_KEY = "cenop_services";
 const FUEL_KEY = "cenop_fuel";
