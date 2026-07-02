@@ -29,7 +29,9 @@ import FullDashboard from "@/components/FullDashboard";
 import DashboardReportes from "@/components/dashboard/DashboardReportes";
 import PersonalManager from "@/components/PersonalManager";
 import ClientManager from "@/components/ClientManager";
+import MovilesManager from "@/components/MovilesManager";
 import UserManager from "@/components/UserManager";
+
 import amCustodiasDoorAsset from "@/assets/am-custodias-door-400.png.asset.json";
 import { ServiceEntry, FuelEntry, isCountableServiceEntry } from "@/lib/types";
 import {
