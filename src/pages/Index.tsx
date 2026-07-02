@@ -64,22 +64,37 @@ function AppSidebar({
   const collapsed = state === "collapsed";
 
   return (
-    <Sidebar collapsible="icon" className="border-sidebar-border">
-      <SidebarHeader className="p-3">
-        <div className="flex items-center gap-3 rounded-lg px-1 py-2">
-          <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-sidebar-primary/10 glow-amber">
+    <Sidebar collapsible="icon" className="border-sidebar-border [&>[data-sidebar=sidebar]]:relative [&>[data-sidebar=sidebar]]:overflow-hidden">
+      {/* Foto de fondo ocupando toda la sidebar (solo cuando está expandida) */}
+      {!collapsed && (
+        <div className="pointer-events-none absolute inset-0 z-0 overflow-hidden">
+          <img
+            src={amCustodiasAsset.url}
+            alt="AM Seguridad — División Custodias"
+            className="absolute inset-0 h-full w-full object-cover animate-ken-burns"
+            style={{ objectPosition: "70% center" }}
+          />
+          {/* Overlay oscuro para legibilidad del menú */}
+          <div className="absolute inset-0 bg-gradient-to-b from-sidebar-background/85 via-sidebar-background/70 to-sidebar-background/95" />
+          <div className="absolute inset-0 bg-gradient-to-r from-sidebar-background/60 to-transparent" />
+        </div>
+      )}
+
+      <SidebarHeader className="relative z-10 p-3">
+        <div className="flex items-center gap-3 rounded-lg px-1 py-2 backdrop-blur-sm">
+          <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-sidebar-primary/20 glow-amber">
             <Shield className="h-5 w-5 text-sidebar-primary" />
           </div>
           {!collapsed && (
             <div className="min-w-0">
-              <h1 className="text-base font-bold tracking-tight text-sidebar-foreground">CENOP</h1>
-              <p className="truncate text-xs text-sidebar-foreground/65">AM Seguridad</p>
+              <h1 className="text-base font-bold tracking-tight text-sidebar-foreground drop-shadow">CENOP</h1>
+              <p className="truncate text-xs text-sidebar-foreground/80 drop-shadow">AM Seguridad</p>
             </div>
           )}
         </div>
       </SidebarHeader>
-      <SidebarSeparator />
-      <SidebarContent>
+      <SidebarSeparator className="relative z-10" />
+      <SidebarContent className="relative z-10">
         <SidebarGroup>
           <SidebarGroupContent>
             <SidebarMenu>
@@ -89,7 +104,7 @@ function AppSidebar({
                     tooltip={label}
                     isActive={activeTab === key}
                     onClick={() => setActiveTab(key as AppTab)}
-                    className="h-10 text-sidebar-foreground data-[active=true]:bg-sidebar-primary data-[active=true]:text-sidebar-primary-foreground"
+                    className="h-10 text-sidebar-foreground backdrop-blur-sm bg-sidebar-background/40 hover:bg-sidebar-accent/70 data-[active=true]:bg-sidebar-primary data-[active=true]:text-sidebar-primary-foreground"
                   >
                     <Icon className="h-4 w-4" />
                     <span>{label}</span>
@@ -100,33 +115,17 @@ function AppSidebar({
           </SidebarGroupContent>
         </SidebarGroup>
       </SidebarContent>
-      {!collapsed && (
-        <div className="px-3 pb-2">
-          <div className="relative overflow-hidden rounded-lg border border-sidebar-border/60 aspect-[4/5] group">
-            <img
-              src={amCustodiasAsset.url}
-              alt="AM Seguridad — División Custodias"
-              className="absolute inset-0 h-full w-full object-cover animate-ken-burns"
-              loading="lazy"
-            />
-            {/* Gradient overlay para legibilidad y estética */}
-            <div className="absolute inset-0 bg-gradient-to-t from-sidebar-background via-sidebar-background/40 to-transparent" />
-            {/* Sutil brillo animado */}
-            <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-700 bg-gradient-to-tr from-primary/10 via-transparent to-primary/5" />
-            <div className="absolute bottom-2 left-2 right-2">
-              <p className="text-[10px] font-bold uppercase tracking-widest text-sidebar-primary">
-                División Custodias
-              </p>
-              <p className="text-[9px] text-sidebar-foreground/70 leading-tight">
-                amseguridad.com.ar
-              </p>
-            </div>
+      <SidebarFooter className="relative z-10 p-3 text-xs text-sidebar-foreground/80">
+        {!collapsed && (
+          <div className="rounded-md bg-sidebar-background/60 backdrop-blur-sm px-2 py-1.5">
+            <p className="text-[10px] font-bold uppercase tracking-widest text-sidebar-primary">
+              División Custodias
+            </p>
+            <p className="text-[10px] text-sidebar-foreground/70">Control Operativo</p>
           </div>
-        </div>
-      )}
-      <SidebarFooter className="p-3 text-xs text-sidebar-foreground/60">
-        {!collapsed && <span>Control Operativo</span>}
+        )}
       </SidebarFooter>
+
 
       <SidebarRail />
     </Sidebar>
