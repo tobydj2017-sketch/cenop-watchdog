@@ -253,6 +253,21 @@ export default function PersonalManager() {
                       )}
                     </td>
                     <td className="px-4 py-2.5">
+                      <Input
+                        defaultValue={p.telefono || ""}
+                        placeholder="—"
+                        className="h-7 text-xs w-40"
+                        onBlur={(e) => {
+                          const val = e.target.value.trim();
+                          if (val !== (p.telefono || "")) {
+                            updatePersonal(p.id, { telefono: val });
+                            refresh();
+                            toast.success("Teléfono actualizado");
+                          }
+                        }}
+                      />
+
+                    <td className="px-4 py-2.5">
                       <div className="flex flex-wrap gap-1.5 justify-center">
                         {ALL_ROLES.map((role) => {
                           const effectiveRoles = pendingChanges[p.id] ?? p.roles;
