@@ -69,10 +69,12 @@ export default function ServiceEditDialog({ service, open, onClose, onSave, exis
 
   const setMovil = (value: string) => {
     const info = movilesCatalog.find((m) => m.patente === value);
+    const first = (info?.telefono || "").split(/[,;/]| o /i)[0]?.trim() || "";
     setForm((prev) =>
-      prev ? { ...prev, movil: value, celular: info?.telefono || prev.celular } : prev,
+      prev ? { ...prev, movil: value, celular: first || prev.celular } : prev,
     );
   };
+
 
 
   const computeHours = (f: ServiceEntry) => {
