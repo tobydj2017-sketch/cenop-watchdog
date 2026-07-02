@@ -3,48 +3,22 @@ import { BLOB_KEYS, queueUpload } from "./azureBlob";
 
 const SERVICES_KEY = "cenop_services";
 const FUEL_KEY = "cenop_fuel";
-const CUTOFF_DATE = "2026-07-01"; // Se descartan cargas anteriores a esta fecha
-const PURGE_KEY = "cenop_purged_pre_2026_07_01";
+// Descartar solo cargas de 2025 o anteriores (mantener todo 2026+)
+const CUTOFF_DATE = "2026-01-01";
 
-function purgeLegacyData() {
-  if (localStorage.getItem(PURGE_KEY)) return;
-  const servicesRaw = localStorage.getItem(SERVICES_KEY);
-  if (servicesRaw) {
-    try {
-      const parsed: ServiceEntry[] = JSON.parse(servicesRaw);
-      const kept = parsed.filter((s) => (s.fecha || "") >= CUTOFF_DATE);
-      localStorage.setItem(SERVICES_KEY, JSON.stringify(kept));
-      queueUpload(BLOB_KEYS.services, () => kept.filter(isCountableServiceEntry));
-    } catch {
-      localStorage.removeItem(SERVICES_KEY);
-    }
-  }
-  const fuelRaw = localStorage.getItem(FUEL_KEY);
-  if (fuelRaw) {
-    try {
-      const parsed: FuelEntry[] = JSON.parse(fuelRaw);
-      const kept = parsed.filter((f) => (f.fecha || "") >= CUTOFF_DATE);
-      localStorage.setItem(FUEL_KEY, JSON.stringify(kept));
-      queueUpload(BLOB_KEYS.fuel, () => kept);
-    } catch {
-      localStorage.removeItem(FUEL_KEY);
-    }
-  }
-  // Limpiar la vieja bandera de seed para que no reingrese data de 2025
-  localStorage.removeItem("cenop_seeded_v2");
-  localStorage.setItem(PURGE_KEY, "true");
+function isLegacy(fecha: string | undefined): boolean {
+  return !!fecha && fecha < CUTOFF_DATE;
 }
 
 export function getServices(): ServiceEntry[] {
-  purgeLegacyData();
   const data = localStorage.getItem(SERVICES_KEY);
   const parsed: ServiceEntry[] = data ? JSON.parse(data) : [];
-  return parsed.filter(isCountableServiceEntry).filter((s) => (s.fecha || "") >= CUTOFF_DATE);
+  return parsed.filter(isCountableServiceEntry).filter((s) => !isLegacy(s.fecha));
 }
 
 
 export function saveServices(entries: ServiceEntry[]) {
-  const clean = entries.filter(isCountableServiceEntry);
+  const clean = entries.filter(isCountableServiceEntry).filter((s) => !isLegacy(s.fecha));
   localStorage.setItem(SERVICES_KEY, JSON.stringify(clean));
   queueUpload(BLOB_KEYS.services, () => clean);
 }
@@ -65,10 +39,9 @@ export function updateService(entry: ServiceEntry) {
 }
 
 export function getFuelEntries(): FuelEntry[] {
-  purgeLegacyData();
   const data = localStorage.getItem(FUEL_KEY);
   const parsed: FuelEntry[] = data ? JSON.parse(data) : [];
-  return parsed.filter((f) => (f.fecha || "") >= CUTOFF_DATE);
+  return parsed.filter((f) => !isLegacy(f.fecha));
 }
 
 export function saveFuelEntries(entries: FuelEntry[]) {
