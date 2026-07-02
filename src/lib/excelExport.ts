@@ -3,27 +3,47 @@ import { DownloadReport } from "./reportAnalytics";
 import { ServiceEntry } from "./types";
 import { cleanTime } from "./formatTime";
 
+function diffHoras(inicio: string, fin: string): string {
+  const a = cleanTime(inicio);
+  const b = cleanTime(fin);
+  const parse = (t: string) => {
+    const m = /^(\d{1,2}):(\d{2})$/.exec(t);
+    if (!m) return null;
+    return parseInt(m[1], 10) * 60 + parseInt(m[2], 10);
+  };
+  const ma = parse(a);
+  const mb = parse(b);
+  if (ma == null || mb == null) return "—";
+  let diff = mb - ma;
+  if (diff < 0) diff += 24 * 60;
+  const h = Math.floor(diff / 60);
+  const mm = diff % 60;
+  return `${h}h ${mm.toString().padStart(2, "0")}m`;
+}
+
 export function exportCargaDiaExcel(services: ServiceEntry[], fecha: string) {
   const fechaLabel = fecha ? fecha.split("-").reverse().join("/") : "Todas";
   const columns = [
     "N°",
     "Nombre del Chofer",
     "Cita del Chofer",
+    "Hora de Franco Chofer",
+    "Total Horas Chofer",
     "Nombre del Custodio",
     "Cita del Custodio",
-    "Hora de Franco Chofer",
     "Hora de Franco Custodio",
-    "Total de Horas",
+    "Total Horas Custodio",
   ];
   const rows = services.map((s) => [
     s.solicitud,
     s.chofer || "—",
     cleanTime(s.citaChofer) || "—",
+    cleanTime(s.horaFrancoChofer) || "—",
+    diffHoras(s.citaChofer, s.horaFrancoChofer),
     s.custodio || "—",
     cleanTime(s.citaCustodio) || "—",
-    cleanTime(s.horaFrancoChofer) || "—",
     cleanTime(s.horaFrancoCustodio) || "—",
-    cleanTime(s.horasTotales) || "—",
+    diffHoras(s.citaCustodio, s.horaFrancoCustodio),
   ]);
   const aoa: (string | number)[][] = [
     [`Carga del día: ${fechaLabel}`],
