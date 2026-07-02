@@ -2,7 +2,7 @@ import { ServiceEntry, FuelEntry, isCountableServiceEntry } from "./types";
 import { BLOB_KEYS, queueUpload, uploadJson } from "./azureBlob";
 
 // Purga única de todas las cargas de combustible (pedido del usuario)
-const FUEL_WIPE_KEY = "cenop_fuel_wiped_v1";
+const FUEL_WIPE_KEY = "cenop_fuel_wiped_v2";
 (function wipeFuelOnce() {
   if (typeof localStorage === "undefined") return;
   if (localStorage.getItem(FUEL_WIPE_KEY)) return;
