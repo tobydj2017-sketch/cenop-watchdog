@@ -28,7 +28,9 @@ function AppGate() {
     getFuelEntries();
     getClients();
     getPersonal();
+    getMoviles();
     bootstrapFromAzure().finally(() => setDataReady(true));
+
   }, []);
 
   if (!ready || !dataReady) {
