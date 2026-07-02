@@ -65,8 +65,10 @@ export function updateService(entry: ServiceEntry) {
 }
 
 export function getFuelEntries(): FuelEntry[] {
+  purgeLegacyData();
   const data = localStorage.getItem(FUEL_KEY);
-  return data ? JSON.parse(data) : [];
+  const parsed: FuelEntry[] = data ? JSON.parse(data) : [];
+  return parsed.filter((f) => (f.fecha || "") >= CUTOFF_DATE);
 }
 
 export function saveFuelEntries(entries: FuelEntry[]) {
