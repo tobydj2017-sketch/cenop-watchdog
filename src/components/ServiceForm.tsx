@@ -276,7 +276,7 @@ export default function ServiceForm({ onAdd, selectedDate, existingServices }: P
 
   const nextSolicitudFor = (fecha: string): number => {
     const nums = existingServices
-      .filter((s) => (s.fecha || s.fechaServicio) === fecha)
+      .filter((s) => (s.fecha || (s as any).fechaServicio) === fecha)
       .map((s) => Number(s.solicitud) || 0);
     return (nums.length ? Math.max(...nums) : 0) + 1;
   };
