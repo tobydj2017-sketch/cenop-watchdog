@@ -191,84 +191,71 @@ function tableStyle() {
 }
 
 // ========== CARGA DE DATOS ==========
+// PDF pensado para choferes y custodios: se imprime en A4 y se lee desde el celular.
+// Solo incluye la información necesaria para saber a qué hora presentarse y a dónde ir.
 export async function exportCargaDiaPDF(services: ServiceEntry[], fuel: FuelEntry[], fecha: string) {
-  const doc = new jsPDF({ orientation: "landscape", format: "a4", unit: "mm" });
+  const doc = new jsPDF({ orientation: "portrait", format: "a4", unit: "mm" });
   const logoDataUrl = await loadImageAsDataUrl(AM_LOGO_PATH);
   const fechaLabel = fecha ? fecha.split("-").reverse().join("/") : "Todas las fechas";
-  addHeader(doc, `Carga de Datos — ${fechaLabel}`, `Servicios: ${services.length} | Combustible: ${fuel.length} entradas`, logoDataUrl);
+  addHeader(doc, `Servicios del Día — ${fechaLabel}`, `Total de servicios: ${services.length}`, logoDataUrl);
 
   let startY = 56;
 
   if (services.length > 0) {
-    addSectionTitle(doc, "Servicios del Día", 14, startY);
-    startY += 4;
-
     autoTable(doc, {
       startY,
       head: [[
-        "Fecha", "N°", "Solicitud", "Cliente", "Lugar Salida", "Destino", "Chofer", "Cita Chofer",
-        "Custodio", "Cita Custodio", "Móvil", "Celular", "Salida CENOP", "Llegada Servicio",
-        "Inicia Servicio", "Llegada Destino", "Finaliza Servicio", "Llegada CENOP", "Franco Chofer",
-        "Franco Custodio", "Orden Carga", "Remito", "Continúa Orden", "Observaciones",
-        "Hs Prod.", "Hs Improd. 1", "Hs Improd. 2", "Hs Improd.", "Hs Total",
-        "KM Salida", "KM Llegada", "KM Recorridos", "Tipo Cruzado", "Servicios Cruzados",
-        "Comisiones", "Peajes", "Detalle Peajes",
+        "N°", "Cliente", "Salida → Destino",
+        "Chofer", "Cita\nChofer",
+        "Custodio", "Cita\nCustodio",
+        "Móvil", "Celular", "Observaciones",
       ]],
       body: services.map((s) => [
-        s.fecha ? s.fecha.split("-").reverse().join("/") : "—",
-        s.solicitud,
-        cleanTime(s.horaSolicitud) || "—",
-        s.cliente,
-        s.lugarSalida || "—",
-        s.destino,
+        String(s.solicitud || "—"),
+        s.cliente || "—",
+        `${s.lugarSalida || "—"}\n→ ${s.destino || "—"}`,
         s.chofer || "—",
         cleanTime(s.citaChofer) || "—",
         s.custodio || "—",
         cleanTime(s.citaCustodio) || "—",
-        s.movil,
+        s.movil || "—",
         s.celular || "—",
-        cleanTime(s.salidaCenop),
-        cleanTime(s.llegadaServicio) || "—",
-        cleanTime(s.iniciaServicio) || "—",
-        cleanTime(s.llegadaDestino) || "—",
-        cleanTime(s.finalizaServicio),
-        cleanTime(s.llegadaCenop) || "—",
-        cleanTime(s.horaFrancoChofer) || "—",
-        cleanTime(s.horaFrancoCustodio) || "—",
-        s.ordenCarga || "—",
-        s.remito || "—",
-        s.continuaOrden || "—",
         s.observaciones || "—",
-        cleanTime(s.horasProductivas),
-        cleanTime(s.horasImproductivas1) || "—",
-        cleanTime(s.horasImproductivas2) || "—",
-        cleanTime(s.horasImproductivas),
-        cleanTime(s.horasTotales),
-        s.kmSalida || "—",
-        s.kmLlegada || "—",
-        s.kmRecorridos || "—",
-        servicioCruzadoTipo(s),
-        serviciosCruzadosDetalle(s),
-        comisionesDetalle(s),
-        peajesTotal(s) ? money(peajesTotal(s)) : "—",
-        peajesDetalle(s),
       ]),
       margin: { left: 8, right: 8 },
-      headStyles: { fillColor: HEADER_BG, textColor: PRIMARY_COLOR, fontStyle: "bold", fontSize: 5.5, cellPadding: 1.2, halign: "center", valign: "middle" },
-      bodyStyles: { fontSize: 5, cellPadding: 1, valign: "middle" },
-      alternateRowStyles: { fillColor: [252, 252, 252] as [number, number, number] },
-      styles: { lineColor: [220, 220, 220] as [number, number, number], lineWidth: 0.2, overflow: "linebreak" },
+      headStyles: {
+        fillColor: AM_GREEN,
+        textColor: [255, 255, 255],
+        fontStyle: "bold",
+        fontSize: 8,
+        cellPadding: 2,
+        halign: "center",
+        valign: "middle",
+      },
+      bodyStyles: { fontSize: 8, cellPadding: 2, valign: "middle" },
+      alternateRowStyles: { fillColor: [248, 250, 248] as [number, number, number] },
+      styles: { lineColor: [200, 200, 200] as [number, number, number], lineWidth: 0.2, overflow: "linebreak" },
+      columnStyles: {
+        0: { cellWidth: 10, halign: "center", fontStyle: "bold" },
+        1: { cellWidth: 22 },
+        2: { cellWidth: 40 },
+        3: { cellWidth: 24 },
+        4: { cellWidth: 12, halign: "center", fontStyle: "bold" },
+        5: { cellWidth: 24 },
+        6: { cellWidth: 12, halign: "center", fontStyle: "bold" },
+        7: { cellWidth: 15, halign: "center" },
+        8: { cellWidth: 22, halign: "center" },
+        9: { cellWidth: "auto" },
+      },
       tableWidth: "auto",
-      horizontalPageBreak: true,
-      horizontalPageBreakRepeat: 0,
     });
 
-    startY = (doc as any).lastAutoTable.finalY + 12;
+    startY = (doc as any).lastAutoTable.finalY + 8;
   }
 
+  // Combustible: solo lo esencial para chofer (móvil, litros, monto, estación).
   if (fuel.length > 0) {
-    // Check if we need a new page
-    if (startY > doc.internal.pageSize.getHeight() - 60) {
+    if (startY > doc.internal.pageSize.getHeight() - 50) {
       doc.addPage();
       startY = 30;
     }
@@ -277,43 +264,33 @@ export async function exportCargaDiaPDF(services: ServiceEntry[], fuel: FuelEntr
 
     autoTable(doc, {
       startY,
-      head: [["Fecha", "Hora", "Móvil", "Chofer", "Marca", "Modelo", "Año", "Tipo", "KM Anterior", "KM Actual", "KM Recorridos", "Litros", "KM/L", "Consumo Ideal", "Monto", "$/L", "Lugar", "Estación", "Remito", "Observaciones", "Ticket"]],
+      head: [["Hora", "Móvil", "Chofer", "Litros", "Monto", "Estación"]],
       body: fuel.map((f) => [
-        f.fecha ? f.fecha.split("-").reverse().join("/") : "—",
         cleanTime(f.hora) || "—",
         f.movil || "—",
         f.chofer || "—",
-        f.marca || "—",
-        f.modelo || "—",
-        f.anio || "—",
-        f.tipoCombustible || "—",
-        f.kmAnterior || "—",
-        f.kilometraje || "—",
-        f.kmRecorridos || "—",
         `${f.litros}L`,
-        f.kmPorLitro || "—",
-        f.consumoIdeal || "—",
         `$${f.monto.toLocaleString("es-AR")}`,
-        f.precioPorLitro ? `$${f.precioPorLitro.toLocaleString("es-AR")}` : (f.litros > 0 ? `$${(f.monto / f.litros).toFixed(2)}` : "—"),
-        f.lugarCarga || "—",
-        f.estacion || "—",
-        f.numeroRemito || "—",
-        f.observaciones || "—",
-        f.ticketImage ? "Sí" : "No",
+        f.estacion || f.lugarCarga || "—",
       ]),
       margin: { left: 8, right: 8 },
-      headStyles: { fillColor: HEADER_BG, textColor: PRIMARY_COLOR, fontStyle: "bold", fontSize: 6, cellPadding: 1.4, halign: "center", valign: "middle" },
-      bodyStyles: { fontSize: 5.5, cellPadding: 1.1, valign: "middle" },
-      alternateRowStyles: { fillColor: [252, 252, 252] as [number, number, number] },
-      styles: { lineColor: [220, 220, 220] as [number, number, number], lineWidth: 0.2, overflow: "linebreak" },
+      headStyles: {
+        fillColor: AM_GREEN,
+        textColor: [255, 255, 255],
+        fontStyle: "bold",
+        fontSize: 8,
+        cellPadding: 2,
+        halign: "center",
+      },
+      bodyStyles: { fontSize: 8, cellPadding: 2, valign: "middle" },
+      alternateRowStyles: { fillColor: [248, 250, 248] as [number, number, number] },
+      styles: { lineColor: [200, 200, 200] as [number, number, number], lineWidth: 0.2, overflow: "linebreak" },
       tableWidth: "auto",
-      horizontalPageBreak: true,
-      horizontalPageBreakRepeat: 0,
     });
   }
 
   addFooter(doc);
-  doc.save(`CENOP_Carga_${fecha}.pdf`);
+  doc.save(`CENOP_Servicios_${fecha}.pdf`);
 }
 
 // ========== DASHBOARD PERSONAL ==========
