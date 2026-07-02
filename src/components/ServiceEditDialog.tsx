@@ -8,7 +8,7 @@ import SearchableSelect from "@/components/SearchableSelect";
 import TimeInput from "@/components/TimeInput";
 import { ServiceEntry, PeajeEntry, ComisionEntry, ServicioOperacionesEntry, generateId, calcTimeDiff, timeToMinutes, minutesToTime } from "@/lib/types";
 import { isValidDate, findServiceCollisions, formatCollisionMessages } from "@/lib/validation";
-import { MOVILES, MOVIL_TELEFONO } from "@/lib/cenopData";
+import { getMoviles } from "@/lib/movilesStore";
 import { getActiveClientNames } from "@/lib/clientStore";
 import { getPersonal, getActivePersonalNames } from "@/lib/personalStore";
 import { Plus, Trash2, Save } from "lucide-react";
