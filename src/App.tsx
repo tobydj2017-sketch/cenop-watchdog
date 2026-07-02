@@ -29,7 +29,10 @@ function AppGate() {
     getClients();
     getPersonal();
     getMoviles();
-    bootstrapFromAzure().finally(() => setDataReady(true));
+    bootstrapFromAzure().finally(() => {
+      import("./lib/store").then(({ wipeFuelIfNeeded }) => wipeFuelIfNeeded());
+      setDataReady(true);
+    });
 
   }, []);
 
