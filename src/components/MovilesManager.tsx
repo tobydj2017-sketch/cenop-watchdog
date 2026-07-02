@@ -167,7 +167,7 @@ export default function MovilesManager() {
                 <th className="text-left px-2 py-2 font-semibold">Combustible</th>
                 <th className="text-left px-2 py-2 font-semibold">Asignación</th>
                 <th className="text-left px-2 py-2 font-semibold">Lugar de carga</th>
-                <th className="text-left px-2 py-2 font-semibold">Teléfono</th>
+                <th className="text-left px-2 py-2 font-semibold">Teléfonos <span className="font-normal text-muted-foreground">(separá con coma)</span></th>
                 <th className="text-center px-2 py-2 font-semibold w-16">Activo</th>
                 <th className="w-10"></th>
               </tr>
