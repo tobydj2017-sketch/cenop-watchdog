@@ -45,7 +45,11 @@ export default function FuelForm({ onAdd, selectedDate, existingEntries, allEntr
   const [ticketImage, setTicketImage] = useState<string | undefined>();
   const fileRef = useRef<HTMLInputElement>(null);
 
+  const movilesList = useMemo(() => getMoviles().filter((m) => m.activo), [open]);
+  const patentes = useMemo(() => movilesList.map((m) => m.patente), [movilesList]);
+
   const historyEntries = allEntries ?? existingEntries;
+
 
   useEffect(() => {
     if (open && !form.fecha) {
