@@ -197,21 +197,22 @@ export default function ServiceEditDialog({ service, open, onClose, onSave, exis
               <div className="space-y-1.5">
                 <Label className="text-xs font-bold uppercase tracking-wider text-muted-foreground">Celular</Label>
                 {(() => {
-                  const info = movilesCatalog.find((m) => m.patente === form.movil);
-                  const opts = (info?.telefono || "")
-                    .split(/[,;/]| o /i)
-                    .map((s) => s.trim())
-                    .filter(Boolean);
+                  const all = Array.from(new Set(
+                    movilesCatalog.flatMap((m) =>
+                      (m.telefono || "").split(/[,;/]| o /i).map((s) => s.trim()).filter(Boolean)
+                    )
+                  )).sort();
                   return (
                     <SearchableSelect
-                      options={opts}
+                      options={all}
                       value={form.celular || ""}
                       onChange={(v) => set("celular", v)}
                       inputClassName="h-10"
-                      placeholder={opts.length > 1 ? "Elegí un teléfono" : ""}
+                      placeholder="Elegí un teléfono"
                     />
                   );
                 })()}
+
               </div>
 
               <Field label="Orden de Carga Cliente" field="ordenCarga" />
