@@ -8,6 +8,7 @@ import Index from "./pages/Index.tsx";
 import NotFound from "./pages/NotFound.tsx";
 import LoginPage from "./components/LoginPage.tsx";
 import { AuthProvider, useAuth } from "./lib/authContext";
+import WorldMapBackground from "./components/WorldMapBackground";
 import { bootstrapFromAzure, isAzureConfigured } from "./lib/azureBlob";
 import { getServices, getFuelEntries } from "./lib/store";
 import { getClients } from "./lib/clientStore";
@@ -54,6 +55,7 @@ function AppGate() {
 const App = () => (
   <QueryClientProvider client={queryClient}>
     <TooltipProvider>
+      <WorldMapBackground />
       <Toaster />
       <Sonner />
       <AuthProvider>
