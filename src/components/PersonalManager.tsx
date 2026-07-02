@@ -209,10 +209,12 @@ export default function PersonalManager() {
             <thead>
               <tr className="border-b border-border bg-muted/30">
                 <th className="text-left px-4 py-2.5 font-semibold text-xs uppercase tracking-wider text-muted-foreground">Nombre</th>
+                <th className="text-left px-4 py-2.5 font-semibold text-xs uppercase tracking-wider text-muted-foreground w-44">Teléfono</th>
                 <th className="text-center px-4 py-2.5 font-semibold text-xs uppercase tracking-wider text-muted-foreground">Roles</th>
                 <th className="text-center px-2 py-2.5 w-16"></th>
               </tr>
             </thead>
+
             <tbody>
               {filtered.length === 0 ? (
                 <tr>
