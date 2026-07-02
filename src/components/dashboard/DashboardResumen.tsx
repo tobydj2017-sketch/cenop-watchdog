@@ -181,10 +181,10 @@ export default function DashboardResumen({ services, fuelEntries, byPerson, byMo
           <h3 className="text-sm font-semibold text-muted-foreground mb-4 uppercase tracking-wider">
             {topPersonalCount > 0 ? `Top ${topPersonalCount} Personal por Horas` : "Personal por Horas"}
           </h3>
-          <ResponsiveContainer width="100%" height={250}>
+          <ResponsiveContainer width="100%" height={300}>
             <BarChart data={byPerson.slice(0, 10)} layout="vertical">
               <XAxis type="number" tickFormatter={(v) => `${Math.floor(v / 60)}h`} />
-              <YAxis type="category" dataKey="nombre" width={120} interval={0} tick={{ fontSize: 11 }} />
+              <YAxis type="category" dataKey="nombre" width={200} interval={0} tick={{ fontSize: 9 }} tickFormatter={(name) => typeof name === "string" && name.length > 20 ? `${name.slice(0, 20)}…` : name} />
               <Tooltip formatter={tooltipFormatter} />
               <Bar dataKey="prod" name="Productivas" fill="hsl(142, 70%, 45%)" stackId="a" />
               <Bar dataKey="improd" name="Improductivas" fill="hsl(0, 72%, 50%)" stackId="a" />
@@ -199,7 +199,7 @@ export default function DashboardResumen({ services, fuelEntries, byPerson, byMo
 function KpiDetailPanel({ detail, totalHoras, totalServicios }: { detail: KpiDetail; totalHoras: number; totalServicios: number }) {
   const xKey = detail.xKey || "name";
   const formatter = detail.formatter || tooltipFormatter;
-  const chartHeight = Math.max(280, Math.min(520, detail.data.length * 34));
+  const chartHeight = Math.max(320, Math.min(900, detail.data.length * 46));
 
   return (
     <div className="glass-card p-5 space-y-5 border-primary/40">
@@ -221,28 +221,30 @@ function KpiDetailPanel({ detail, totalHoras, totalServicios }: { detail: KpiDet
       </div>
 
       <div className="grid xl:grid-cols-[1.2fr_0.8fr] gap-4">
-        <div className="rounded-md border border-border/70 p-4 min-h-[320px]">
+        <div className="rounded-md border border-border/70 p-4">
           <h4 className="text-xs font-semibold text-muted-foreground mb-4 uppercase tracking-wider">{detail.chartTitle}</h4>
-          <ResponsiveContainer width="100%" height={chartHeight}>
-            {detail.chartType === "line" ? (
-              <LineChart data={detail.data}>
-                <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
-                <XAxis dataKey={xKey} tick={{ fontSize: 11 }} />
-                <YAxis tickFormatter={(v) => detail.valueKey === "eficiencia" ? `${v}%` : `${Math.floor(Number(v) / 60)}h`} />
-                <Tooltip formatter={(value: number) => detail.bars?.[0]?.key === "eficiencia" ? `${value}%` : formatter(value)} />
-                {detail.bars?.map((bar, index) => <Line key={bar.key} type="monotone" dataKey={bar.key} name={bar.name} stroke={bar.color || chartColor(index)} strokeWidth={2} dot={{ r: 3 }} />)}
-              </LineChart>
-            ) : (
-              <BarChart data={detail.data} layout="vertical">
-                <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
-                <XAxis type="number" tickFormatter={(v) => detail.formatter === moneyFormatter ? moneyFormatter(Number(v)) : `${Math.floor(Number(v) / 60)}h`} />
-                <YAxis type="category" dataKey={xKey} width={130} interval={0} tick={{ fontSize: 11 }} />
-                <Tooltip formatter={(value: number) => formatter(value)} />
-                <Legend />
-                {detail.bars?.map((bar, index) => <Bar key={bar.key} dataKey={bar.key} name={bar.name} fill={bar.color || chartColor(index)} stackId={detail.bars && detail.bars.length > 1 ? "a" : undefined} />)}
-              </BarChart>
-            )}
-          </ResponsiveContainer>
+          <div className="overflow-y-auto" style={{ maxHeight: "min(70vh, 800px)" }}>
+            <ResponsiveContainer width="100%" height={chartHeight}>
+              {detail.chartType === "line" ? (
+                <LineChart data={detail.data}>
+                  <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
+                  <XAxis dataKey={xKey} tick={{ fontSize: 11 }} />
+                  <YAxis tickFormatter={(v) => detail.valueKey === "eficiencia" ? `${v}%` : `${Math.floor(Number(v) / 60)}h`} />
+                  <Tooltip formatter={(value: number) => detail.bars?.[0]?.key === "eficiencia" ? `${value}%` : formatter(value)} />
+                  {detail.bars?.map((bar, index) => <Line key={bar.key} type="monotone" dataKey={bar.key} name={bar.name} stroke={bar.color || chartColor(index)} strokeWidth={2} dot={{ r: 3 }} />)}
+                </LineChart>
+              ) : (
+                <BarChart data={detail.data} layout="vertical" barCategoryGap={detail.data.length > 20 ? "20%" : "30%"}>
+                  <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
+                  <XAxis type="number" tickFormatter={(v) => detail.formatter === moneyFormatter ? moneyFormatter(Number(v)) : `${Math.floor(Number(v) / 60)}h`} />
+                  <YAxis type="category" dataKey={xKey} width={240} interval={0} tick={{ fontSize: 9 }} tickFormatter={(name) => typeof name === "string" && name.length > 24 ? `${name.slice(0, 24)}…` : name} />
+                  <Tooltip formatter={(value: number) => formatter(value)} />
+                  <Legend />
+                  {detail.bars?.map((bar, index) => <Bar key={bar.key} dataKey={bar.key} name={bar.name} fill={bar.color || chartColor(index)} stackId={detail.bars && detail.bars.length > 1 ? "a" : undefined} />)}
+                </BarChart>
+              )}
+            </ResponsiveContainer>
+          </div>
         </div>
 
         <div className="rounded-md border border-border/70 p-4 overflow-auto">
