@@ -333,8 +333,13 @@ export default function ServiceTable({ services, onDelete, onUpdate, allServices
         <ServiceDetailView
           services={selectedServices}
           onClose={() => setSelectedServiceKey(null)}
+          onEdit={onUpdate && (!canEdit || canEdit(selectedServices[0])) ? (s) => {
+            setSelectedServiceKey(null);
+            setEditingService(s);
+          } : undefined}
         />
       )}
+
 
       {onUpdate && (
         <ServiceEditDialog

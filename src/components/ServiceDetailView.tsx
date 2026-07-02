@@ -1,14 +1,16 @@
 import { ServiceEntry } from "@/lib/types";
 import { cleanTime } from "@/lib/formatTime";
-import { X, MapPin, Clock, User, Truck, FileText, ArrowRight } from "lucide-react";
+import { X, MapPin, Clock, User, Truck, FileText, ArrowRight, Pencil } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
 interface Props {
   services: ServiceEntry[];
   onClose: () => void;
+  onEdit?: (s: ServiceEntry) => void;
 }
 
-export default function ServiceDetailView({ services, onClose }: Props) {
+
+export default function ServiceDetailView({ services, onClose, onEdit }: Props) {
   const s = services[0];
   if (!s) return null;
 
@@ -38,9 +40,23 @@ export default function ServiceDetailView({ services, onClose }: Props) {
               <p className="text-sm text-muted-foreground">{s.fecha ? s.fecha.split("-").reverse().join("/") : ""} — {s.cliente}</p>
             </div>
           </div>
-          <Button variant="ghost" size="sm" onClick={onClose} className="h-8 w-8 p-0">
-            <X className="w-5 h-5" />
-          </Button>
+          <div className="flex items-center gap-2">
+            {onEdit && (
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => onEdit(s)}
+                className="h-8 gap-1.5"
+              >
+                <Pencil className="w-3.5 h-3.5" />
+                Editar
+              </Button>
+            )}
+            <Button variant="ghost" size="sm" onClick={onClose} className="h-8 w-8 p-0">
+              <X className="w-5 h-5" />
+            </Button>
+          </div>
+
         </div>
 
         {/* Info Cards */}
