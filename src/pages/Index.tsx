@@ -73,21 +73,27 @@ function AppSidebar({
 
   return (
     <Sidebar collapsible="icon" className="border-sidebar-border [&>[data-sidebar=sidebar]]:relative [&>[data-sidebar=sidebar]]:overflow-hidden">
-      {/* Foto de fondo ocupando toda la sidebar (solo cuando está expandida) */}
+      {/* Collage de fondo ocupando toda la sidebar (solo cuando está expandida) */}
       {!collapsed && (
         <div className="pointer-events-none absolute inset-0 z-0 overflow-hidden bg-background">
-          <img
-            src={amCustodiasDoorAsset.url}
-            alt="AM Seguridad — División Custodias"
-            className="absolute inset-0 h-full w-full object-contain animate-ken-burns"
-            style={{ objectPosition: "center bottom" }}
-          />
-          {/* Overlay principal: oscuro con acento hacia la izquierda para texto */}
-          <div className="absolute inset-0 bg-gradient-to-r from-black/85 via-black/55 to-black/25" />
-          {/* Refuerzo vertical para header y footer */}
-          <div className="absolute inset-0 bg-gradient-to-b from-black/60 via-transparent to-black/70" />
-          {/* Viñeta sutil */}
-          <div className="absolute inset-0 shadow-[inset_0_0_120px_rgba(0,0,0,0.6)]" />
+          <div className="absolute inset-0 grid grid-rows-4 gap-[2px]">
+            <div className="relative overflow-hidden">
+              <img src={amControlRoomAsset.url} alt="" className="absolute inset-0 h-full w-full object-cover animate-ken-burns" style={{ animationDelay: "0s" }} />
+            </div>
+            <div className="relative overflow-hidden">
+              <img src={amGuardPhoneAsset.url} alt="" className="absolute inset-0 h-full w-full object-cover animate-ken-burns" style={{ animationDelay: "-4s", objectPosition: "center 30%" }} />
+            </div>
+            <div className="relative overflow-hidden">
+              <img src={amGuardCarAsset.url} alt="" className="absolute inset-0 h-full w-full object-cover animate-ken-burns" style={{ animationDelay: "-8s" }} />
+            </div>
+            <div className="relative overflow-hidden">
+              <img src={amGuardCartAsset.url} alt="" className="absolute inset-0 h-full w-full object-cover animate-ken-burns" style={{ animationDelay: "-12s" }} />
+            </div>
+          </div>
+          {/* Overlay oscuro para legibilidad */}
+          <div className="absolute inset-0 bg-gradient-to-r from-black/85 via-black/65 to-black/45" />
+          <div className="absolute inset-0 bg-gradient-to-b from-black/60 via-black/30 to-black/70" />
+          <div className="absolute inset-0 shadow-[inset_0_0_120px_rgba(0,0,0,0.7)]" />
         </div>
       )}
 
