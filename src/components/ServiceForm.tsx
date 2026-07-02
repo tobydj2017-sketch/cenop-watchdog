@@ -520,18 +520,42 @@ export default function ServiceForm({ onAdd, selectedDate, existingServices }: P
             <div className="rounded-md border border-border bg-background p-4 text-foreground">
               <div className="flex items-center justify-between gap-3 mb-3">
                 <p className="text-sm font-extrabold uppercase tracking-wider text-muted-foreground">Peajes</p>
-                <div className="flex items-center gap-3">
-                  {peajes.length > 0 && <span className="text-sm font-bold text-primary">Total: ${totalPeajes.toLocaleString("es-AR")}</span>}
-                  <Button type="button" variant="outline" onClick={addPeaje} className="h-10 gap-2 text-sm">
-                    <CircleDollarSign className="w-4 h-4" /> Agregar Peaje
-                  </Button>
-                </div>
+                <Button type="button" variant="outline" onClick={addPeaje} className="h-10 gap-2 text-sm">
+                  <CircleDollarSign className="w-4 h-4" /> Agregar Peaje
+                </Button>
               </div>
               {peajes.map((peaje, idx) => (
-                <div key={peaje.id} className="grid md:grid-cols-[1fr_9rem_3rem] items-end gap-3 mb-3">
+                <div key={peaje.id} className="grid md:grid-cols-[3rem_1fr_9rem_3rem] items-end gap-3 mb-3">
                   <div className="space-y-2">
-                    <Label className="text-sm font-bold">Ubicación #{idx + 1}</Label>
-                    <Input value={peaje.ubicacion} onChange={(e) => updatePeaje(peaje.id, "ubicacion", e.target.value)} placeholder="Ej: Peaje Dock Sud" className="h-11 text-base" />
+                    <Label className="text-sm font-bold">#</Label>
+                    <div className="h-11 flex items-center justify-center rounded-md border border-border bg-muted/40 text-sm font-bold">{idx + 1}</div>
+                  </div>
+                  <div className="space-y-2">
+                    <Label className="text-sm font-bold">Tipo de peaje</Label>
+                    <div className="flex gap-2">
+                      <button
+                        type="button"
+                        onClick={() => updatePeaje(peaje.id, "conCamion", true)}
+                        className={`flex-1 h-11 rounded-md border-2 px-3 text-sm font-bold transition-all ${
+                          peaje.conCamion === true
+                            ? "border-primary bg-primary text-primary-foreground"
+                            : "border-border bg-background text-foreground hover:border-primary/50"
+                        }`}
+                      >
+                        {peaje.conCamion === true ? "✓ " : ""}Con camión
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => updatePeaje(peaje.id, "conCamion", false)}
+                        className={`flex-1 h-11 rounded-md border-2 px-3 text-sm font-bold transition-all ${
+                          peaje.conCamion === false
+                            ? "border-primary bg-primary text-primary-foreground"
+                            : "border-border bg-background text-foreground hover:border-primary/50"
+                        }`}
+                      >
+                        {peaje.conCamion === false ? "✓ " : ""}Sin camión
+                      </button>
+                    </div>
                   </div>
                   <div className="space-y-2">
                     <Label className="text-sm font-bold">Monto ($)</Label>
@@ -542,6 +566,12 @@ export default function ServiceForm({ onAdd, selectedDate, existingServices }: P
                   </Button>
                 </div>
               ))}
+              {peajes.length > 0 && (
+                <div className="mt-3 pt-3 border-t border-border flex items-center justify-end gap-3">
+                  <span className="text-sm font-extrabold uppercase tracking-wider text-muted-foreground">Valor total</span>
+                  <span className="text-lg font-extrabold text-primary">${totalPeajes.toLocaleString("es-AR")}</span>
+                </div>
+              )}
             </div>
             <div className="rounded-md border border-border bg-background p-4 text-foreground">
               <div className="flex items-center justify-between gap-3 mb-3">
