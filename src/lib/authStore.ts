@@ -245,7 +245,19 @@ export async function bootstrapUsers(): Promise<void> {
       localStorage.setItem(USERS_LOCAL_KEY, JSON.stringify(remote));
     }
   }
+  // Migración: rellenar permisos nuevos con los defaults del rol
+  {
+    const users = readLocal();
+    let migrated = false;
+    const patched = users.map((u) => {
+      const merged = { ...DEFAULT_PERMISSIONS[u.role], ...u.permissions };
+      if (Object.keys(merged).length !== Object.keys(u.permissions).length) migrated = true;
+      return { ...u, permissions: merged };
+    });
+    if (migrated) writeLocal(patched);
+  }
   const users = readLocal();
+
   if (!users.some((u) => u.username === SEED_ADMIN_USERNAME.toLowerCase())) {
     const passwordHash = await hashPassword(SEED_ADMIN_PASSWORD);
     const admin: UserAccount = {
