@@ -112,9 +112,11 @@
   }
 
   body {
-    @apply bg-background text-foreground font-sans antialiased;
+    @apply text-foreground font-sans antialiased;
     font-family: 'Inter', sans-serif;
+    background: transparent;
   }
+
 
   .font-mono {
     font-family: 'JetBrains Mono', monospace;
