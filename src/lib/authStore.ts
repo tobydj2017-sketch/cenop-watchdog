@@ -115,6 +115,8 @@ export const PERMISSION_LABELS: Record<keyof UserPermissions, string> = {
   deleteFuel: "Eliminar combustible",
   managePersonal: "Gestionar Personal",
   manageClients: "Gestionar Clientes",
+  manageMoviles: "Gestionar Móviles",
+
   viewDashboard: "Ver Panel de Análisis",
   viewReportes: "Ver Reportes",
   manageUsers: "Gestionar Usuarios (admin)",
