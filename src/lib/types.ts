@@ -2,7 +2,8 @@ import { getPersonal } from "./personalStore";
 
 export interface PeajeEntry {
   id: string;
-  ubicacion: string;
+  ubicacion?: string; // legacy
+  conCamion?: boolean;
   monto: number;
 }
 
