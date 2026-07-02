@@ -24,12 +24,14 @@ export interface UserPermissions {
   // Catálogos
   managePersonal: boolean;
   manageClients: boolean;
+  manageMoviles: boolean;
   // Vistas
   viewDashboard: boolean;
   viewReportes: boolean;
   // Admin
   manageUsers: boolean;
 }
+
 
 export interface UserAccount {
   id: string;
