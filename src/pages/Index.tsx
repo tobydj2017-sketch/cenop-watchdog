@@ -33,6 +33,10 @@ import MovilesManager from "@/components/MovilesManager";
 import UserManager from "@/components/UserManager";
 
 import amCustodiasDoorAsset from "@/assets/am-custodias-door-400.png.asset.json";
+import amGuardPhoneAsset from "@/assets/am-guard-phone.png.asset.json";
+import amControlRoomAsset from "@/assets/am-control-room.png.asset.json";
+import amGuardCartAsset from "@/assets/am-guard-cart.png.asset.json";
+import amGuardCarAsset from "@/assets/am-guard-car.png.asset.json";
 import { ServiceEntry, FuelEntry, isCountableServiceEntry } from "@/lib/types";
 import {
   getServices, addService, deleteService, updateService,
