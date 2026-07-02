@@ -10,7 +10,7 @@ interface Props {
 }
 
 
-export default function ServiceDetailView({ services, onClose }: Props) {
+export default function ServiceDetailView({ services, onClose, onEdit }: Props) {
   const s = services[0];
   if (!s) return null;
 
