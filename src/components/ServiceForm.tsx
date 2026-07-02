@@ -116,7 +116,7 @@ export default function ServiceForm({ onAdd, selectedDate, existingServices }: P
 
   // Peajes
   const addPeaje = () => {
-    setPeajes((prev) => [...prev, { id: generateId(), ubicacion: "", monto: 0 }]);
+    setPeajes((prev) => [...prev, { id: generateId(), conCamion: false, monto: 0 }]);
   };
 
   const updatePeaje = (id: string, field: keyof Omit<PeajeEntry, "id">, value: string | number) => {
