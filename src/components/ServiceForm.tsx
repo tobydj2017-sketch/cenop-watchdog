@@ -84,7 +84,13 @@ export default function ServiceForm({ onAdd, selectedDate, existingServices }: P
   }, [allPersonalEntries]);
 
   const set = (field: string, value: string | number) =>
-    setForm((prev) => ({ ...prev, [field]: value }));
+    setForm((prev) => {
+      const next: any = { ...prev, [field]: value };
+      if (field === "fechaServicio" && typeof value === "string" && value) {
+        next.solicitud = nextSolicitudFor(value);
+      }
+      return next;
+    });
 
   const movilesCatalog = useMemo(() => getMoviles().filter((m) => m.activo), [open]);
   const movilOptions = useMemo(() => movilesCatalog.map((m) => m.patente), [movilesCatalog]);
