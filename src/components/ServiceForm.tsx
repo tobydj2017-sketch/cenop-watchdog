@@ -83,13 +83,18 @@ export default function ServiceForm({ onAdd, selectedDate, existingServices }: P
   const set = (field: string, value: string | number) =>
     setForm((prev) => ({ ...prev, [field]: value }));
 
+  const movilesCatalog = useMemo(() => getMoviles().filter((m) => m.activo), [open]);
+  const movilOptions = useMemo(() => movilesCatalog.map((m) => m.patente), [movilesCatalog]);
+
   const setMovil = (value: string) => {
+    const info = movilesCatalog.find((m) => m.patente === value);
     setForm((prev) => ({
       ...prev,
       movil: value,
-      celular: MOVIL_TELEFONO[value] || prev.celular,
+      celular: info?.telefono || prev.celular,
     }));
   };
+
 
   // Peajes
   const addPeaje = () => {
