@@ -5,8 +5,9 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { FuelEntry, generateId } from "@/lib/types";
 import { isValidDate, isValidTime, findFuelDuplicate } from "@/lib/validation";
-import { MOVILES } from "@/lib/cenopData";
-import { MOVILES_INFO, LUGARES_CARGA, TIPOS_COMBUSTIBLE } from "@/lib/movilesData";
+import { LUGARES_CARGA, TIPOS_COMBUSTIBLE } from "@/lib/movilesData";
+import { getMoviles } from "@/lib/movilesStore";
+
 import SearchableSelect from "@/components/SearchableSelect";
 import { Camera, Plus, Upload, Fuel, ChevronLeft, ChevronRight } from "lucide-react";
 import { toast } from "sonner";
