@@ -13,6 +13,8 @@ import { bootstrapFromAzure, isAzureConfigured } from "./lib/azureBlob";
 import { getServices, getFuelEntries } from "./lib/store";
 import { getClients } from "./lib/clientStore";
 import { getPersonal } from "./lib/personalStore";
+import { getMoviles } from "./lib/movilesStore";
+
 
 const queryClient = new QueryClient();
 
