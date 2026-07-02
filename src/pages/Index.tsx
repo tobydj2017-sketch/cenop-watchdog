@@ -72,28 +72,35 @@ function AppSidebar({
             src={amCustodiasAsset.url}
             alt="AM Seguridad — División Custodias"
             className="absolute inset-0 h-full w-full object-cover animate-ken-burns"
-            style={{ objectPosition: "70% center" }}
+            style={{ objectPosition: "72% center" }}
           />
-          {/* Overlay oscuro para legibilidad del menú */}
-          <div className="absolute inset-0 bg-gradient-to-b from-sidebar-background/85 via-sidebar-background/70 to-sidebar-background/95" />
-          <div className="absolute inset-0 bg-gradient-to-r from-sidebar-background/60 to-transparent" />
+          {/* Overlay principal: oscuro con acento hacia la izquierda para texto */}
+          <div className="absolute inset-0 bg-gradient-to-r from-black/85 via-black/55 to-black/25" />
+          {/* Refuerzo vertical para header y footer */}
+          <div className="absolute inset-0 bg-gradient-to-b from-black/60 via-transparent to-black/70" />
+          {/* Viñeta sutil */}
+          <div className="absolute inset-0 shadow-[inset_0_0_120px_rgba(0,0,0,0.6)]" />
         </div>
       )}
 
       <SidebarHeader className="relative z-10 p-3">
-        <div className="flex items-center gap-3 rounded-lg px-1 py-2 backdrop-blur-sm">
-          <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-sidebar-primary/20 glow-amber">
+        <div className="flex items-center gap-3 rounded-lg px-2 py-2 bg-black/40 backdrop-blur-md border border-white/5">
+          <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-sidebar-primary/25 ring-1 ring-sidebar-primary/40 glow-amber">
             <Shield className="h-5 w-5 text-sidebar-primary" />
           </div>
           {!collapsed && (
             <div className="min-w-0">
-              <h1 className="text-base font-bold tracking-tight text-sidebar-foreground drop-shadow">CENOP</h1>
-              <p className="truncate text-xs text-sidebar-foreground/80 drop-shadow">AM Seguridad</p>
+              <h1 className="text-lg font-extrabold tracking-tight text-white [text-shadow:_0_2px_6px_rgb(0_0_0_/_80%)]">
+                CENOP
+              </h1>
+              <p className="truncate text-[11px] font-semibold uppercase tracking-widest text-sidebar-primary [text-shadow:_0_1px_3px_rgb(0_0_0_/_90%)]">
+                AM Seguridad
+              </p>
             </div>
           )}
         </div>
       </SidebarHeader>
-      <SidebarSeparator className="relative z-10" />
+      <SidebarSeparator className="relative z-10 bg-white/10" />
       <SidebarContent className="relative z-10">
         <SidebarGroup>
           <SidebarGroupContent>
@@ -104,7 +111,7 @@ function AppSidebar({
                     tooltip={label}
                     isActive={activeTab === key}
                     onClick={() => setActiveTab(key as AppTab)}
-                    className="h-10 text-sidebar-foreground backdrop-blur-sm bg-sidebar-background/40 hover:bg-sidebar-accent/70 data-[active=true]:bg-sidebar-primary data-[active=true]:text-sidebar-primary-foreground"
+                    className="h-11 font-semibold text-white/95 [text-shadow:_0_1px_3px_rgb(0_0_0_/_85%)] bg-black/45 backdrop-blur-md border border-white/10 hover:bg-black/70 hover:border-white/20 hover:text-white transition-all data-[active=true]:bg-sidebar-primary data-[active=true]:text-sidebar-primary-foreground data-[active=true]:border-sidebar-primary data-[active=true]:[text-shadow:none] data-[active=true]:shadow-[0_4px_20px_-4px_hsl(var(--sidebar-primary)/0.6)]"
                   >
                     <Icon className="h-4 w-4" />
                     <span>{label}</span>
@@ -115,16 +122,19 @@ function AppSidebar({
           </SidebarGroupContent>
         </SidebarGroup>
       </SidebarContent>
-      <SidebarFooter className="relative z-10 p-3 text-xs text-sidebar-foreground/80">
+      <SidebarFooter className="relative z-10 p-3">
         {!collapsed && (
-          <div className="rounded-md bg-sidebar-background/60 backdrop-blur-sm px-2 py-1.5">
-            <p className="text-[10px] font-bold uppercase tracking-widest text-sidebar-primary">
+          <div className="rounded-lg bg-black/60 backdrop-blur-md border border-white/10 px-3 py-2">
+            <p className="text-[11px] font-extrabold uppercase tracking-widest text-sidebar-primary [text-shadow:_0_1px_3px_rgb(0_0_0_/_90%)]">
               División Custodias
             </p>
-            <p className="text-[10px] text-sidebar-foreground/70">Control Operativo</p>
+            <p className="text-[10px] font-medium text-white/80 [text-shadow:_0_1px_2px_rgb(0_0_0_/_80%)]">
+              Control Operativo
+            </p>
           </div>
         )}
       </SidebarFooter>
+
 
 
       <SidebarRail />
