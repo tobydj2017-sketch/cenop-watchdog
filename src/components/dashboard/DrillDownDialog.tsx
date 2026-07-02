@@ -121,7 +121,7 @@ export default function DrillDownDialog({ open, onOpenChange, entity, name, serv
           <h4 className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">{breakdownTitle}</h4>
           <DataTable
             columns={isCliente
-              ? [entity === "personal" ? "Cliente" : "Persona", "Servicios", "Hs Prod."]
+              ? ["Persona", "Servicios", "Hs Prod."]
               : [entity === "personal" ? "Cliente" : "Persona", "Servicios", "Hs Prod.", "Hs Improd.", "Hs Total"]}
             rows={breakdown.map((b) => isCliente
               ? [b.k, b.servicios, formatHoursMinutes(b.prod)]
