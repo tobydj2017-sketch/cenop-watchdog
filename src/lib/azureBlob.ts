@@ -77,6 +77,7 @@ export const BLOB_KEYS = {
   fuel: "fuel.json",
   clientes: "clientes.json",
   personal: "personal.json",
+  moviles: "moviles.json",
 } as const;
 
 export const LOCAL_KEYS = {
@@ -84,6 +85,7 @@ export const LOCAL_KEYS = {
   fuel: "cenop_fuel",
   clientes: "cenop_clientes",
   personal: "cenop_personal",
+  moviles: "cenop_moviles",
 } as const;
 
 export async function bootstrapFromAzure(): Promise<void> {
@@ -93,7 +95,9 @@ export async function bootstrapFromAzure(): Promise<void> {
     [BLOB_KEYS.fuel, LOCAL_KEYS.fuel],
     [BLOB_KEYS.clientes, LOCAL_KEYS.clientes],
     [BLOB_KEYS.personal, LOCAL_KEYS.personal],
+    [BLOB_KEYS.moviles, LOCAL_KEYS.moviles],
   ] as const;
+
 
   await Promise.all(
     entries.map(async ([blob, localKey]) => {
