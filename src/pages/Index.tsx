@@ -30,6 +30,7 @@ import DashboardReportes from "@/components/dashboard/DashboardReportes";
 import PersonalManager from "@/components/PersonalManager";
 import ClientManager from "@/components/ClientManager";
 import UserManager from "@/components/UserManager";
+import amCustodiasAsset from "@/assets/am-custodias.png.asset.json";
 import { ServiceEntry, FuelEntry, isCountableServiceEntry } from "@/lib/types";
 import {
   getServices, addService, deleteService, updateService,
@@ -99,9 +100,34 @@ function AppSidebar({
           </SidebarGroupContent>
         </SidebarGroup>
       </SidebarContent>
+      {!collapsed && (
+        <div className="px-3 pb-2">
+          <div className="relative overflow-hidden rounded-lg border border-sidebar-border/60 aspect-[4/5] group">
+            <img
+              src={amCustodiasAsset.url}
+              alt="AM Seguridad — División Custodias"
+              className="absolute inset-0 h-full w-full object-cover animate-ken-burns"
+              loading="lazy"
+            />
+            {/* Gradient overlay para legibilidad y estética */}
+            <div className="absolute inset-0 bg-gradient-to-t from-sidebar-background via-sidebar-background/40 to-transparent" />
+            {/* Sutil brillo animado */}
+            <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-700 bg-gradient-to-tr from-primary/10 via-transparent to-primary/5" />
+            <div className="absolute bottom-2 left-2 right-2">
+              <p className="text-[10px] font-bold uppercase tracking-widest text-sidebar-primary">
+                División Custodias
+              </p>
+              <p className="text-[9px] text-sidebar-foreground/70 leading-tight">
+                amseguridad.com.ar
+              </p>
+            </div>
+          </div>
+        </div>
+      )}
       <SidebarFooter className="p-3 text-xs text-sidebar-foreground/60">
         {!collapsed && <span>Control Operativo</span>}
       </SidebarFooter>
+
       <SidebarRail />
     </Sidebar>
   );
