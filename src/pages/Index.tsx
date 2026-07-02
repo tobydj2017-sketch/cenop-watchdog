@@ -72,7 +72,7 @@ function AppSidebar({
             src={amCustodiasAsset.url}
             alt="AM Seguridad — División Custodias"
             className="absolute inset-0 h-full w-full object-cover animate-ken-burns"
-            style={{ objectPosition: "70% center" }}
+            style={{ objectPosition: "65% center" }}
           />
           {/* Overlay principal: oscuro con acento hacia la izquierda para texto */}
           <div className="absolute inset-0 bg-gradient-to-r from-black/85 via-black/55 to-black/25" />
