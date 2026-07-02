@@ -143,9 +143,10 @@
 
 @keyframes ken-burns {
   0%   { transform: scale(1.0) translate(0, 0); }
-  50%  { transform: scale(1.04) translate(-1%, -0.75%); }
+  50%  { transform: scale(1.02) translate(-0.5%, -0.25%); }
   100% { transform: scale(1.0) translate(0, 0); }
 }
+
 
 .animate-ken-burns {
   animation: ken-burns 22s ease-in-out infinite;
