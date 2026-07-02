@@ -191,10 +191,11 @@ function tableStyle() {
 }
 
 // ========== CARGA DE DATOS ==========
-// PDF pensado para choferes y custodios: se imprime en A4 y se lee desde el celular.
+// PDF pensado para choferes y custodios: se imprime en A4 apaisado para que
+// todos los encabezados y datos esenciales entren completos en una sola página.
 // Solo incluye la información necesaria para saber a qué hora presentarse y a dónde ir.
 export async function exportCargaDiaPDF(services: ServiceEntry[], fuel: FuelEntry[], fecha: string) {
-  const doc = new jsPDF({ orientation: "portrait", format: "a4", unit: "mm" });
+  const doc = new jsPDF({ orientation: "landscape", format: "a4", unit: "mm" });
   const logoDataUrl = await loadImageAsDataUrl(AM_LOGO_PATH);
   const fechaLabel = fecha ? fecha.split("-").reverse().join("/") : "Todas las fechas";
   addHeader(doc, `Servicios del Día — ${fechaLabel}`, `Total de servicios: ${services.length}`, logoDataUrl);
@@ -204,16 +205,13 @@ export async function exportCargaDiaPDF(services: ServiceEntry[], fuel: FuelEntr
   if (services.length > 0) {
     autoTable(doc, {
       startY,
-      head: [[
-        "N°", "Cliente", "Salida → Destino",
-        "Chofer", "Cita\nChofer",
-        "Custodio", "Cita\nCustodio",
-        "Móvil", "Celular", "Observaciones",
-      ]],
+      head: [
+        ["N°", "Cliente", "Salida → Destino", "Chofer", "Cita Chofer", "Custodio", "Cita Custodio", "Móvil", "Celular", "Observaciones"],
+      ],
       body: services.map((s) => [
         String(s.solicitud || "—"),
         s.cliente || "—",
-        `${s.lugarSalida || "—"}\n→ ${s.destino || "—"}`,
+        `${s.lugarSalida || "—"} → ${s.destino || "—"}`,
         s.chofer || "—",
         cleanTime(s.citaChofer) || "—",
         s.custodio || "—",
@@ -227,25 +225,25 @@ export async function exportCargaDiaPDF(services: ServiceEntry[], fuel: FuelEntr
         fillColor: AM_GREEN,
         textColor: [255, 255, 255],
         fontStyle: "bold",
-        fontSize: 8,
-        cellPadding: 2,
+        fontSize: 7.5,
+        cellPadding: 1.5,
         halign: "center",
         valign: "middle",
       },
-      bodyStyles: { fontSize: 8, cellPadding: 2, valign: "middle" },
+      bodyStyles: { fontSize: 7, cellPadding: 1.5, valign: "middle" },
       alternateRowStyles: { fillColor: [248, 250, 248] as [number, number, number] },
       styles: { lineColor: [200, 200, 200] as [number, number, number], lineWidth: 0.2, overflow: "linebreak" },
       columnStyles: {
         0: { cellWidth: 10, halign: "center", fontStyle: "bold" },
         1: { cellWidth: 22 },
         2: { cellWidth: 40 },
-        3: { cellWidth: 24 },
-        4: { cellWidth: 12, halign: "center", fontStyle: "bold" },
-        5: { cellWidth: 24 },
-        6: { cellWidth: 12, halign: "center", fontStyle: "bold" },
-        7: { cellWidth: 15, halign: "center" },
+        3: { cellWidth: 38 },
+        4: { cellWidth: 20, halign: "center", fontStyle: "bold" },
+        5: { cellWidth: 38 },
+        6: { cellWidth: 20, halign: "center", fontStyle: "bold" },
+        7: { cellWidth: 18, halign: "center" },
         8: { cellWidth: 22, halign: "center" },
-        9: { cellWidth: "auto" },
+        9: { cellWidth: 30 },
       },
       tableWidth: "auto",
     });
