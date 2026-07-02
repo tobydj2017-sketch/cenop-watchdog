@@ -5,7 +5,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { ServiceEntry, PeajeEntry, ComisionEntry, ServicioOperacionesEntry, generateId, calcTimeDiff, timeToMinutes, minutesToTime } from "@/lib/types";
 import { isValidDate, findServiceCollisions, formatCollisionMessages } from "@/lib/validation";
-import { MOVILES, MOVIL_TELEFONO } from "@/lib/cenopData";
+import { getMoviles } from "@/lib/movilesStore";
 import { getActiveClientNames } from "@/lib/clientStore";
 import { getPersonal, getActivePersonalNames } from "@/lib/personalStore";
 import SearchableSelect from "@/components/SearchableSelect";
@@ -83,13 +83,18 @@ export default function ServiceForm({ onAdd, selectedDate, existingServices }: P
   const set = (field: string, value: string | number) =>
     setForm((prev) => ({ ...prev, [field]: value }));
 
+  const movilesCatalog = useMemo(() => getMoviles().filter((m) => m.activo), [open]);
+  const movilOptions = useMemo(() => movilesCatalog.map((m) => m.patente), [movilesCatalog]);
+
   const setMovil = (value: string) => {
+    const info = movilesCatalog.find((m) => m.patente === value);
     setForm((prev) => ({
       ...prev,
       movil: value,
-      celular: MOVIL_TELEFONO[value] || prev.celular,
+      celular: info?.telefono || prev.celular,
     }));
   };
+
 
   // Peajes
   const addPeaje = () => {
@@ -310,7 +315,7 @@ export default function ServiceForm({ onAdd, selectedDate, existingServices }: P
       {step === 2 && (
         <div className="grid md:grid-cols-2 gap-3">
           {renderField({ label: "Destino", field: "destino" })}
-          {renderSelectField({ label: "Móvil", field: "movil", options: MOVILES, onCustomChange: setMovil })}
+          {renderSelectField({ label: "Móvil", field: "movil", options: movilOptions, onCustomChange: setMovil })}
           <div className="space-y-1.5">
             <Label className="text-sm font-bold text-background">Celular</Label>
             <Input value={form.celular} readOnly className="h-9 text-sm bg-background text-foreground border-input" />

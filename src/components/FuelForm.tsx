@@ -5,8 +5,9 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { FuelEntry, generateId } from "@/lib/types";
 import { isValidDate, isValidTime, findFuelDuplicate } from "@/lib/validation";
-import { MOVILES } from "@/lib/cenopData";
-import { MOVILES_INFO, LUGARES_CARGA, TIPOS_COMBUSTIBLE } from "@/lib/movilesData";
+import { LUGARES_CARGA, TIPOS_COMBUSTIBLE } from "@/lib/movilesData";
+import { getMoviles } from "@/lib/movilesStore";
+
 import SearchableSelect from "@/components/SearchableSelect";
 import { Camera, Plus, Upload, Fuel, ChevronLeft, ChevronRight } from "lucide-react";
 import { toast } from "sonner";
@@ -44,7 +45,11 @@ export default function FuelForm({ onAdd, selectedDate, existingEntries, allEntr
   const [ticketImage, setTicketImage] = useState<string | undefined>();
   const fileRef = useRef<HTMLInputElement>(null);
 
+  const movilesList = useMemo(() => getMoviles().filter((m) => m.activo), [open]);
+  const patentes = useMemo(() => movilesList.map((m) => m.patente), [movilesList]);
+
   const historyEntries = allEntries ?? existingEntries;
+
 
   useEffect(() => {
     if (open && !form.fecha) {
@@ -62,7 +67,7 @@ export default function FuelForm({ onAdd, selectedDate, existingEntries, allEntr
 
   // Autocomplete al elegir móvil
   const handleMovil = (value: string) => {
-    const info = MOVILES_INFO[value];
+    const info = movilesList.find((m) => m.patente === value);
     setForm((p) => ({
       ...p,
       movil: value,
@@ -75,6 +80,7 @@ export default function FuelForm({ onAdd, selectedDate, existingEntries, allEntr
       lugarCarga: info?.lugarCarga || p.lugarCarga,
     }));
   };
+
 
   // KM anterior del móvil (última carga histórica antes de esta fecha/hora)
   const kmAnterior = useMemo(() => {
@@ -250,7 +256,7 @@ export default function FuelForm({ onAdd, selectedDate, existingEntries, allEntr
                 {renderInput("Hora", "hora", "time")}
                 <div className="space-y-1.5">
                   <Label className="text-sm font-bold">Patente / Móvil</Label>
-                  <SearchableSelect options={MOVILES} value={form.movil} onChange={handleMovil} placeholder="Seleccionar móvil..." />
+                  <SearchableSelect options={patentes} value={form.movil} onChange={handleMovil} placeholder="Seleccionar móvil..." />
                 </div>
                 {renderInput("Asignación (Chofer)", "chofer", "text", "Auto desde móvil")}
                 {renderReadonly("Marca", form.marca)}

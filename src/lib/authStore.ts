@@ -24,12 +24,14 @@ export interface UserPermissions {
   // Catálogos
   managePersonal: boolean;
   manageClients: boolean;
+  manageMoviles: boolean;
   // Vistas
   viewDashboard: boolean;
   viewReportes: boolean;
   // Admin
   manageUsers: boolean;
 }
+
 
 export interface UserAccount {
   id: string;
@@ -62,6 +64,9 @@ export const DEFAULT_PERMISSIONS: Record<UserRole, UserPermissions> = {
     deleteFuel: true,
     managePersonal: true,
     manageClients: true,
+    manageMoviles: true,
+
+
     viewDashboard: true,
     viewReportes: true,
     manageUsers: true,
@@ -76,6 +81,8 @@ export const DEFAULT_PERMISSIONS: Record<UserRole, UserPermissions> = {
     deleteFuel: false,
     managePersonal: false,
     manageClients: false,
+    manageMoviles: false,
+
     viewDashboard: false,
     viewReportes: false,
     manageUsers: false,
@@ -90,6 +97,8 @@ export const DEFAULT_PERMISSIONS: Record<UserRole, UserPermissions> = {
     deleteFuel: false,
     managePersonal: false,
     manageClients: false,
+    manageMoviles: false,
+
     viewDashboard: false,
     viewReportes: false,
     manageUsers: false,
@@ -106,6 +115,8 @@ export const PERMISSION_LABELS: Record<keyof UserPermissions, string> = {
   deleteFuel: "Eliminar combustible",
   managePersonal: "Gestionar Personal",
   manageClients: "Gestionar Clientes",
+  manageMoviles: "Gestionar Móviles",
+
   viewDashboard: "Ver Panel de Análisis",
   viewReportes: "Ver Reportes",
   manageUsers: "Gestionar Usuarios (admin)",
@@ -234,7 +245,19 @@ export async function bootstrapUsers(): Promise<void> {
       localStorage.setItem(USERS_LOCAL_KEY, JSON.stringify(remote));
     }
   }
+  // Migración: rellenar permisos nuevos con los defaults del rol
+  {
+    const users = readLocal();
+    let migrated = false;
+    const patched = users.map((u) => {
+      const merged = { ...DEFAULT_PERMISSIONS[u.role], ...u.permissions };
+      if (Object.keys(merged).length !== Object.keys(u.permissions).length) migrated = true;
+      return { ...u, permissions: merged };
+    });
+    if (migrated) writeLocal(patched);
+  }
   const users = readLocal();
+
   if (!users.some((u) => u.username === SEED_ADMIN_USERNAME.toLowerCase())) {
     const passwordHash = await hashPassword(SEED_ADMIN_PASSWORD);
     const admin: UserAccount = {

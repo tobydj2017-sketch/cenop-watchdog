@@ -1,5 +1,5 @@
 import { useState, useCallback, useMemo, useEffect } from "react";
-import { Shield, CalendarDays, BarChart3, ClipboardList, Users, Building2, Download, Moon, Sun, FileText, LogOut, ShieldCheck } from "lucide-react";
+import { Shield, CalendarDays, BarChart3, ClipboardList, Users, Building2, Download, Moon, Sun, FileText, LogOut, ShieldCheck, Car } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
@@ -29,7 +29,9 @@ import FullDashboard from "@/components/FullDashboard";
 import DashboardReportes from "@/components/dashboard/DashboardReportes";
 import PersonalManager from "@/components/PersonalManager";
 import ClientManager from "@/components/ClientManager";
+import MovilesManager from "@/components/MovilesManager";
 import UserManager from "@/components/UserManager";
+
 import amCustodiasDoorAsset from "@/assets/am-custodias-door-400.png.asset.json";
 import { ServiceEntry, FuelEntry, isCountableServiceEntry } from "@/lib/types";
 import {
@@ -40,16 +42,18 @@ import { exportCargaDiaPDF, exportPersonalManagerPDF, exportClientManagerPDF } f
 import { useAuth } from "@/lib/authContext";
 import { isOwnService } from "@/lib/authStore";
 
-type AppTab = "carga" | "dashboard" | "personal" | "clientes" | "reportes" | "usuarios";
+type AppTab = "carga" | "dashboard" | "personal" | "clientes" | "moviles" | "reportes" | "usuarios";
 
 const ALL_NAV_ITEMS = [
   { key: "carga", label: "Carga de Datos", icon: ClipboardList, perm: null },
   { key: "dashboard", label: "Panel de Análisis", icon: BarChart3, perm: "viewDashboard" as const },
   { key: "personal", label: "Personal", icon: Users, perm: "managePersonal" as const },
   { key: "clientes", label: "Clientes", icon: Building2, perm: "manageClients" as const },
+  { key: "moviles", label: "Móviles", icon: Car, perm: "manageMoviles" as const },
   { key: "reportes", label: "Reportes", icon: FileText, perm: "viewReportes" as const },
   { key: "usuarios", label: "Usuarios", icon: ShieldCheck, perm: "manageUsers" as const },
 ] as const;
+
 
 function AppSidebar({
   activeTab,
@@ -301,7 +305,10 @@ export default function Index() {
           <PersonalManager />
         ) : activeTab === "clientes" ? (
           <ClientManager />
+        ) : activeTab === "moviles" ? (
+          <MovilesManager />
         ) : activeTab === "reportes" ? (
+
           <DashboardReportes services={cleanServices} fuelEntries={fuelEntries} />
         ) : activeTab === "usuarios" ? (
           <UserManager />

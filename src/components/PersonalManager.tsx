@@ -209,17 +209,20 @@ export default function PersonalManager() {
             <thead>
               <tr className="border-b border-border bg-muted/30">
                 <th className="text-left px-4 py-2.5 font-semibold text-xs uppercase tracking-wider text-muted-foreground">Nombre</th>
+                <th className="text-left px-4 py-2.5 font-semibold text-xs uppercase tracking-wider text-muted-foreground w-44">Teléfono</th>
                 <th className="text-center px-4 py-2.5 font-semibold text-xs uppercase tracking-wider text-muted-foreground">Roles</th>
                 <th className="text-center px-2 py-2.5 w-16"></th>
               </tr>
             </thead>
+
             <tbody>
               {filtered.length === 0 ? (
                 <tr>
-                  <td colSpan={3} className="text-center py-8 text-muted-foreground">
+                  <td colSpan={4} className="text-center py-8 text-muted-foreground">
                     {searchTerm || filterRole !== "todos" ? "Sin resultados para el filtro aplicado" : "No hay personal cargado"}
                   </td>
                 </tr>
+
               ) : (
                 filtered.map((p) => (
                   <tr key={p.id} className="border-b border-border/50 hover:bg-muted/20 transition-colors">
@@ -250,6 +253,22 @@ export default function PersonalManager() {
                       )}
                     </td>
                     <td className="px-4 py-2.5">
+                      <Input
+                        defaultValue={p.telefono || ""}
+                        placeholder="—"
+                        className="h-7 text-xs w-40"
+                        onBlur={(e) => {
+                          const val = e.target.value.trim();
+                          if (val !== (p.telefono || "")) {
+                            updatePersonal(p.id, { telefono: val });
+                            refresh();
+                            toast.success("Teléfono actualizado");
+                          }
+                        }}
+                      />
+                    </td>
+                    <td className="px-4 py-2.5">
+
                       <div className="flex flex-wrap gap-1.5 justify-center">
                         {ALL_ROLES.map((role) => {
                           const effectiveRoles = pendingChanges[p.id] ?? p.roles;

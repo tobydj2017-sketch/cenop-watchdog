@@ -8,7 +8,7 @@ import SearchableSelect from "@/components/SearchableSelect";
 import TimeInput from "@/components/TimeInput";
 import { ServiceEntry, PeajeEntry, ComisionEntry, ServicioOperacionesEntry, generateId, calcTimeDiff, timeToMinutes, minutesToTime } from "@/lib/types";
 import { isValidDate, findServiceCollisions, formatCollisionMessages } from "@/lib/validation";
-import { MOVILES, MOVIL_TELEFONO } from "@/lib/cenopData";
+import { getMoviles } from "@/lib/movilesStore";
 import { getActiveClientNames } from "@/lib/clientStore";
 import { getPersonal, getActivePersonalNames } from "@/lib/personalStore";
 import { Plus, Trash2, Save } from "lucide-react";
@@ -64,11 +64,16 @@ export default function ServiceEditDialog({ service, open, onClose, onSave, exis
   const set = (field: keyof ServiceEntry, value: any) =>
     setForm((prev) => (prev ? { ...prev, [field]: value } : prev));
 
+  const movilesCatalog = useMemo(() => getMoviles().filter((m) => m.activo), [open]);
+  const movilOptions = useMemo(() => movilesCatalog.map((m) => m.patente), [movilesCatalog]);
+
   const setMovil = (value: string) => {
+    const info = movilesCatalog.find((m) => m.patente === value);
     setForm((prev) =>
-      prev ? { ...prev, movil: value, celular: MOVIL_TELEFONO[value] || prev.celular } : prev,
+      prev ? { ...prev, movil: value, celular: info?.telefono || prev.celular } : prev,
     );
   };
+
 
   const computeHours = (f: ServiceEntry) => {
     const prod = calcTimeDiff(f.iniciaServicio, f.finalizaServicio);
@@ -185,7 +190,7 @@ export default function ServiceEditDialog({ service, open, onClose, onSave, exis
             <div className="grid md:grid-cols-3 gap-4">
               <div className="space-y-1.5">
                 <Label className="text-xs font-bold uppercase tracking-wider text-muted-foreground">Móvil</Label>
-                <SearchableSelect options={MOVILES} value={form.movil} onChange={setMovil} inputClassName="h-10" />
+                <SearchableSelect options={movilOptions} value={form.movil} onChange={setMovil} inputClassName="h-10" />
               </div>
               <Field label="Celular" field="celular" />
               <Field label="Orden de Carga Cliente" field="ordenCarga" />
