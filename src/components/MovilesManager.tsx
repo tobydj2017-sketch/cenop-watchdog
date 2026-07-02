@@ -219,7 +219,7 @@ export default function MovilesManager() {
                       </select>
                     </td>
                     <td className="px-2 py-1.5">
-                      <Input value={e.telefono} onChange={(ev) => setField(m.id, "telefono", ev.target.value)} placeholder="—" className="h-7 text-xs w-32" />
+                      <Input value={e.telefono} onChange={(ev) => setField(m.id, "telefono", ev.target.value)} placeholder="1122, 1133..." className="h-7 text-xs w-44" />
                     </td>
                     <td className="px-2 py-1.5 text-center">
                       <input
