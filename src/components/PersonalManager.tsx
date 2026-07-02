@@ -218,10 +218,11 @@ export default function PersonalManager() {
             <tbody>
               {filtered.length === 0 ? (
                 <tr>
-                  <td colSpan={3} className="text-center py-8 text-muted-foreground">
+                  <td colSpan={4} className="text-center py-8 text-muted-foreground">
                     {searchTerm || filterRole !== "todos" ? "Sin resultados para el filtro aplicado" : "No hay personal cargado"}
                   </td>
                 </tr>
+
               ) : (
                 filtered.map((p) => (
                   <tr key={p.id} className="border-b border-border/50 hover:bg-muted/20 transition-colors">
