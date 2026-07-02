@@ -405,16 +405,49 @@ export async function exportClientManagerPDF() {
 
 // ========== CENTRO DE REPORTES ==========
 export async function exportDownloadReportPDF(report: DownloadReport) {
-  const doc = new jsPDF({ orientation: report.columns.length > 6 ? "landscape" : "portrait" });
+  const numCols = report.columns.length;
+  // Elegir tamaño de página según cantidad de columnas para que el texto no se apile letra por letra
+  let format: string | [number, number] = "a4";
+  let orientation: "portrait" | "landscape" = "portrait";
+  if (numCols > 20) { format = "a2"; orientation = "landscape"; }
+  else if (numCols > 12) { format = "a3"; orientation = "landscape"; }
+  else if (numCols > 6) { orientation = "landscape"; }
+
+  const doc = new jsPDF({ orientation, format, unit: "mm" });
   const logoDataUrl = await loadImageAsDataUrl(AM_LOGO_PATH);
   addHeader(doc, report.title, `${report.description} | ${report.totalLabel}: ${report.totalValue}`, logoDataUrl);
-  const chartEndY = drawBarChart(doc, `Gráfico — ${report.metricLabel}`, report.chartData, 58, 10);
+
+  // Omitir el gráfico en reportes muy anchos (queda ilegible y ocupa espacio)
+  const startY = numCols > 12
+    ? 58
+    : drawBarChart(doc, `Gráfico — ${report.metricLabel}`, report.chartData, 58, 10);
+
+  const fontSize = numCols > 20 ? 6 : numCols > 12 ? 6.5 : 7;
+  const headFontSize = numCols > 20 ? 6.5 : numCols > 12 ? 7 : 7.5;
+  const base = tableStyle();
 
   autoTable(doc, {
-    startY: chartEndY,
+    startY,
     head: [report.columns],
     body: report.rows.length ? report.rows : [["Sin datos para los filtros seleccionados"]],
-    ...tableStyle(),
+    margin: base.margin,
+    alternateRowStyles: base.alternateRowStyles,
+    styles: {
+      ...base.styles,
+      fontSize,
+      cellPadding: 1.5,
+      overflow: "linebreak",
+      valign: "middle",
+    },
+    headStyles: {
+      ...base.headStyles,
+      fontSize: headFontSize,
+      cellPadding: 2,
+      halign: "center",
+      valign: "middle",
+    },
+    bodyStyles: { ...base.bodyStyles, fontSize, cellPadding: 1.5 },
+    tableWidth: "auto",
   });
 
   addFooter(doc);
