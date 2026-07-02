@@ -84,7 +84,13 @@ export default function ServiceForm({ onAdd, selectedDate, existingServices }: P
   }, [allPersonalEntries]);
 
   const set = (field: string, value: string | number) =>
-    setForm((prev) => ({ ...prev, [field]: value }));
+    setForm((prev) => {
+      const next: any = { ...prev, [field]: value };
+      if (field === "fechaServicio" && typeof value === "string" && value) {
+        next.solicitud = nextSolicitudFor(value);
+      }
+      return next;
+    });
 
   const movilesCatalog = useMemo(() => getMoviles().filter((m) => m.activo), [open]);
   const movilOptions = useMemo(() => movilesCatalog.map((m) => m.patente), [movilesCatalog]);
@@ -274,11 +280,19 @@ export default function ServiceForm({ onAdd, selectedDate, existingServices }: P
     </div>
   );
 
+  const nextSolicitudFor = (fecha: string): number => {
+    const nums = existingServices
+      .filter((s) => (s.fecha || (s as any).fechaServicio) === fecha)
+      .map((s) => Number(s.solicitud) || 0);
+    return (nums.length ? Math.max(...nums) : 0) + 1;
+  };
+
   return (
     <>
       <Button
         onClick={() => {
-          setForm({ ...defaultEntry, fechaServicio: selectedDate || new Date().toISOString().slice(0, 10) });
+          const fecha = selectedDate || new Date().toISOString().slice(0, 10);
+          setForm({ ...defaultEntry, fechaServicio: fecha, solicitud: nextSolicitudFor(fecha) });
           setOpen(true);
         }}
         className="h-9 gap-2 text-sm font-semibold"
