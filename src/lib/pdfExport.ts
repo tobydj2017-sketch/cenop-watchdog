@@ -444,6 +444,9 @@ export async function exportDownloadReportPDF(report: DownloadReport) {
     },
     bodyStyles: { ...base.bodyStyles, fontSize, cellPadding: 1.5 },
     tableWidth: "auto",
+    // Si la tabla es más ancha que la página A4, se parte en páginas horizontales
+    horizontalPageBreak: true,
+    horizontalPageBreakRepeat: 0,
   });
 
   addFooter(doc);
