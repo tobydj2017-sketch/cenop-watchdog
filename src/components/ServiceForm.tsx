@@ -119,7 +119,7 @@ export default function ServiceForm({ onAdd, selectedDate, existingServices }: P
     setPeajes((prev) => [...prev, { id: generateId(), conCamion: false, monto: 0 }]);
   };
 
-  const updatePeaje = (id: string, field: keyof Omit<PeajeEntry, "id">, value: string | number) => {
+  const updatePeaje = (id: string, field: keyof Omit<PeajeEntry, "id">, value: string | number | boolean) => {
     setPeajes((prev) =>
       prev.map((p) => (p.id === id ? { ...p, [field]: value } : p))
     );
