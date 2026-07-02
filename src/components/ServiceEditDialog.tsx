@@ -59,13 +59,13 @@ export default function ServiceEditDialog({ service, open, onClose, onSave, exis
     setServiciosOp(service?.serviciosOperaciones ?? []);
   }, [service]);
 
+  const movilesCatalog = useMemo(() => getMoviles().filter((m) => m.activo), [open]);
+  const movilOptions = useMemo(() => movilesCatalog.map((m) => m.patente), [movilesCatalog]);
+
   if (!form) return null;
 
   const set = (field: keyof ServiceEntry, value: any) =>
     setForm((prev) => (prev ? { ...prev, [field]: value } : prev));
-
-  const movilesCatalog = useMemo(() => getMoviles().filter((m) => m.activo), [open]);
-  const movilOptions = useMemo(() => movilesCatalog.map((m) => m.patente), [movilesCatalog]);
 
   const setMovil = (value: string) => {
     const info = movilesCatalog.find((m) => m.patente === value);
