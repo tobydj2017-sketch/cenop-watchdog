@@ -315,7 +315,7 @@ export default function ServiceForm({ onAdd, selectedDate, existingServices }: P
       {step === 2 && (
         <div className="grid md:grid-cols-2 gap-3">
           {renderField({ label: "Destino", field: "destino" })}
-          {renderSelectField({ label: "Móvil", field: "movil", options: MOVILES, onCustomChange: setMovil })}
+          {renderSelectField({ label: "Móvil", field: "movil", options: movilOptions, onCustomChange: setMovil })}
           <div className="space-y-1.5">
             <Label className="text-sm font-bold text-background">Celular</Label>
             <Input value={form.celular} readOnly className="h-9 text-sm bg-background text-foreground border-input" />
