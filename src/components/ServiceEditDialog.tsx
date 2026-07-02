@@ -372,15 +372,42 @@ export default function ServiceEditDialog({ service, open, onClose, onSave, exis
           <section className="space-y-3 rounded-md border border-border p-4">
             <div className="flex items-center justify-between">
               <h4 className="text-sm font-extrabold uppercase tracking-wider">Peajes</h4>
-              <Button type="button" variant="outline" size="sm" onClick={() => setPeajes((p) => [...p, { id: generateId(), ubicacion: "", monto: 0 }])}>
+              <Button type="button" variant="outline" size="sm" onClick={() => setPeajes((p) => [...p, { id: generateId(), conCamion: false, monto: 0 }])}>
                 <Plus className="w-4 h-4" /> Agregar
               </Button>
             </div>
             {peajes.map((p, idx) => (
-              <div key={p.id} className="grid grid-cols-[1fr_8rem_3rem] gap-3 items-end">
+              <div key={p.id} className="grid grid-cols-[2.5rem_1fr_8rem_3rem] gap-3 items-end">
                 <div className="space-y-1.5">
-                  <Label className="text-xs">Ubicación #{idx + 1}</Label>
-                  <Input value={p.ubicacion} onChange={(e) => setPeajes((prev) => prev.map((x) => x.id === p.id ? { ...x, ubicacion: e.target.value } : x))} className="h-10" />
+                  <Label className="text-xs">#</Label>
+                  <div className="h-10 flex items-center justify-center rounded-md border border-border bg-muted/40 text-sm font-bold">{idx + 1}</div>
+                </div>
+                <div className="space-y-1.5">
+                  <Label className="text-xs">Tipo de peaje</Label>
+                  <div className="flex gap-2">
+                    <button
+                      type="button"
+                      onClick={() => setPeajes((prev) => prev.map((x) => x.id === p.id ? { ...x, conCamion: true } : x))}
+                      className={`flex-1 h-10 rounded-md border-2 px-2 text-xs font-bold transition-all ${
+                        p.conCamion === true
+                          ? "border-primary bg-primary text-primary-foreground"
+                          : "border-border bg-background text-foreground hover:border-primary/50"
+                      }`}
+                    >
+                      {p.conCamion === true ? "✓ " : ""}Con camión
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setPeajes((prev) => prev.map((x) => x.id === p.id ? { ...x, conCamion: false } : x))}
+                      className={`flex-1 h-10 rounded-md border-2 px-2 text-xs font-bold transition-all ${
+                        p.conCamion === false
+                          ? "border-primary bg-primary text-primary-foreground"
+                          : "border-border bg-background text-foreground hover:border-primary/50"
+                      }`}
+                    >
+                      {p.conCamion === false ? "✓ " : ""}Sin camión
+                    </button>
+                  </div>
                 </div>
                 <div className="space-y-1.5">
                   <Label className="text-xs">Monto ($)</Label>
@@ -391,6 +418,12 @@ export default function ServiceEditDialog({ service, open, onClose, onSave, exis
                 </Button>
               </div>
             ))}
+            {peajes.length > 0 && (
+              <div className="pt-3 border-t border-border flex items-center justify-end gap-3">
+                <span className="text-xs font-extrabold uppercase tracking-wider text-muted-foreground">Valor total</span>
+                <span className="text-lg font-extrabold text-primary">${peajes.reduce((s, p) => s + (p.monto || 0), 0).toLocaleString("es-AR")}</span>
+              </div>
+            )}
           </section>
 
           {/* Comisiones */}
