@@ -237,7 +237,7 @@ function KpiDetailPanel({ detail, totalHoras, totalServicios }: { detail: KpiDet
                 <BarChart data={detail.data} layout="vertical" barCategoryGap={detail.data.length > 20 ? "20%" : "30%"}>
                   <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
                   <XAxis type="number" tickFormatter={(v) => detail.formatter === moneyFormatter ? moneyFormatter(Number(v)) : `${Math.floor(Number(v) / 60)}h`} />
-                  <YAxis type="category" dataKey={xKey} width={200} interval={0} tick={{ fontSize: 10 }} tickFormatter={(name) => typeof name === "string" && name.length > 24 ? `${name.slice(0, 24)}…` : name} />
+                  <YAxis type="category" dataKey={xKey} width={220} interval={0} tick={{ fontSize: 9 }} tickFormatter={(name) => typeof name === "string" && name.length > 20 ? `${name.slice(0, 20)}…` : name} />
                   <Tooltip formatter={(value: number) => formatter(value)} />
                   <Legend />
                   {detail.bars?.map((bar, index) => <Bar key={bar.key} dataKey={bar.key} name={bar.name} fill={bar.color || chartColor(index)} stackId={detail.bars && detail.bars.length > 1 ? "a" : undefined} />)}
