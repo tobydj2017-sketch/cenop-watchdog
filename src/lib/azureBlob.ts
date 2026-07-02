@@ -90,22 +90,42 @@ export const LOCAL_KEYS = {
 
 export async function bootstrapFromAzure(): Promise<void> {
   if (!isAzureConfigured()) return;
-  const entries = [
+
+  // Blobs que se MERGEAN por id (nunca se pierde lo local ni lo remoto)
+  const mergeable = [
     [BLOB_KEYS.services, LOCAL_KEYS.services],
     [BLOB_KEYS.fuel, LOCAL_KEYS.fuel],
+  ] as const;
+
+  // Blobs de catálogo: remoto pisa a local
+  const overwrite = [
     [BLOB_KEYS.clientes, LOCAL_KEYS.clientes],
     [BLOB_KEYS.personal, LOCAL_KEYS.personal],
     [BLOB_KEYS.moviles, LOCAL_KEYS.moviles],
   ] as const;
 
-
-  await Promise.all(
-    entries.map(async ([blob, localKey]) => {
+  await Promise.all([
+    ...mergeable.map(async ([blob, localKey]) => {
+      const remote = (await downloadJson<any[]>(blob)) ?? [];
+      const localRaw = localStorage.getItem(localKey);
+      let local: any[] = [];
+      try { local = localRaw ? JSON.parse(localRaw) : []; } catch { local = []; }
+      const byId = new Map<string, any>();
+      for (const item of remote) if (item && item.id) byId.set(item.id, item);
+      // Local pisa a remoto en caso de conflicto (ediciones locales más nuevas)
+      for (const item of local) if (item && item.id) byId.set(item.id, item);
+      const merged = Array.from(byId.values());
+      localStorage.setItem(localKey, JSON.stringify(merged));
+      // Si el merge agregó cosas que no estaban en el remoto, sincronizar
+      if (merged.length !== remote.length) {
+        void uploadJson(blob, merged);
+      }
+    }),
+    ...overwrite.map(async ([blob, localKey]) => {
       const remote = await downloadJson<unknown>(blob);
       if (remote !== null && Array.isArray(remote)) {
         localStorage.setItem(localKey, JSON.stringify(remote));
       } else if (remote === null) {
-        // Si Azure no tiene el blob aún, subir lo que haya local (primera vez)
         const local = localStorage.getItem(localKey);
         if (local) {
           try {
@@ -116,6 +136,6 @@ export async function bootstrapFromAzure(): Promise<void> {
           } catch {/* ignore */}
         }
       }
-    })
-  );
+    }),
+  ]);
 }
