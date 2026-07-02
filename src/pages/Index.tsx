@@ -305,7 +305,10 @@ export default function Index() {
           <PersonalManager />
         ) : activeTab === "clientes" ? (
           <ClientManager />
+        ) : activeTab === "moviles" ? (
+          <MovilesManager />
         ) : activeTab === "reportes" ? (
+
           <DashboardReportes services={cleanServices} fuelEntries={fuelEntries} />
         ) : activeTab === "usuarios" ? (
           <UserManager />
