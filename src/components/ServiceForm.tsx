@@ -88,12 +88,14 @@ export default function ServiceForm({ onAdd, selectedDate, existingServices }: P
 
   const setMovil = (value: string) => {
     const info = movilesCatalog.find((m) => m.patente === value);
+    const first = (info?.telefono || "").split(/[,;/]| o /i)[0]?.trim() || "";
     setForm((prev) => ({
       ...prev,
       movil: value,
-      celular: info?.telefono || prev.celular,
+      celular: first || prev.celular,
     }));
   };
+
 
 
   // Peajes
