@@ -15,6 +15,56 @@ const AM_LOGO_PATH = "/AM.png";
 
 type ChartDatum = { name: string; value: number; label?: string };
 
+const money = (value: number) => `$${value.toLocaleString("es-AR")}`;
+
+function formatPeajeTipo(peaje: NonNullable<ServiceEntry["peajes"]>[number]) {
+  if (peaje.conCamion === true) return "Con camión";
+  if (peaje.conCamion === false) return "Sin camión";
+  return peaje.ubicacion || "Sin tipo";
+}
+
+function peajesTotal(service: ServiceEntry) {
+  return (service.peajes || []).reduce((sum, p) => sum + (p.monto || 0), 0);
+}
+
+function peajesDetalle(service: ServiceEntry) {
+  return service.peajes?.length
+    ? service.peajes.map((p) => `${formatPeajeTipo(p)}: ${money(p.monto || 0)}`).join(" | ")
+    : "—";
+}
+
+function servicioCruzadoTipo(service: ServiceEntry) {
+  if (service.tipoCenopOp === "cenop_en_op") return "CENOP en Operaciones";
+  if (service.tipoCenopOp === "op_en_cenop") return "Operaciones en CENOP";
+  return "Ninguno";
+}
+
+function rangoHorario(inicio?: string, fin?: string) {
+  if (!inicio && !fin) return "—";
+  return `${cleanTime(inicio || "") || "—"} a ${cleanTime(fin || "") || "—"}`;
+}
+
+function serviciosCruzadosDetalle(service: ServiceEntry) {
+  return service.serviciosOperaciones?.length
+    ? service.serviciosOperaciones.map((item) => [
+      normalizeClientName(item.cliente),
+      item.descripcion || "Sin descripción",
+      item.persona ? `Por ${item.persona}` : "Sin persona",
+      rangoHorario(item.horaInicio || item.hora, item.horaFin),
+    ].join(" · ")).join(" | ")
+    : "—";
+}
+
+function comisionesDetalle(service: ServiceEntry) {
+  return service.comisiones?.length
+    ? service.comisiones.map((item) => [
+      item.descripcion || "Sin descripción",
+      item.persona ? `Por ${item.persona}` : "Sin persona",
+      rangoHorario(item.horaInicio || item.hora, item.horaFin),
+    ].join(" · ")).join(" | ")
+    : "—";
+}
+
 async function loadImageAsDataUrl(src: string): Promise<string> {
   const response = await fetch(src);
   const blob = await response.blob();
@@ -142,9 +192,9 @@ function tableStyle() {
 
 // ========== CARGA DE DATOS ==========
 export async function exportCargaDiaPDF(services: ServiceEntry[], fuel: FuelEntry[], fecha: string) {
-  const doc = new jsPDF({ orientation: "landscape" });
+  const doc = new jsPDF({ orientation: "landscape", format: "a4", unit: "mm" });
   const logoDataUrl = await loadImageAsDataUrl(AM_LOGO_PATH);
-  const fechaLabel = fecha.split("-").reverse().join("/");
+  const fechaLabel = fecha ? fecha.split("-").reverse().join("/") : "Todas las fechas";
   addHeader(doc, `Carga de Datos — ${fechaLabel}`, `Servicios: ${services.length} | Combustible: ${fuel.length} entradas`, logoDataUrl);
 
   let startY = 56;
@@ -155,23 +205,62 @@ export async function exportCargaDiaPDF(services: ServiceEntry[], fuel: FuelEntr
 
     autoTable(doc, {
       startY,
-      head: [["#", "Cliente", "Destino", "Chofer", "Custodio", "Móvil", "Remito", "Salida", "Fin Serv.", "Peajes", "Hs Prod.", "Hs Improd.", "Hs Total"]],
-      body: services.filter(s => s.chofer || s.custodio).map((s) => [
+      head: [[
+        "Fecha", "N°", "Solicitud", "Cliente", "Lugar Salida", "Destino", "Chofer", "Cita Chofer",
+        "Custodio", "Cita Custodio", "Móvil", "Celular", "Salida CENOP", "Llegada Servicio",
+        "Inicia Servicio", "Llegada Destino", "Finaliza Servicio", "Llegada CENOP", "Franco Chofer",
+        "Franco Custodio", "Orden Carga", "Remito", "Continúa Orden", "Observaciones",
+        "Hs Prod.", "Hs Improd. 1", "Hs Improd. 2", "Hs Improd.", "Hs Total",
+        "KM Salida", "KM Llegada", "KM Recorridos", "Tipo Cruzado", "Servicios Cruzados",
+        "Comisiones", "Peajes", "Detalle Peajes",
+      ]],
+      body: services.map((s) => [
+        s.fecha ? s.fecha.split("-").reverse().join("/") : "—",
         s.solicitud,
+        cleanTime(s.horaSolicitud) || "—",
         s.cliente,
+        s.lugarSalida || "—",
         s.destino,
         s.chofer || "—",
+        cleanTime(s.citaChofer) || "—",
         s.custodio || "—",
+        cleanTime(s.citaCustodio) || "—",
         s.movil,
-        s.remito || "—",
+        s.celular || "—",
         cleanTime(s.salidaCenop),
+        cleanTime(s.llegadaServicio) || "—",
+        cleanTime(s.iniciaServicio) || "—",
+        cleanTime(s.llegadaDestino) || "—",
         cleanTime(s.finalizaServicio),
-        s.peajes?.length ? `$${s.peajes.reduce((sum, p) => sum + (p.monto || 0), 0).toLocaleString("es-AR")}` : "—",
+        cleanTime(s.llegadaCenop) || "—",
+        cleanTime(s.horaFrancoChofer) || "—",
+        cleanTime(s.horaFrancoCustodio) || "—",
+        s.ordenCarga || "—",
+        s.remito || "—",
+        s.continuaOrden || "—",
+        s.observaciones || "—",
         cleanTime(s.horasProductivas),
+        cleanTime(s.horasImproductivas1) || "—",
+        cleanTime(s.horasImproductivas2) || "—",
         cleanTime(s.horasImproductivas),
         cleanTime(s.horasTotales),
+        s.kmSalida || "—",
+        s.kmLlegada || "—",
+        s.kmRecorridos || "—",
+        servicioCruzadoTipo(s),
+        serviciosCruzadosDetalle(s),
+        comisionesDetalle(s),
+        peajesTotal(s) ? money(peajesTotal(s)) : "—",
+        peajesDetalle(s),
       ]),
-      ...tableStyle(),
+      margin: { left: 8, right: 8 },
+      headStyles: { fillColor: HEADER_BG, textColor: PRIMARY_COLOR, fontStyle: "bold", fontSize: 5.5, cellPadding: 1.2, halign: "center", valign: "middle" },
+      bodyStyles: { fontSize: 5, cellPadding: 1, valign: "middle" },
+      alternateRowStyles: { fillColor: [252, 252, 252] as [number, number, number] },
+      styles: { lineColor: [220, 220, 220] as [number, number, number], lineWidth: 0.2, overflow: "linebreak" },
+      tableWidth: "auto",
+      horizontalPageBreak: true,
+      horizontalPageBreakRepeat: 0,
     });
 
     startY = (doc as any).lastAutoTable.finalY + 12;
@@ -188,19 +277,38 @@ export async function exportCargaDiaPDF(services: ServiceEntry[], fuel: FuelEntr
 
     autoTable(doc, {
       startY,
-      head: [["Móvil", "Chofer", "Km", "Litros", "Monto", "$/L", "Lugar", "Remito", "Observaciones"]],
+      head: [["Fecha", "Hora", "Móvil", "Chofer", "Marca", "Modelo", "Año", "Tipo", "KM Anterior", "KM Actual", "KM Recorridos", "Litros", "KM/L", "Consumo Ideal", "Monto", "$/L", "Lugar", "Estación", "Remito", "Observaciones", "Ticket"]],
       body: fuel.map((f) => [
-        f.movil,
-        f.chofer,
+        f.fecha ? f.fecha.split("-").reverse().join("/") : "—",
+        cleanTime(f.hora) || "—",
+        f.movil || "—",
+        f.chofer || "—",
+        f.marca || "—",
+        f.modelo || "—",
+        f.anio || "—",
+        f.tipoCombustible || "—",
+        f.kmAnterior || "—",
         f.kilometraje || "—",
+        f.kmRecorridos || "—",
         `${f.litros}L`,
+        f.kmPorLitro || "—",
+        f.consumoIdeal || "—",
         `$${f.monto.toLocaleString("es-AR")}`,
-        f.litros > 0 ? `$${(f.monto / f.litros).toFixed(2)}` : "—",
-        f.lugarCarga || f.estacion || "—",
+        f.precioPorLitro ? `$${f.precioPorLitro.toLocaleString("es-AR")}` : (f.litros > 0 ? `$${(f.monto / f.litros).toFixed(2)}` : "—"),
+        f.lugarCarga || "—",
+        f.estacion || "—",
         f.numeroRemito || "—",
         f.observaciones || "—",
+        f.ticketImage ? "Sí" : "No",
       ]),
-      ...tableStyle(),
+      margin: { left: 8, right: 8 },
+      headStyles: { fillColor: HEADER_BG, textColor: PRIMARY_COLOR, fontStyle: "bold", fontSize: 6, cellPadding: 1.4, halign: "center", valign: "middle" },
+      bodyStyles: { fontSize: 5.5, cellPadding: 1.1, valign: "middle" },
+      alternateRowStyles: { fillColor: [252, 252, 252] as [number, number, number] },
+      styles: { lineColor: [220, 220, 220] as [number, number, number], lineWidth: 0.2, overflow: "linebreak" },
+      tableWidth: "auto",
+      horizontalPageBreak: true,
+      horizontalPageBreakRepeat: 0,
     });
   }
 
