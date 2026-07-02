@@ -1,4 +1,4 @@
-import { PERSONAL } from "./cenopData";
+import { PERSONAL, PERSONAL_TELEFONO } from "./cenopData";
 import { BLOB_KEYS, queueUpload } from "./azureBlob";
 
 export type PersonalRole = "chofer" | "custodio" | "playero" | "operaciones";
@@ -8,10 +8,12 @@ export interface PersonalEntry {
   nombre: string;
   roles: PersonalRole[];
   activo: boolean;
+  telefono?: string;
 }
 
 const PERSONAL_KEY = "cenop_personal";
 const SEED_PERSONAL_KEY = "cenop_personal_seeded_v1";
+const SEED_TEL_KEY = "cenop_personal_tel_seeded_v1";
 
 function generateId(): string {
   return Math.random().toString(36).substring(2, 11);
@@ -34,6 +36,17 @@ function seedPersonal() {
     localStorage.setItem(PERSONAL_KEY, JSON.stringify(merged));
     localStorage.setItem(SEED_PERSONAL_KEY, "true");
   }
+  // Segunda migración: incorporar teléfonos por defecto sin pisar ediciones del usuario
+  if (!localStorage.getItem(SEED_TEL_KEY)) {
+    try {
+      const list: PersonalEntry[] = JSON.parse(localStorage.getItem(PERSONAL_KEY) || "[]");
+      const patched = list.map((p) => (
+        p.telefono ? p : { ...p, telefono: PERSONAL_TELEFONO[p.nombre] || "" }
+      ));
+      localStorage.setItem(PERSONAL_KEY, JSON.stringify(patched));
+      localStorage.setItem(SEED_TEL_KEY, "true");
+    } catch { /* ignore */ }
+  }
 }
 
 export function getPersonal(): PersonalEntry[] {
@@ -49,13 +62,13 @@ export function savePersonal(entries: PersonalEntry[]) {
 
 export function addPersonal(nombre: string, roles: PersonalRole[]): PersonalEntry {
   const entries = getPersonal();
-  const entry: PersonalEntry = { id: generateId(), nombre: nombre.toUpperCase().trim(), roles, activo: true };
+  const entry: PersonalEntry = { id: generateId(), nombre: nombre.toUpperCase().trim(), roles, activo: true, telefono: "" };
   entries.push(entry);
   savePersonal(entries);
   return entry;
 }
 
-export function updatePersonal(id: string, updates: Partial<Pick<PersonalEntry, "nombre" | "roles" | "activo">>) {
+export function updatePersonal(id: string, updates: Partial<Pick<PersonalEntry, "nombre" | "roles" | "activo" | "telefono">>) {
   const entries = getPersonal();
   const idx = entries.findIndex((e) => e.id === id);
   if (idx >= 0) {
@@ -84,3 +97,4 @@ export const ROLE_LABELS: Record<PersonalRole, string> = {
 };
 
 export const ALL_ROLES: PersonalRole[] = ["chofer", "custodio", "playero", "operaciones"];
+
