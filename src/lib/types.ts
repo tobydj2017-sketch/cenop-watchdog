@@ -55,6 +55,9 @@ export interface ServiceEntry {
   horasImproductivas2: string;
   horasImproductivas: string;
   horasTotales: string;
+  kmSalida?: string;
+  kmLlegada?: string;
+  kmRecorridos?: string;
   fecha: string;
   peajes?: PeajeEntry[];
   comisiones?: ComisionEntry[];
@@ -143,6 +146,9 @@ export function isCountableServiceEntry(service: ServiceEntry): boolean {
     service.remito,
     service.continuaOrden,
     service.observaciones,
+    service.kmSalida,
+    service.kmLlegada,
+    service.kmRecorridos,
   ].some((value) => {
     const normalized = String(value ?? "").trim();
     return normalized !== "" && normalized !== "00:00" && normalized !== "00:00:00" && normalized !== "0:00";

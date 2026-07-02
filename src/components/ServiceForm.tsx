@@ -44,6 +44,9 @@ const defaultEntry = {
   remito: "",
   continuaOrden: "",
   observaciones: "",
+  kmSalida: "",
+  kmLlegada: "",
+  kmRecorridos: "",
 };
 
 export default function ServiceForm({ onAdd, selectedDate, existingServices }: Props) {
@@ -94,6 +97,19 @@ export default function ServiceForm({ onAdd, selectedDate, existingServices }: P
       movil: value,
       celular: first || prev.celular,
     }));
+  };
+
+  const setKm = (field: "kmSalida" | "kmLlegada", value: string) => {
+    setForm((prev) => {
+      const salida = field === "kmSalida" ? value : prev.kmSalida || "";
+      const llegada = field === "kmLlegada" ? value : prev.kmLlegada || "";
+      const salidaNum = parseFloat(salida);
+      const llegadaNum = parseFloat(llegada);
+      const recorridos = !isNaN(salidaNum) && !isNaN(llegadaNum) && llegadaNum >= salidaNum
+        ? String(Math.round(llegadaNum - salidaNum))
+        : "";
+      return { ...prev, [field]: value, kmRecorridos: recorridos };
+    });
   };
 
 
@@ -337,6 +353,41 @@ export default function ServiceForm({ onAdd, selectedDate, existingServices }: P
               );
             })()}
 
+          </div>
+
+          <div className="md:col-span-2 grid md:grid-cols-3 gap-3">
+            <div className="space-y-1.5">
+              <Label className="text-sm font-bold text-background">KM Salida</Label>
+              <Input
+                type="number"
+                min={0}
+                value={form.kmSalida}
+                onChange={(e) => setKm("kmSalida", e.target.value)}
+                placeholder="Ej: 45200"
+                className="h-9 text-sm bg-background text-foreground border-input"
+              />
+            </div>
+            <div className="space-y-1.5">
+              <Label className="text-sm font-bold text-background">KM Llegada</Label>
+              <Input
+                type="number"
+                min={0}
+                value={form.kmLlegada}
+                onChange={(e) => setKm("kmLlegada", e.target.value)}
+                placeholder="Ej: 45680"
+                className="h-9 text-sm bg-background text-foreground border-input"
+              />
+            </div>
+            <div className="space-y-1.5">
+              <Label className="text-sm font-bold text-background">KM Recorridos</Label>
+              <Input
+                type="number"
+                value={form.kmRecorridos}
+                readOnly
+                placeholder="Auto"
+                className="h-9 text-sm bg-muted text-foreground border-input font-mono font-bold"
+              />
+            </div>
           </div>
 
           {renderField({ label: "Orden de Carga Cliente", field: "ordenCarga" })}
