@@ -98,6 +98,8 @@ export default function DrillDownDialog({ open, onOpenChange, entity, name, serv
   const breakdownTitle =
     entity === "personal" ? "Clientes atendidos" : "Personal involucrado";
 
+  const isCliente = entity === "cliente";
+
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-5xl max-h-[90vh] overflow-y-auto">
@@ -108,26 +110,32 @@ export default function DrillDownDialog({ open, onOpenChange, entity, name, serv
           </DialogDescription>
         </DialogHeader>
 
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-2 mb-2">
+        <div className={`grid grid-cols-2 ${isCliente ? "md:grid-cols-3" : "md:grid-cols-4"} gap-2 mb-2`}>
           <Stat label="Servicios" value={totals.servicios.toString()} />
           <Stat label="Hs Productivas" value={formatHoursMinutes(totals.prod)} tone="text-success" />
-          <Stat label="Hs Improductivas" value={formatHoursMinutes(totals.improd)} tone="text-destructive" />
-          <Stat label="Hs Totales" value={formatHoursMinutes(totals.total)} />
+          {!isCliente && <Stat label="Hs Improductivas" value={formatHoursMinutes(totals.improd)} tone="text-destructive" />}
+          <Stat label="Hs Totales" value={formatHoursMinutes(isCliente ? totals.prod : totals.total)} />
         </div>
 
         <div className="space-y-2">
           <h4 className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">{breakdownTitle}</h4>
           <DataTable
-            columns={[entity === "personal" ? "Cliente" : "Persona", "Servicios", "Hs Prod.", "Hs Improd.", "Hs Total"]}
-            rows={breakdown.map((b) => [b.k, b.servicios, formatHoursMinutes(b.prod), formatHoursMinutes(b.improd), formatHoursMinutes(b.total)])}
+            columns={isCliente
+              ? ["Persona", "Servicios", "Hs Prod."]
+              : [entity === "personal" ? "Cliente" : "Persona", "Servicios", "Hs Prod.", "Hs Improd.", "Hs Total"]}
+            rows={breakdown.map((b) => isCliente
+              ? [b.k, b.servicios, formatHoursMinutes(b.prod)]
+              : [b.k, b.servicios, formatHoursMinutes(b.prod), formatHoursMinutes(b.improd), formatHoursMinutes(b.total)])}
           />
         </div>
 
         <div className="space-y-2 mt-3">
           <h4 className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Servicios</h4>
           <DataTable
-            columns={["Fecha", "Sol.", "Cliente", "Chofer", "Custodio", "Móvil", "Hs Prod.", "Hs Improd."]}
-            rows={detailRows}
+            columns={isCliente
+              ? ["Fecha", "Sol.", "Cliente", "Chofer", "Custodio", "Móvil", "Hs Prod."]
+              : ["Fecha", "Sol.", "Cliente", "Chofer", "Custodio", "Móvil", "Hs Prod.", "Hs Improd."]}
+            rows={detailRows.map((r) => isCliente ? r.slice(0, 7) : r)}
           />
         </div>
       </DialogContent>
