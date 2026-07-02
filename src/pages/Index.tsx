@@ -30,7 +30,7 @@ import DashboardReportes from "@/components/dashboard/DashboardReportes";
 import PersonalManager from "@/components/PersonalManager";
 import ClientManager from "@/components/ClientManager";
 import UserManager from "@/components/UserManager";
-import amCustodiasAsset from "@/assets/am-custodias.png.asset.json";
+import amCustodiasDoorAsset from "@/assets/am-custodias-door-400.png.asset.json";
 import { ServiceEntry, FuelEntry, isCountableServiceEntry } from "@/lib/types";
 import {
   getServices, addService, deleteService, updateService,
@@ -67,12 +67,12 @@ function AppSidebar({
     <Sidebar collapsible="icon" className="border-sidebar-border [&>[data-sidebar=sidebar]]:relative [&>[data-sidebar=sidebar]]:overflow-hidden">
       {/* Foto de fondo ocupando toda la sidebar (solo cuando está expandida) */}
       {!collapsed && (
-        <div className="pointer-events-none absolute inset-0 z-0 overflow-hidden">
+        <div className="pointer-events-none absolute inset-0 z-0 overflow-hidden bg-background">
           <img
-            src={amCustodiasAsset.url}
+            src={amCustodiasDoorAsset.url}
             alt="AM Seguridad — División Custodias"
-            className="absolute inset-0 h-full w-full object-cover animate-ken-burns"
-            style={{ objectPosition: "65% center" }}
+            className="absolute inset-0 h-full w-full object-contain animate-ken-burns"
+            style={{ objectPosition: "center bottom" }}
           />
           {/* Overlay principal: oscuro con acento hacia la izquierda para texto */}
           <div className="absolute inset-0 bg-gradient-to-r from-black/85 via-black/55 to-black/25" />
