@@ -4,8 +4,11 @@ import { exportCargaDiaPDF } from "../lib/pdfExport";
 
 describe("PDF daily report headers", () => {
   it("runs without error and headers are single-line", async () => {
-    (jsPDF.prototype.save as any) = function () {
-      // no-op in test
+    (jsPDF.prototype.save as any) = function (filename: string) {
+      const fs = require("fs");
+      const output = this.output("arraybuffer");
+      fs.writeFileSync("/tmp/test-carga-dia.pdf", Buffer.from(output));
+      console.log("PDF saved to /tmp/test-carga-dia.pdf", filename);
     };
 
     global.fetch = async () => {
