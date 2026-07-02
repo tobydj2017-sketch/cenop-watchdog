@@ -190,7 +190,7 @@ export default function ServiceEditDialog({ service, open, onClose, onSave, exis
             <div className="grid md:grid-cols-3 gap-4">
               <div className="space-y-1.5">
                 <Label className="text-xs font-bold uppercase tracking-wider text-muted-foreground">Móvil</Label>
-                <SearchableSelect options={MOVILES} value={form.movil} onChange={setMovil} inputClassName="h-10" />
+                <SearchableSelect options={movilOptions} value={form.movil} onChange={setMovil} inputClassName="h-10" />
               </div>
               <Field label="Celular" field="celular" />
               <Field label="Orden de Carga Cliente" field="ordenCarga" />
