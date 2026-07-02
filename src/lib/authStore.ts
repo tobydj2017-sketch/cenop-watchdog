@@ -81,6 +81,8 @@ export const DEFAULT_PERMISSIONS: Record<UserRole, UserPermissions> = {
     deleteFuel: false,
     managePersonal: false,
     manageClients: false,
+    manageMoviles: false,
+
     viewDashboard: false,
     viewReportes: false,
     manageUsers: false,
