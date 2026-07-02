@@ -190,9 +190,10 @@ export default function Index() {
   return (
     <SidebarProvider>
       <AppSidebar activeTab={activeTab} setActiveTab={setActiveTab} navItems={navItems} />
-      <SidebarInset className="min-w-0 overflow-hidden">
+      <SidebarInset className="min-w-0 overflow-hidden bg-transparent">
           {/* Encabezado */}
-          <header className="sticky top-0 z-40 border-b border-border bg-card/50 backdrop-blur-sm">
+          <header className="sticky top-0 z-40 border-b border-border bg-card/40 backdrop-blur-md">
+
             <div className="flex w-full items-center justify-between px-4 py-3">
               <div className="flex items-center gap-3">
                 <SidebarTrigger className="h-9 w-9" />
