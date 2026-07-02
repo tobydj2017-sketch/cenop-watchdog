@@ -1,12 +1,14 @@
 import { ServiceEntry } from "@/lib/types";
 import { cleanTime } from "@/lib/formatTime";
-import { X, MapPin, Clock, User, Truck, FileText, ArrowRight } from "lucide-react";
+import { X, MapPin, Clock, User, Truck, FileText, ArrowRight, Pencil } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
 interface Props {
   services: ServiceEntry[];
   onClose: () => void;
+  onEdit?: (s: ServiceEntry) => void;
 }
+
 
 export default function ServiceDetailView({ services, onClose }: Props) {
   const s = services[0];
