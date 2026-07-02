@@ -49,19 +49,21 @@ export default function WorldMapBackground() {
   return (
     <div
       aria-hidden
-      className="fixed inset-0 -z-10 pointer-events-none overflow-hidden bg-background"
+      className="fixed inset-0 pointer-events-none overflow-hidden"
+      style={{ zIndex: 0, background: "hsl(var(--background))" }}
     >
       <div
         ref={ref}
-        className="absolute inset-0 opacity-[0.18] will-change-[background-position]"
+        className="absolute inset-0 will-change-[background-position]"
         style={{
           backgroundImage: `url(${worldMap})`,
           backgroundRepeat: "repeat-x",
           backgroundSize: "auto 100vh",
+          opacity: 0.45,
         }}
       />
-      {/* Viñeta para integrar con el tema */}
-      <div className="absolute inset-0 bg-gradient-to-b from-background/60 via-background/30 to-background/80" />
+      <div className="absolute inset-0 bg-gradient-to-b from-background/40 via-transparent to-background/70" />
     </div>
   );
 }
+
