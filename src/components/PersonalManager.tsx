@@ -266,8 +266,9 @@ export default function PersonalManager() {
                           }
                         }}
                       />
-
+                    </td>
                     <td className="px-4 py-2.5">
+
                       <div className="flex flex-wrap gap-1.5 justify-center">
                         {ALL_ROLES.map((role) => {
                           const effectiveRoles = pendingChanges[p.id] ?? p.roles;
