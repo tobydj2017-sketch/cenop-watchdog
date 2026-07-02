@@ -256,7 +256,7 @@ export default function FuelForm({ onAdd, selectedDate, existingEntries, allEntr
                 {renderInput("Hora", "hora", "time")}
                 <div className="space-y-1.5">
                   <Label className="text-sm font-bold">Patente / Móvil</Label>
-                  <SearchableSelect options={MOVILES} value={form.movil} onChange={handleMovil} placeholder="Seleccionar móvil..." />
+                  <SearchableSelect options={patentes} value={form.movil} onChange={handleMovil} placeholder="Seleccionar móvil..." />
                 </div>
                 {renderInput("Asignación (Chofer)", "chofer", "text", "Auto desde móvil")}
                 {renderReadonly("Marca", form.marca)}
