@@ -11,6 +11,31 @@ const FUEL_WIPE_KEY = "cenop_fuel_wiped_v1";
   localStorage.setItem(FUEL_WIPE_KEY, "true");
 })();
 
+// Renumerar servicios existentes por fecha (1..N ordenados por horaSolicitud)
+const RENUM_KEY = "cenop_services_renumbered_v1";
+(function renumberServicesOnce() {
+  if (typeof localStorage === "undefined") return;
+  if (localStorage.getItem(RENUM_KEY)) return;
+  const raw = localStorage.getItem("cenop_services");
+  if (!raw) { localStorage.setItem(RENUM_KEY, "true"); return; }
+  try {
+    const list: ServiceEntry[] = JSON.parse(raw);
+    const groups = new Map<string, ServiceEntry[]>();
+    list.forEach((s) => {
+      const key = s.fecha || (s as any).fechaServicio || "";
+      if (!groups.has(key)) groups.set(key, []);
+      groups.get(key)!.push(s);
+    });
+    groups.forEach((arr) => {
+      arr.sort((a, b) => (a.horaSolicitud || "99:99").localeCompare(b.horaSolicitud || "99:99") || (a.id || "").localeCompare(b.id || ""));
+      arr.forEach((s, i) => { s.solicitud = i + 1; });
+    });
+    localStorage.setItem("cenop_services", JSON.stringify(list));
+    void uploadJson(BLOB_KEYS.services, list);
+    localStorage.setItem(RENUM_KEY, "true");
+  } catch { /* ignore */ }
+})();
+
 const SERVICES_KEY = "cenop_services";
 const FUEL_KEY = "cenop_fuel";
 // Descartar solo cargas de 2025 o anteriores (mantener todo 2026+)
