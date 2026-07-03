@@ -108,12 +108,45 @@ export default function FuelForm({ onAdd, selectedDate, existingEntries, allEntr
       ? (Number(kmRecorridos) / Number(form.litros)).toFixed(2)
       : "";
 
-  const handleImage = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const compressTicketImage = (file: File): Promise<string> =>
+    new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onerror = () => reject(new Error("No se pudo leer la foto del ticket"));
+      reader.onload = () => {
+        const img = new Image();
+        img.onerror = () => reject(new Error("La foto del ticket no es válida"));
+        img.onload = () => {
+          const maxSide = 1100;
+          const scale = Math.min(1, maxSide / Math.max(img.width, img.height));
+          const width = Math.max(1, Math.round(img.width * scale));
+          const height = Math.max(1, Math.round(img.height * scale));
+          const canvas = document.createElement("canvas");
+          canvas.width = width;
+          canvas.height = height;
+          const ctx = canvas.getContext("2d");
+          if (!ctx) {
+            reject(new Error("No se pudo procesar la foto del ticket"));
+            return;
+          }
+          ctx.drawImage(img, 0, 0, width, height);
+          resolve(canvas.toDataURL("image/jpeg", 0.72));
+        };
+        img.src = String(reader.result || "");
+      };
+      reader.readAsDataURL(file);
+    });
+
+  const handleImage = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
-    const reader = new FileReader();
-    reader.onloadend = () => setTicketImage(reader.result as string);
-    reader.readAsDataURL(file);
+    try {
+      const compressed = await compressTicketImage(file);
+      setTicketImage(compressed);
+      toast.success("Ticket cargado correctamente");
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : "No se pudo cargar la foto del ticket");
+      if (fileRef.current) fileRef.current.value = "";
+    }
   };
 
   const reset = () => {
@@ -183,8 +216,13 @@ export default function FuelForm({ onAdd, selectedDate, existingEntries, allEntr
       toast.error(`El KM actual (${form.kilometraje}) es menor que el KM anterior (${kmAnterior})`);
       return;
     }
-    onAdd(candidate);
-    closeForm();
+    try {
+      onAdd(candidate);
+      toast.success("Carga de combustible guardada");
+      closeForm();
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : "No se pudo guardar la carga de combustible");
+    }
   };
 
   const renderInput = (
