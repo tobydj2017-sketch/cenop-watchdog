@@ -85,7 +85,30 @@ export function getFuelEntries(): FuelEntry[] {
 }
 
 export function saveFuelEntries(entries: FuelEntry[]) {
-  localStorage.setItem(FUEL_KEY, JSON.stringify(entries));
+  const payload = JSON.stringify(entries);
+  try {
+    localStorage.setItem(FUEL_KEY, payload);
+  } catch (err) {
+    const isQuotaError =
+      err instanceof DOMException &&
+      (err.name === "QuotaExceededError" || err.name === "NS_ERROR_DOM_QUOTA_REACHED");
+    if (!isQuotaError) throw err;
+
+    const trimmed = entries.map((entry) => ({ ...entry, ticketImage: undefined }));
+    localStorage.setItem(FUEL_KEY, JSON.stringify(trimmed));
+    queueUploadMerged<FuelEntry>(
+      BLOB_KEYS.fuel,
+      () => JSON.parse(localStorage.getItem(FUEL_KEY) || "[]"),
+      (merged) => {
+        const finalList = merged.filter((f) => !isLegacy(f.fecha));
+        localStorage.setItem(FUEL_KEY, JSON.stringify(finalList));
+        window.dispatchEvent(new Event("cenop:fuel-synced"));
+      },
+    );
+    window.dispatchEvent(new Event("cenop:fuel-synced"));
+    console.warn("[Combustible] localStorage sin espacio: la carga se guardó sin foto de ticket.");
+    return;
+  }
   queueUploadMerged<FuelEntry>(
     BLOB_KEYS.fuel,
     () => JSON.parse(localStorage.getItem(FUEL_KEY) || "[]"),

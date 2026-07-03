@@ -89,7 +89,7 @@ export interface FuelEntry {
   anio: string;
   consumoIdeal: string;
   tipoCombustible: string;
-  ticketImage?: string;
+  ticketImage?: string; // data URL legacy o referencia azure:tickets/...
   observaciones: string;
 }
 

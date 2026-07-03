@@ -7,10 +7,19 @@ export function isAzureConfigured(): boolean {
   return !!SAS_URL && SAS_URL.includes("?");
 }
 
+function encodeBlobName(blobName: string): string {
+  return blobName.split("/").map(encodeURIComponent).join("/");
+}
+
 function buildBlobUrl(blobName: string): string {
   if (!SAS_URL) throw new Error("VITE_AZURE_BLOB_SAS_URL no está configurada");
   const [base, query] = SAS_URL.split("?");
-  return `${base}/${encodeURIComponent(blobName)}?${query}`;
+  return `${base}/${encodeBlobName(blobName)}?${query}`;
+}
+
+export function getBlobAccessUrl(value: string): string {
+  if (!value.startsWith("azure:")) return value;
+  return buildBlobUrl(value.slice("azure:".length));
 }
 
 export async function downloadJson<T>(blobName: string): Promise<T | null> {
@@ -55,6 +64,30 @@ export async function uploadJson(blobName: string, data: unknown): Promise<boole
   } catch (err) {
     console.warn(`[Azure] error subiendo ${blobName}:`, err);
     return false;
+  }
+}
+
+export async function uploadDataUrlBlob(blobName: string, dataUrl: string): Promise<string | null> {
+  if (!isAzureConfigured()) return null;
+  try {
+    const blob = await fetch(dataUrl).then((res) => res.blob());
+    const res = await fetch(buildBlobUrl(blobName), {
+      method: "PUT",
+      headers: {
+        "x-ms-version": "2025-05-05",
+        "x-ms-blob-type": "BlockBlob",
+        "Content-Type": blob.type || "image/jpeg",
+      },
+      body: blob,
+    });
+    if (!res.ok) {
+      console.warn(`[Azure] upload ticket ${blobName} -> ${res.status}`, await res.text());
+      return null;
+    }
+    return `azure:${blobName}`;
+  } catch (err) {
+    console.warn(`[Azure] error subiendo ticket ${blobName}:`, err);
+    return null;
   }
 }
 
