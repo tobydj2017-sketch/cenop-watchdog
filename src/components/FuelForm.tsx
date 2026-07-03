@@ -378,11 +378,11 @@ export default function FuelForm({ onAdd, selectedDate, existingEntries, allEntr
             )}
 
             <div className="flex items-center justify-between gap-3 pt-2">
-                <Button type="button" onClick={() => setStep((s) => Math.max(1, s - 1))} disabled={step === 1 || saving} className="h-9 px-4 text-sm gap-2 bg-background text-foreground hover:bg-background/90 disabled:opacity-40">
+                <Button type="button" onClick={(event) => { event.preventDefault(); setStep((s) => Math.max(1, s - 1)); }} disabled={step === 1 || saving} className="h-9 px-4 text-sm gap-2 bg-background text-foreground hover:bg-background/90 disabled:opacity-40">
                 <ChevronLeft className="w-4 h-4" /> Anterior
               </Button>
               {step < 3 ? (
-                <Button type="button" onClick={() => setStep((s) => Math.min(3, s + 1))} disabled={saving} className="h-9 px-5 text-sm gap-2">
+                <Button type="button" onClick={(event) => { event.preventDefault(); setStep((s) => Math.min(3, s + 1)); }} disabled={saving} className="h-9 px-5 text-sm gap-2">
                   Siguiente <ChevronRight className="w-4 h-4" />
                 </Button>
               ) : (
