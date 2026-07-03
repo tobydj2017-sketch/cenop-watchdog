@@ -166,6 +166,10 @@ export default function FuelForm({ onAdd, selectedDate, existingEntries, allEntr
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (saving) return;
+    if (step < 3) {
+      setStep((s) => Math.min(3, s + 1));
+      return;
+    }
     const trimmedRemito = form.numeroRemito.trim();
     if (!trimmedRemito) {
       toast.error("El N° de Remito es obligatorio");
