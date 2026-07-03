@@ -2,6 +2,7 @@ import { FuelEntry } from "@/lib/types";
 import { Trash2, Eye } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useState } from "react";
+import { getBlobAccessUrl } from "@/lib/azureBlob";
 
 interface Props {
   entries: FuelEntry[];
@@ -45,7 +46,7 @@ export default function FuelTable({ entries, onDelete }: Props) {
                   <td className="px-3 py-2.5 font-mono text-xs">{f.numeroRemito || "—"}</td>
                   <td className="px-3 py-2.5">
                     {f.ticketImage ? (
-                      <Button variant="ghost" size="sm" onClick={() => setViewImage(f.ticketImage!)} className="h-7 gap-1 text-xs">
+                      <Button variant="ghost" size="sm" onClick={() => setViewImage(getBlobAccessUrl(f.ticketImage!))} className="h-7 gap-1 text-xs">
                         <Eye className="w-3 h-3" /> Ver
                       </Button>
                     ) : (
