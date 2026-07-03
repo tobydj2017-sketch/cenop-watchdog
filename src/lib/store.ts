@@ -106,7 +106,8 @@ export function saveFuelEntries(entries: FuelEntry[]) {
       },
     );
     window.dispatchEvent(new Event("cenop:fuel-synced"));
-    throw new Error("La foto del ticket es demasiado pesada. La carga se guardó sin foto; sacá otra foto más chica o recortada.");
+    console.warn("[Combustible] localStorage sin espacio: la carga se guardó sin foto de ticket.");
+    return;
   }
   queueUploadMerged<FuelEntry>(
     BLOB_KEYS.fuel,
