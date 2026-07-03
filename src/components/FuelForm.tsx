@@ -7,6 +7,7 @@ import { FuelEntry, generateId } from "@/lib/types";
 import { isValidDate, isValidTime, findFuelDuplicate } from "@/lib/validation";
 import { LUGARES_CARGA, TIPOS_COMBUSTIBLE } from "@/lib/movilesData";
 import { getMoviles } from "@/lib/movilesStore";
+import { uploadDataUrlBlob } from "@/lib/azureBlob";
 
 import SearchableSelect from "@/components/SearchableSelect";
 import { Camera, Plus, Upload, Fuel, ChevronLeft, ChevronRight } from "lucide-react";
@@ -43,6 +44,7 @@ export default function FuelForm({ onAdd, selectedDate, existingEntries, allEntr
   const [step, setStep] = useState(1);
   const [form, setForm] = useState({ ...defaultState });
   const [ticketImage, setTicketImage] = useState<string | undefined>();
+  const [saving, setSaving] = useState(false);
   const fileRef = useRef<HTMLInputElement>(null);
 
   const movilesList = useMemo(() => getMoviles().filter((m) => m.activo), [open]);
@@ -152,6 +154,7 @@ export default function FuelForm({ onAdd, selectedDate, existingEntries, allEntr
   const reset = () => {
     setForm({ ...defaultState });
     setTicketImage(undefined);
+    setSaving(false);
     setStep(1);
   };
 
@@ -160,8 +163,9 @@ export default function FuelForm({ onAdd, selectedDate, existingEntries, allEntr
     setOpen(false);
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (saving) return;
     const trimmedRemito = form.numeroRemito.trim();
     if (!trimmedRemito) {
       toast.error("El N° de Remito es obligatorio");
@@ -183,8 +187,22 @@ export default function FuelForm({ onAdd, selectedDate, existingEntries, allEntr
       toast.error("La hora no es válida");
       return;
     }
+    setSaving(true);
+    const entryId = generateId();
+    let ticketRef = ticketImage;
+    if (ticketImage?.startsWith("data:")) {
+      const uploaded = await uploadDataUrlBlob(
+        `tickets/${form.fecha || new Date().toISOString().slice(0, 10)}/${entryId}.jpg`,
+        ticketImage,
+      );
+      if (uploaded) {
+        ticketRef = uploaded;
+      } else {
+        toast.warning("No se pudo subir la foto del ticket. Se guardará comprimida en este equipo.");
+      }
+    }
     const candidate: FuelEntry = {
-      id: generateId(),
+      id: entryId,
       fecha: form.fecha,
       hora: form.hora,
       movil: form.movil,
@@ -204,7 +222,7 @@ export default function FuelForm({ onAdd, selectedDate, existingEntries, allEntr
       anio: form.anio,
       consumoIdeal: form.consumoIdeal,
       tipoCombustible: form.tipoCombustible,
-      ticketImage,
+      ticketImage: ticketRef,
       observaciones: form.observaciones,
     };
     const dup = findFuelDuplicate(candidate, historyEntries);
@@ -222,6 +240,7 @@ export default function FuelForm({ onAdd, selectedDate, existingEntries, allEntr
       closeForm();
     } catch (err) {
       toast.error(err instanceof Error ? err.message : "No se pudo guardar la carga de combustible");
+      setSaving(false);
     }
   };
 
@@ -356,16 +375,16 @@ export default function FuelForm({ onAdd, selectedDate, existingEntries, allEntr
             )}
 
             <div className="flex items-center justify-between gap-3 pt-2">
-              <Button type="button" onClick={() => setStep((s) => Math.max(1, s - 1))} disabled={step === 1} className="h-9 px-4 text-sm gap-2 bg-background text-foreground hover:bg-background/90 disabled:opacity-40">
+                <Button type="button" onClick={() => setStep((s) => Math.max(1, s - 1))} disabled={step === 1 || saving} className="h-9 px-4 text-sm gap-2 bg-background text-foreground hover:bg-background/90 disabled:opacity-40">
                 <ChevronLeft className="w-4 h-4" /> Anterior
               </Button>
               {step < 3 ? (
-                <Button type="button" onClick={() => setStep((s) => Math.min(3, s + 1))} className="h-9 px-5 text-sm gap-2">
+                <Button type="button" onClick={() => setStep((s) => Math.min(3, s + 1))} disabled={saving} className="h-9 px-5 text-sm gap-2">
                   Siguiente <ChevronRight className="w-4 h-4" />
                 </Button>
               ) : (
-                <Button type="submit" className="h-9 px-5 text-sm gap-2">
-                  <Upload className="w-4 h-4" /> Guardar carga
+                <Button type="submit" disabled={saving} className="h-9 px-5 text-sm gap-2">
+                  <Upload className="w-4 h-4" /> {saving ? "Guardando..." : "Guardar carga"}
                 </Button>
               )}
             </div>
