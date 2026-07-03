@@ -96,6 +96,16 @@ export function saveFuelEntries(entries: FuelEntry[]) {
 
     const trimmed = entries.map((entry) => ({ ...entry, ticketImage: undefined }));
     localStorage.setItem(FUEL_KEY, JSON.stringify(trimmed));
+    queueUploadMerged<FuelEntry>(
+      BLOB_KEYS.fuel,
+      () => JSON.parse(localStorage.getItem(FUEL_KEY) || "[]"),
+      (merged) => {
+        const finalList = merged.filter((f) => !isLegacy(f.fecha));
+        localStorage.setItem(FUEL_KEY, JSON.stringify(finalList));
+        window.dispatchEvent(new Event("cenop:fuel-synced"));
+      },
+    );
+    window.dispatchEvent(new Event("cenop:fuel-synced"));
     throw new Error("La foto del ticket es demasiado pesada. La carga se guardó sin foto; sacá otra foto más chica o recortada.");
   }
   queueUploadMerged<FuelEntry>(
