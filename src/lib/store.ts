@@ -1,14 +1,12 @@
 import { ServiceEntry, FuelEntry, isCountableServiceEntry } from "./types";
 import { BLOB_KEYS, queueUploadMerged, uploadJson } from "./azureBlob";
 
-// Purga única de todas las cargas de combustible (pedido del usuario).
-const FUEL_WIPE_KEY = "cenop_fuel_wiped_v2";
+// La purga única ya se ejecutó en su momento. Este stub queda para no
+// romper imports existentes, pero NO debe borrar nada: hacerlo por navegador
+// hacía que cada sesión nueva subiera un fuel.json vacío a Azure y borrara
+// las cargas de todos los demás.
 export function wipeFuelIfNeeded() {
-  if (typeof localStorage === "undefined") return;
-  if (localStorage.getItem(FUEL_WIPE_KEY)) return;
-  localStorage.setItem("cenop_fuel", JSON.stringify([]));
-  void uploadJson(BLOB_KEYS.fuel, []);
-  localStorage.setItem(FUEL_WIPE_KEY, "true");
+  return;
 }
 
 const SERVICES_KEY = "cenop_services";
