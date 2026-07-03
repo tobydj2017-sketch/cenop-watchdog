@@ -67,6 +67,8 @@ export default function FuelForm({ onAdd, selectedDate, existingEntries, allEntr
   const set = (field: keyof typeof defaultState, value: string) =>
     setForm((p) => ({ ...p, [field]: value }));
 
+  const normalizeRemito = (value: unknown) => String(value || "").trim().toUpperCase();
+
   // Autocomplete al elegir móvil
   const handleMovil = (value: string) => {
     const info = movilesList.find((m) => m.patente === value);
@@ -175,7 +177,7 @@ export default function FuelForm({ onAdd, selectedDate, existingEntries, allEntr
       toast.error("El N° de Remito es obligatorio");
       return;
     }
-    if (existingEntries.some((f) => f.numeroRemito.trim().toUpperCase() === trimmedRemito.toUpperCase())) {
+    if (existingEntries.some((f) => normalizeRemito(f.numeroRemito) === normalizeRemito(trimmedRemito))) {
       toast.error(`Ya existe una carga con el remito "${trimmedRemito}"`);
       return;
     }
@@ -205,7 +207,7 @@ export default function FuelForm({ onAdd, selectedDate, existingEntries, allEntr
       kmAnterior: kmAnterior || "PRIMER REGISTRO",
       kmRecorridos,
       kmPorLitro,
-      numeroRemito: form.numeroRemito,
+      numeroRemito: trimmedRemito,
       lugarCarga: form.lugarCarga,
       estacion: form.estacion,
       marca: form.marca,
