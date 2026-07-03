@@ -187,20 +187,7 @@ export default function FuelForm({ onAdd, selectedDate, existingEntries, allEntr
       toast.error("La hora no es válida");
       return;
     }
-    setSaving(true);
     const entryId = generateId();
-    let ticketRef = ticketImage;
-    if (ticketImage?.startsWith("data:")) {
-      const uploaded = await uploadDataUrlBlob(
-        `tickets/${form.fecha || new Date().toISOString().slice(0, 10)}/${entryId}.jpg`,
-        ticketImage,
-      );
-      if (uploaded) {
-        ticketRef = uploaded;
-      } else {
-        toast.warning("No se pudo subir la foto del ticket. Se guardará comprimida en este equipo.");
-      }
-    }
     const candidate: FuelEntry = {
       id: entryId,
       fecha: form.fecha,
@@ -222,7 +209,7 @@ export default function FuelForm({ onAdd, selectedDate, existingEntries, allEntr
       anio: form.anio,
       consumoIdeal: form.consumoIdeal,
       tipoCombustible: form.tipoCombustible,
-      ticketImage: ticketRef,
+      ticketImage,
       observaciones: form.observaciones,
     };
     const dup = findFuelDuplicate(candidate, historyEntries);
@@ -233,6 +220,18 @@ export default function FuelForm({ onAdd, selectedDate, existingEntries, allEntr
     if (kmAnterior && Number(form.kilometraje) > 0 && Number(form.kilometraje) < Number(kmAnterior)) {
       toast.error(`El KM actual (${form.kilometraje}) es menor que el KM anterior (${kmAnterior})`);
       return;
+    }
+    setSaving(true);
+    if (ticketImage?.startsWith("data:")) {
+      const uploaded = await uploadDataUrlBlob(
+        `tickets/${form.fecha || new Date().toISOString().slice(0, 10)}/${entryId}.jpg`,
+        ticketImage,
+      );
+      if (uploaded) {
+        candidate.ticketImage = uploaded;
+      } else {
+        toast.warning("No se pudo subir la foto del ticket. Se guardará comprimida en este equipo.");
+      }
     }
     try {
       onAdd(candidate);
