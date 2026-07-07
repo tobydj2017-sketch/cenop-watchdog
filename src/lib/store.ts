@@ -70,6 +70,7 @@ export function addService(entry: ServiceEntry) {
 }
 
 export function deleteService(id: string) {
+  addTombstone(BLOB_KEYS.services, id);
   saveServices(getServices().filter((e) => e.id !== id));
 }
 
