@@ -203,49 +203,64 @@ export async function exportCargaDiaPDF(services: ServiceEntry[], fuel: FuelEntr
   let startY = 56;
 
   if (services.length > 0) {
+    // Ordenar por N° de solicitud y desdoblar cada servicio en dos filas
+    // (una para chofer y otra para custodio) para replicar el formato oficial.
+    const sorted = [...services].sort((a, b) => (a.solicitud || 0) - (b.solicitud || 0));
+    const body: string[][] = [];
+    sorted.forEach((s) => {
+      const base = {
+        num: String(s.solicitud || "—"),
+        solicitud: cleanTime(s.horaSolicitud) || "—",
+        cliente: s.cliente || "—",
+        salida: s.lugarSalida || "—",
+        destino: s.destino || "—",
+        movil: s.movil || "—",
+        celular: s.celular || "—",
+        orden: s.ordenCarga || "—",
+      };
+      if (s.chofer) {
+        body.push([base.num, base.solicitud, base.cliente, base.salida, base.destino, s.chofer, cleanTime(s.citaChofer) || "—", "", "", base.movil, base.celular, base.orden]);
+      }
+      if (s.custodio) {
+        body.push([base.num, base.solicitud, base.cliente, base.salida, base.destino, "", "", s.custodio, cleanTime(s.citaCustodio) || "—", base.movil, base.celular, base.orden]);
+      }
+      if (!s.chofer && !s.custodio) {
+        body.push([base.num, base.solicitud, base.cliente, base.salida, base.destino, "—", "—", "—", "—", base.movil, base.celular, base.orden]);
+      }
+    });
+
     autoTable(doc, {
       startY,
       head: [
-        ["N°", "Cliente", "Salida", "Destino", "Chofer", "Cita Chofer", "Custodio", "Cita Custodio", "Móvil", "Celular", "Orden de Carga Cliente"],
+        ["N°", "Solicitud de Custodia", "Cliente", "Lugar de Salida", "Destino", "Chofer", "Cita Chofer", "Custodio", "Cita Custodio", "Móvil", "Celular", "Orden de Carga Cliente"],
       ],
-      body: services.map((s) => [
-        String(s.solicitud || "—"),
-        s.cliente || "—",
-        s.lugarSalida || "—",
-        s.destino || "—",
-        s.chofer || "—",
-        cleanTime(s.citaChofer) || "—",
-        s.custodio || "—",
-        cleanTime(s.citaCustodio) || "—",
-        s.movil || "—",
-        s.celular || "—",
-        s.ordenCarga || "—",
-      ]),
+      body,
       margin: { left: 8, right: 8 },
       headStyles: {
         fillColor: AM_GREEN,
         textColor: [255, 255, 255],
         fontStyle: "bold",
-        fontSize: 7.5,
+        fontSize: 7,
         cellPadding: 1.5,
         halign: "center",
         valign: "middle",
       },
-      bodyStyles: { fontSize: 7, cellPadding: 1.5, valign: "middle" },
+      bodyStyles: { fontSize: 7, cellPadding: 1.5, valign: "middle", halign: "center" },
       alternateRowStyles: { fillColor: [248, 250, 248] as [number, number, number] },
       styles: { lineColor: [200, 200, 200] as [number, number, number], lineWidth: 0.2, overflow: "linebreak" },
       columnStyles: {
         0: { cellWidth: 10, halign: "center", fontStyle: "bold" },
-        1: { cellWidth: 22 },
-        2: { cellWidth: 30 },
-        3: { cellWidth: 30 },
-        4: { cellWidth: 38 },
-        5: { cellWidth: 20, halign: "center", fontStyle: "bold" },
-        6: { cellWidth: 38 },
-        7: { cellWidth: 20, halign: "center", fontStyle: "bold" },
-        8: { cellWidth: 18, halign: "center" },
-        9: { cellWidth: 22, halign: "center" },
-        10: { cellWidth: 33, halign: "center" },
+        1: { cellWidth: 20, halign: "center", fontStyle: "bold" },
+        2: { cellWidth: 24 },
+        3: { cellWidth: 26 },
+        4: { cellWidth: 26 },
+        5: { cellWidth: 34 },
+        6: { cellWidth: 16, halign: "center", fontStyle: "bold" },
+        7: { cellWidth: 34 },
+        8: { cellWidth: 16, halign: "center", fontStyle: "bold" },
+        9: { cellWidth: 18, halign: "center" },
+        10: { cellWidth: 22, halign: "center" },
+        11: { cellWidth: 35, halign: "center" },
       },
       tableWidth: "auto",
     });
