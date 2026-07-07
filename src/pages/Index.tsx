@@ -255,6 +255,11 @@ export default function Index() {
     setFuelEntries(getFuelEntries());
   }, []);
 
+  const handleUpdateFuel = useCallback((entry: FuelEntry) => {
+    updateFuelEntry(entry);
+    setFuelEntries(getFuelEntries());
+  }, []);
+
   const cleanServices = useMemo(
     () => services.filter(isCountableServiceEntry),
     [services],
