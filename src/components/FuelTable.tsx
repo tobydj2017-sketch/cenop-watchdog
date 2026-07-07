@@ -58,9 +58,16 @@ export default function FuelTable({ entries, onDelete, onUpdate, allEntries }: P
                     )}
                   </td>
                   <td className="px-3 py-2.5">
-                    <Button variant="ghost" size="sm" onClick={() => onDelete(f.id)} className="h-7 w-7 p-0 text-muted-foreground hover:text-destructive">
-                      <Trash2 className="w-3.5 h-3.5" />
-                    </Button>
+                    <div className="flex items-center gap-1">
+                      {onUpdate && (
+                        <Button variant="ghost" size="sm" onClick={() => setEditing(f)} className="h-7 w-7 p-0 text-muted-foreground hover:text-primary" title="Editar">
+                          <Pencil className="w-3.5 h-3.5" />
+                        </Button>
+                      )}
+                      <Button variant="ghost" size="sm" onClick={() => onDelete(f.id)} className="h-7 w-7 p-0 text-muted-foreground hover:text-destructive" title="Eliminar">
+                        <Trash2 className="w-3.5 h-3.5" />
+                      </Button>
+                    </div>
                   </td>
                 </tr>
                 );
