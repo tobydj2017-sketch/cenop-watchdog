@@ -208,23 +208,21 @@ export default function FullDashboard({ services, fuelEntries, onBack }: Props) 
       {tab === "moviles" && (
         <div className="space-y-4">
           <div className="glass-card p-5">
-            <h3 className="text-sm font-semibold text-muted-foreground mb-4 uppercase tracking-wider">Horas por Patente / Móvil</h3>
+            <h3 className="text-sm font-semibold text-muted-foreground mb-4 uppercase tracking-wider">Horas productivas por Patente / Móvil</h3>
             <ResponsiveContainer width="100%" height={Math.max(300, byMovil.length * 35)}>
               <BarChart data={byMovil} layout="vertical" onClick={openDrill("movil")}>
                 <XAxis type="number" tickFormatter={(v) => `${Math.floor(v / 60)}h`} />
                 <YAxis type="category" dataKey="patente" width={100} tick={{ fontSize: 11, cursor: "pointer" }} onClick={(e: any) => e?.value && setDrill({ entity: "movil", name: String(e.value) })} />
                 <Tooltip formatter={tooltipFormatter} />
                 <Legend />
-                <Bar dataKey="prod" name="Hs Productivas" fill="hsl(142, 70%, 45%)" stackId="a" style={{ cursor: "pointer" }} />
-                <Bar dataKey="improd" name="Hs Improductivas" fill="hsl(0, 72%, 50%)" stackId="a" style={{ cursor: "pointer" }} />
+                <Bar dataKey="prod" name="Hs Productivas" fill="hsl(142, 70%, 45%)" style={{ cursor: "pointer" }} />
               </BarChart>
             </ResponsiveContainer>
           </div>
           <DataTable
-            columns={["Patente", "Servicios", "Hs Prod.", "Hs Improd.", "Hs Total", "Eficiencia"]}
+            columns={["Patente", "Servicios", "Hs Prod."]}
             rows={byMovil.map((m) => [
-              m.patente, m.servicios, formatHoursMinutes(m.prod), formatHoursMinutes(m.improd),
-              formatHoursMinutes(m.total), m.total > 0 ? `${Math.round((m.prod / m.total) * 100)}%` : "—",
+              m.patente, m.servicios, formatHoursMinutes(m.prod),
             ])}
           />
         </div>
