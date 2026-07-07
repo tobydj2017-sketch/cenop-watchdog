@@ -404,7 +404,7 @@ export default function Index() {
               canEdit={canEditService}
               canDelete={canDeleteService}
             />
-            <FuelTable entries={dayFuel} onDelete={handleDeleteFuel} />
+            <FuelTable entries={dayFuel} onDelete={handleDeleteFuel} onUpdate={handleUpdateFuel} allEntries={fuelEntries} />
           </>
         )}
           </main>
