@@ -217,18 +217,18 @@ export async function bootstrapFromAzure(): Promise<void> {
 
   await Promise.all([
     ...mergeable.map(async ([blob, localKey]) => {
+      const tombstones = await syncTombstones(blob);
       const remote = (await downloadJson<any[]>(blob)) ?? [];
       const localRaw = localStorage.getItem(localKey);
       let local: any[] = [];
       try { local = localRaw ? JSON.parse(localRaw) : []; } catch { local = []; }
       const byId = new Map<string, any>();
-      for (const item of remote) if (item && item.id) byId.set(item.id, item);
-      // Local pisa a remoto en caso de conflicto (ediciones locales más nuevas)
-      for (const item of local) if (item && item.id) byId.set(item.id, item);
+      for (const item of remote) if (item && item.id && !tombstones.has(item.id)) byId.set(item.id, item);
+      for (const item of local) if (item && item.id && !tombstones.has(item.id)) byId.set(item.id, item);
       const merged = Array.from(byId.values());
       localStorage.setItem(localKey, JSON.stringify(merged));
-      // Si el merge agregó cosas que no estaban en el remoto, sincronizar
-      if (merged.length !== remote.length) {
+      // Si el merge cambió respecto al remoto (agregados o borrados), sincronizar
+      if (merged.length !== remote.length || remote.some((r) => r?.id && tombstones.has(r.id))) {
         void uploadJson(blob, merged);
       }
     }),
