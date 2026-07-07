@@ -1,16 +1,20 @@
 import { FuelEntry } from "@/lib/types";
-import { Trash2, Eye } from "lucide-react";
+import { Trash2, Eye, Pencil } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useState } from "react";
 import { getBlobAccessUrl } from "@/lib/azureBlob";
+import FuelEditDialog from "@/components/FuelEditDialog";
 
 interface Props {
   entries: FuelEntry[];
   onDelete: (id: string) => void;
+  onUpdate?: (entry: FuelEntry) => void;
+  allEntries?: FuelEntry[];
 }
 
-export default function FuelTable({ entries, onDelete }: Props) {
+export default function FuelTable({ entries, onDelete, onUpdate, allEntries }: Props) {
   const [viewImage, setViewImage] = useState<string | null>(null);
+  const [editing, setEditing] = useState<FuelEntry | null>(null);
 
   if (entries.length === 0) return null;
 
@@ -54,9 +58,16 @@ export default function FuelTable({ entries, onDelete }: Props) {
                     )}
                   </td>
                   <td className="px-3 py-2.5">
-                    <Button variant="ghost" size="sm" onClick={() => onDelete(f.id)} className="h-7 w-7 p-0 text-muted-foreground hover:text-destructive">
-                      <Trash2 className="w-3.5 h-3.5" />
-                    </Button>
+                    <div className="flex items-center gap-1">
+                      {onUpdate && (
+                        <Button variant="ghost" size="sm" onClick={() => setEditing(f)} className="h-7 w-7 p-0 text-muted-foreground hover:text-primary" title="Editar">
+                          <Pencil className="w-3.5 h-3.5" />
+                        </Button>
+                      )}
+                      <Button variant="ghost" size="sm" onClick={() => onDelete(f.id)} className="h-7 w-7 p-0 text-muted-foreground hover:text-destructive" title="Eliminar">
+                        <Trash2 className="w-3.5 h-3.5" />
+                      </Button>
+                    </div>
                   </td>
                 </tr>
                 );
@@ -72,6 +83,16 @@ export default function FuelTable({ entries, onDelete }: Props) {
             <img src={viewImage} alt="Ticket de combustible" className="w-full h-full object-contain" />
           </div>
         </div>
+      )}
+
+      {onUpdate && (
+        <FuelEditDialog
+          entry={editing}
+          open={editing !== null}
+          onClose={() => setEditing(null)}
+          onSave={(e) => onUpdate(e)}
+          existingEntries={allEntries ?? entries}
+        />
       )}
     </>
   );

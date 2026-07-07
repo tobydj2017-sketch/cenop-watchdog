@@ -40,7 +40,7 @@ import amGuardCarAsset from "@/assets/am-guard-car.png.asset.json";
 import { ServiceEntry, FuelEntry, isCountableServiceEntry } from "@/lib/types";
 import {
   getServices, addService, deleteService, updateService,
-  getFuelEntries, addFuelEntry, deleteFuelEntry,
+  getFuelEntries, addFuelEntry, deleteFuelEntry, updateFuelEntry,
 } from "@/lib/store";
 import { exportCargaDiaPDF, exportPersonalManagerPDF, exportClientManagerPDF } from "@/lib/pdfExport";
 import { exportCargaDiaExcel } from "@/lib/excelExport";
@@ -255,6 +255,11 @@ export default function Index() {
     setFuelEntries(getFuelEntries());
   }, []);
 
+  const handleUpdateFuel = useCallback((entry: FuelEntry) => {
+    updateFuelEntry(entry);
+    setFuelEntries(getFuelEntries());
+  }, []);
+
   const cleanServices = useMemo(
     () => services.filter(isCountableServiceEntry),
     [services],
@@ -399,7 +404,7 @@ export default function Index() {
               canEdit={canEditService}
               canDelete={canDeleteService}
             />
-            <FuelTable entries={dayFuel} onDelete={handleDeleteFuel} />
+            <FuelTable entries={dayFuel} onDelete={handleDeleteFuel} onUpdate={handleUpdateFuel} allEntries={fuelEntries} />
           </>
         )}
           </main>

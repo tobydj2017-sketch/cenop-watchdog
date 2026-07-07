@@ -302,7 +302,18 @@ export default function ServiceForm({ onAdd, selectedDate, existingServices }: P
 
       <Dialog open={open} onOpenChange={(o) => { if (!o) closeForm(); }}>
         <DialogContent className="max-w-3xl w-[95vw] max-h-[90vh] overflow-y-auto p-0 border-primary/40 bg-foreground text-background">
-          <form onSubmit={handleSubmit} className="p-5 space-y-4 text-sm">
+          <form
+            onSubmit={handleSubmit}
+            onKeyDown={(e) => {
+              if (e.key !== "Enter") return;
+              const target = e.target as HTMLElement;
+              const tag = target.tagName;
+              const isSubmit = tag === "BUTTON" && (target as HTMLButtonElement).type === "submit";
+              if (tag === "TEXTAREA" || isSubmit) return;
+              e.preventDefault();
+            }}
+            className="p-5 space-y-4 text-sm"
+          >
             <div className="flex items-center justify-between">
               <div>
                 <h3 className="text-base font-extrabold uppercase tracking-widest text-primary">Nuevo Servicio</h3>

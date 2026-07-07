@@ -143,11 +143,32 @@ export default function ServiceEditDialog({ service, open, onClose, onSave, exis
     onClose();
   };
 
-  const Field = ({ label, field, type = "text" }: { label: string; field: keyof ServiceEntry; type?: string }) => (
-    <div className="space-y-1.5">
+  const timeFields = [
+    "horaSolicitud", "citaChofer", "citaCustodio", "salidaCenop", "llegadaServicio",
+    "iniciaServicio", "llegadaDestino", "finalizaServicio", "llegadaCenop",
+    "horaFrancoChofer", "horaFrancoCustodio",
+  ];
+
+  const focusNextTimeField = (currentField: string) => {
+    const idx = timeFields.indexOf(currentField);
+    if (idx < 0 || idx >= timeFields.length - 1) return;
+    const nextField = timeFields[idx + 1];
+    const nextInput = document.querySelector(`[data-edit-timefield="${nextField}"] input`) as HTMLInputElement | null;
+    nextInput?.focus();
+  };
+
+  const renderField = ({ label, field, type = "text" }: { label: string; field: keyof ServiceEntry; type?: string }) => (
+    <div key={String(field)} className="space-y-1.5">
       <Label className="text-xs font-bold uppercase tracking-wider text-muted-foreground">{label}</Label>
       {type === "time" ? (
-        <TimeInput value={(form[field] as string) || ""} onChange={(v) => set(field, v)} className="h-10" />
+        <div data-edit-timefield={String(field)}>
+          <TimeInput
+            value={(form[field] as string) || ""}
+            onChange={(v) => set(field, v)}
+            onComplete={() => focusNextTimeField(String(field))}
+            className="h-10"
+          />
+        </div>
       ) : (
         <Input
           type={type}
@@ -171,15 +192,15 @@ export default function ServiceEditDialog({ service, open, onClose, onSave, exis
           <section className="space-y-3">
             <h4 className="text-sm font-extrabold uppercase tracking-wider text-primary">Datos generales</h4>
             <div className="grid md:grid-cols-3 gap-4">
-              <Field label="Fecha" field="fecha" type="date" />
-              <Field label="N°" field="solicitud" type="number" />
-              <Field label="Solicitud de Custodia" field="horaSolicitud" type="time" />
+              {renderField({ label: "Fecha", field: "fecha", type: "date" })}
+              {renderField({ label: "N°", field: "solicitud", type: "number" })}
+              {renderField({ label: "Solicitud de Custodia", field: "horaSolicitud", type: "time" })}
               <div className="space-y-1.5">
                 <Label className="text-xs font-bold uppercase tracking-wider text-muted-foreground">Cliente</Label>
                 <SearchableSelect options={clientesList} value={form.cliente} onChange={(v) => set("cliente", v)} inputClassName="h-10" />
               </div>
-              <Field label="Lugar de Salida" field="lugarSalida" />
-              <Field label="Destino" field="destino" />
+              {renderField({ label: "Lugar de Salida", field: "lugarSalida" })}
+              {renderField({ label: "Destino", field: "destino" })}
             </div>
           </section>
 
@@ -191,12 +212,12 @@ export default function ServiceEditDialog({ service, open, onClose, onSave, exis
                 <Label className="text-xs font-bold uppercase tracking-wider text-muted-foreground">Chofer</Label>
                 <SearchableSelect options={allPersonal} value={form.chofer} onChange={(v) => set("chofer", v)} badgeMap={roleBadgeMap} inputClassName="h-10" />
               </div>
-              <Field label="Cita Chofer" field="citaChofer" type="time" />
+              {renderField({ label: "Cita Chofer", field: "citaChofer", type: "time" })}
               <div className="space-y-1.5">
                 <Label className="text-xs font-bold uppercase tracking-wider text-muted-foreground">Custodio</Label>
                 <SearchableSelect options={allPersonal} value={form.custodio} onChange={(v) => set("custodio", v)} badgeMap={roleBadgeMap} inputClassName="h-10" />
               </div>
-              <Field label="Cita Custodio" field="citaCustodio" type="time" />
+              {renderField({ label: "Cita Custodio", field: "citaCustodio", type: "time" })}
             </div>
           </section>
 
@@ -262,7 +283,7 @@ export default function ServiceEditDialog({ service, open, onClose, onSave, exis
                 />
               </div>
 
-              <Field label="Orden de Carga Cliente" field="ordenCarga" />
+              {renderField({ label: "Orden de Carga Cliente", field: "ordenCarga" })}
             </div>
           </section>
 
@@ -270,14 +291,14 @@ export default function ServiceEditDialog({ service, open, onClose, onSave, exis
           <section className="space-y-3">
             <h4 className="text-sm font-extrabold uppercase tracking-wider text-primary">Horarios</h4>
             <div className="grid md:grid-cols-3 gap-4">
-              <Field label="Salida de CENOP" field="salidaCenop" type="time" />
-              <Field label="Llegada a Servicio" field="llegadaServicio" type="time" />
-              <Field label="Inicia Servicio" field="iniciaServicio" type="time" />
-              <Field label="Llegada a Destino" field="llegadaDestino" type="time" />
-              <Field label="Finaliza Servicio" field="finalizaServicio" type="time" />
-              <Field label="Llegada a CENOP" field="llegadaCenop" type="time" />
-              <Field label="Hora Franco Chofer" field="horaFrancoChofer" type="time" />
-              <Field label="Hora Franco Custodio" field="horaFrancoCustodio" type="time" />
+              {renderField({ label: "Salida de CENOP", field: "salidaCenop", type: "time" })}
+              {renderField({ label: "Llegada a Servicio", field: "llegadaServicio", type: "time" })}
+              {renderField({ label: "Inicia Servicio", field: "iniciaServicio", type: "time" })}
+              {renderField({ label: "Llegada a Destino", field: "llegadaDestino", type: "time" })}
+              {renderField({ label: "Finaliza Servicio", field: "finalizaServicio", type: "time" })}
+              {renderField({ label: "Llegada a CENOP", field: "llegadaCenop", type: "time" })}
+              {renderField({ label: "Hora Franco Chofer", field: "horaFrancoChofer", type: "time" })}
+              {renderField({ label: "Hora Franco Custodio", field: "horaFrancoCustodio", type: "time" })}
             </div>
           </section>
 
@@ -285,8 +306,8 @@ export default function ServiceEditDialog({ service, open, onClose, onSave, exis
           <section className="space-y-3">
             <h4 className="text-sm font-extrabold uppercase tracking-wider text-primary">Documentación</h4>
             <div className="grid md:grid-cols-3 gap-4">
-              <Field label="N° Remito" field="remito" />
-              <Field label="Continúa Orden N°" field="continuaOrden" />
+              {renderField({ label: "N° Remito", field: "remito" })}
+              {renderField({ label: "Continúa Orden N°", field: "continuaOrden" })}
               <div className="space-y-1.5 md:col-span-3">
                 <Label className="text-xs font-bold uppercase tracking-wider text-muted-foreground">Observaciones</Label>
                 <Textarea value={form.observaciones} onChange={(e) => set("observaciones", e.target.value)} rows={2} />
