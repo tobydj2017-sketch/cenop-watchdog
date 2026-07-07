@@ -140,7 +140,7 @@ const canJoinPair = (group: ServiceEntry[], service: ServiceEntry) => {
 const buildPairGroups = (entries: ServiceEntry[]) => {
   const groups: { key: string; rows: ServiceEntry[] }[] = [];
 
-  entries.filter((s) => s.chofer || s.custodio).forEach((service) => {
+  entries.forEach((service) => {
     const lastGroup = groups[groups.length - 1];
     if (lastGroup && canJoinPair(lastGroup.rows, service)) {
       lastGroup.rows.push(service);
