@@ -206,7 +206,7 @@ export async function exportCargaDiaPDF(services: ServiceEntry[], fuel: FuelEntr
     autoTable(doc, {
       startY,
       head: [
-        ["N°", "Cliente", "Salida → Destino", "Chofer", "Cita Chofer", "Custodio", "Cita Custodio", "Móvil", "Celular", "Observaciones"],
+        ["N°", "Cliente", "Salida → Destino", "Chofer", "Cita Chofer", "Custodio", "Cita Custodio", "Móvil", "Celular", "Orden de Carga Cliente"],
       ],
       body: services.map((s) => [
         String(s.solicitud || "—"),
@@ -218,7 +218,7 @@ export async function exportCargaDiaPDF(services: ServiceEntry[], fuel: FuelEntr
         cleanTime(s.citaCustodio) || "—",
         s.movil || "—",
         s.celular || "—",
-        s.observaciones || "—",
+        s.ordenCarga || "—",
       ]),
       margin: { left: 8, right: 8 },
       headStyles: {
@@ -243,7 +243,7 @@ export async function exportCargaDiaPDF(services: ServiceEntry[], fuel: FuelEntr
         6: { cellWidth: 20, halign: "center", fontStyle: "bold" },
         7: { cellWidth: 18, halign: "center" },
         8: { cellWidth: 22, halign: "center" },
-        9: { cellWidth: 30 },
+        9: { cellWidth: 35, halign: "center" },
       },
       tableWidth: "auto",
     });
