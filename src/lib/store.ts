@@ -128,6 +128,7 @@ export function addFuelEntry(entry: FuelEntry) {
 }
 
 export function deleteFuelEntry(id: string) {
+  addTombstone(BLOB_KEYS.fuel, id);
   saveFuelEntries(getFuelEntries().filter((e) => e.id !== id));
 }
 
