@@ -129,3 +129,8 @@ export function addFuelEntry(entry: FuelEntry) {
 export function deleteFuelEntry(id: string) {
   saveFuelEntries(getFuelEntries().filter((e) => e.id !== id));
 }
+
+export function updateFuelEntry(entry: FuelEntry) {
+  const entries = getFuelEntries().map((e) => (e.id === entry.id ? entry : e));
+  saveFuelEntries(entries);
+}
