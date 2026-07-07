@@ -143,11 +143,32 @@ export default function ServiceEditDialog({ service, open, onClose, onSave, exis
     onClose();
   };
 
-  const Field = ({ label, field, type = "text" }: { label: string; field: keyof ServiceEntry; type?: string }) => (
-    <div className="space-y-1.5">
+  const timeFields = [
+    "horaSolicitud", "citaChofer", "citaCustodio", "salidaCenop", "llegadaServicio",
+    "iniciaServicio", "llegadaDestino", "finalizaServicio", "llegadaCenop",
+    "horaFrancoChofer", "horaFrancoCustodio",
+  ];
+
+  const focusNextTimeField = (currentField: string) => {
+    const idx = timeFields.indexOf(currentField);
+    if (idx < 0 || idx >= timeFields.length - 1) return;
+    const nextField = timeFields[idx + 1];
+    const nextInput = document.querySelector(`[data-edit-timefield="${nextField}"] input`) as HTMLInputElement | null;
+    nextInput?.focus();
+  };
+
+  const renderField = ({ label, field, type = "text" }: { label: string; field: keyof ServiceEntry; type?: string }) => (
+    <div key={String(field)} className="space-y-1.5">
       <Label className="text-xs font-bold uppercase tracking-wider text-muted-foreground">{label}</Label>
       {type === "time" ? (
-        <TimeInput value={(form[field] as string) || ""} onChange={(v) => set(field, v)} className="h-10" />
+        <div data-edit-timefield={String(field)}>
+          <TimeInput
+            value={(form[field] as string) || ""}
+            onChange={(v) => set(field, v)}
+            onComplete={() => focusNextTimeField(String(field))}
+            className="h-10"
+          />
+        </div>
       ) : (
         <Input
           type={type}
