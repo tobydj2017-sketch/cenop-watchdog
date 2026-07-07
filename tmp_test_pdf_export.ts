@@ -1,6 +1,7 @@
 import jsPDF from "jspdf";
 import "jspdf-autotable";
 import fs from "fs";
+import path from "path";
 
 const PNG_BASE64 = "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8z8BQDwAEhQGAhKmMIQAAAABJRU5ErkJggg==";
 
@@ -26,8 +27,9 @@ const PNG_BASE64 = "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8
 
 (jsPDF.prototype.save as any) = function (filename: string) {
   const output = this.output("arraybuffer");
-  fs.writeFileSync("/mnt/documents/test-export.pdf", Buffer.from(output));
-  console.log("PDF saved to /mnt/documents/test-export.pdf", filename);
+  const outPath = "/tmp/test-export.pdf";
+  fs.writeFileSync(outPath, Buffer.from(output));
+  console.log("PDF saved to", outPath, "size:", fs.statSync(outPath).size, "bytes", filename);
 };
 
 import { exportCargaDiaPDF } from "/dev-server/src/lib/pdfExport.ts";
