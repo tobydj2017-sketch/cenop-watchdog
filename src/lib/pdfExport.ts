@@ -243,7 +243,7 @@ export async function exportCargaDiaPDF(services: ServiceEntry[], fuel: FuelEntr
         6: { cellWidth: 20, halign: "center", fontStyle: "bold" },
         7: { cellWidth: 18, halign: "center" },
         8: { cellWidth: 22, halign: "center" },
-        9: { cellWidth: 30, halign: "center" },
+        9: { cellWidth: 50, halign: "center" },
       },
       tableWidth: "auto",
     });
