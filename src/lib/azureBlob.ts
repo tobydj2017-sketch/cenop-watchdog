@@ -104,18 +104,58 @@ export function queueUpload(blobName: string, getData: () => unknown, delayMs = 
   pending.set(blobName, t);
 }
 
+// ----- Tombstones (para que un delete no reviva desde remoto) -----
+function tombstoneBlobName(blobName: string): string {
+  return blobName.replace(/\.json$/, ".deleted.json");
+}
+function tombstoneLocalKey(blobName: string): string {
+  return `cenop_tombstones_${blobName}`;
+}
+
+export function getLocalTombstones(blobName: string): string[] {
+  try {
+    const raw = localStorage.getItem(tombstoneLocalKey(blobName));
+    const arr = raw ? JSON.parse(raw) : [];
+    return Array.isArray(arr) ? arr.filter((x) => typeof x === "string") : [];
+  } catch {
+    return [];
+  }
+}
+
+export function addTombstone(blobName: string, id: string) {
+  if (!id) return;
+  const list = getLocalTombstones(blobName);
+  if (!list.includes(id)) {
+    list.push(id);
+    localStorage.setItem(tombstoneLocalKey(blobName), JSON.stringify(list));
+  }
+}
+
+async function syncTombstones(blobName: string): Promise<Set<string>> {
+  const local = getLocalTombstones(blobName);
+  if (!isAzureConfigured()) return new Set(local);
+  const remote = (await downloadJson<string[]>(tombstoneBlobName(blobName))) ?? [];
+  const union = new Set<string>([...remote, ...local]);
+  if (union.size !== remote.length) {
+    void uploadJson(tombstoneBlobName(blobName), Array.from(union));
+  }
+  localStorage.setItem(tombstoneLocalKey(blobName), JSON.stringify(Array.from(union)));
+  return union;
+}
+
 // Sube MERGEANDO con lo remoto por id. Local pisa a remoto en conflictos,
 // pero jamás se pierde lo que otro navegador haya cargado.
-// Devuelve el array final mergeado (o el local si Azure no está configurado).
+// Los ids en tombstones se excluyen para que los borrados no revivan.
 export async function uploadMergedById<T extends { id?: string }>(
   blobName: string,
   local: T[],
 ): Promise<T[]> {
   if (!isAzureConfigured()) return local;
+  const tombstones = await syncTombstones(blobName);
   const remote = (await downloadJson<T[]>(blobName)) ?? [];
   const byId = new Map<string, T>();
-  for (const item of remote) if (item && item.id) byId.set(item.id, item);
-  for (const item of local) if (item && item.id) byId.set(item.id, item);
+  for (const item of remote) if (item && item.id && !tombstones.has(item.id)) byId.set(item.id, item);
+  for (const item of local) if (item && item.id && !tombstones.has(item.id)) byId.set(item.id, item);
   const merged = Array.from(byId.values());
   await uploadJson(blobName, merged);
   return merged;
@@ -177,18 +217,18 @@ export async function bootstrapFromAzure(): Promise<void> {
 
   await Promise.all([
     ...mergeable.map(async ([blob, localKey]) => {
+      const tombstones = await syncTombstones(blob);
       const remote = (await downloadJson<any[]>(blob)) ?? [];
       const localRaw = localStorage.getItem(localKey);
       let local: any[] = [];
       try { local = localRaw ? JSON.parse(localRaw) : []; } catch { local = []; }
       const byId = new Map<string, any>();
-      for (const item of remote) if (item && item.id) byId.set(item.id, item);
-      // Local pisa a remoto en caso de conflicto (ediciones locales más nuevas)
-      for (const item of local) if (item && item.id) byId.set(item.id, item);
+      for (const item of remote) if (item && item.id && !tombstones.has(item.id)) byId.set(item.id, item);
+      for (const item of local) if (item && item.id && !tombstones.has(item.id)) byId.set(item.id, item);
       const merged = Array.from(byId.values());
       localStorage.setItem(localKey, JSON.stringify(merged));
-      // Si el merge agregó cosas que no estaban en el remoto, sincronizar
-      if (merged.length !== remote.length) {
+      // Si el merge cambió respecto al remoto (agregados o borrados), sincronizar
+      if (merged.length !== remote.length || remote.some((r) => r?.id && tombstones.has(r.id))) {
         void uploadJson(blob, merged);
       }
     }),

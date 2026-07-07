@@ -1,5 +1,5 @@
 import { ServiceEntry, FuelEntry, isCountableServiceEntry } from "./types";
-import { BLOB_KEYS, queueUploadMerged, uploadJson } from "./azureBlob";
+import { BLOB_KEYS, queueUploadMerged, uploadJson, addTombstone } from "./azureBlob";
 
 // La purga única ya se ejecutó en su momento. Este stub queda para no
 // romper imports existentes, pero NO debe borrar nada: hacerlo por navegador
@@ -70,6 +70,7 @@ export function addService(entry: ServiceEntry) {
 }
 
 export function deleteService(id: string) {
+  addTombstone(BLOB_KEYS.services, id);
   saveServices(getServices().filter((e) => e.id !== id));
 }
 
@@ -127,6 +128,7 @@ export function addFuelEntry(entry: FuelEntry) {
 }
 
 export function deleteFuelEntry(id: string) {
+  addTombstone(BLOB_KEYS.fuel, id);
   saveFuelEntries(getFuelEntries().filter((e) => e.id !== id));
 }
 
