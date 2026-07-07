@@ -40,7 +40,7 @@ import amGuardCarAsset from "@/assets/am-guard-car.png.asset.json";
 import { ServiceEntry, FuelEntry, isCountableServiceEntry } from "@/lib/types";
 import {
   getServices, addService, deleteService, updateService,
-  getFuelEntries, addFuelEntry, deleteFuelEntry,
+  getFuelEntries, addFuelEntry, deleteFuelEntry, updateFuelEntry,
 } from "@/lib/store";
 import { exportCargaDiaPDF, exportPersonalManagerPDF, exportClientManagerPDF } from "@/lib/pdfExport";
 import { exportCargaDiaExcel } from "@/lib/excelExport";
