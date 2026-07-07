@@ -84,6 +84,16 @@ export default function FuelTable({ entries, onDelete, onUpdate, allEntries }: P
           </div>
         </div>
       )}
+
+      {onUpdate && (
+        <FuelEditDialog
+          entry={editing}
+          open={editing !== null}
+          onClose={() => setEditing(null)}
+          onSave={(e) => onUpdate(e)}
+          existingEntries={allEntries ?? entries}
+        />
+      )}
     </>
   );
 }
