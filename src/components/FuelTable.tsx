@@ -1,16 +1,20 @@
 import { FuelEntry } from "@/lib/types";
-import { Trash2, Eye } from "lucide-react";
+import { Trash2, Eye, Pencil } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useState } from "react";
 import { getBlobAccessUrl } from "@/lib/azureBlob";
+import FuelEditDialog from "@/components/FuelEditDialog";
 
 interface Props {
   entries: FuelEntry[];
   onDelete: (id: string) => void;
+  onUpdate?: (entry: FuelEntry) => void;
+  allEntries?: FuelEntry[];
 }
 
-export default function FuelTable({ entries, onDelete }: Props) {
+export default function FuelTable({ entries, onDelete, onUpdate, allEntries }: Props) {
   const [viewImage, setViewImage] = useState<string | null>(null);
+  const [editing, setEditing] = useState<FuelEntry | null>(null);
 
   if (entries.length === 0) return null;
 
