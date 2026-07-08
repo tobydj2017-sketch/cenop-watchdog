@@ -223,11 +223,14 @@ export async function bootstrapFromAzure(): Promise<void> {
       let local: any[] = [];
       try { local = localRaw ? JSON.parse(localRaw) : []; } catch { local = []; }
       const byId = new Map<string, any>();
-      for (const item of remote) if (item && item.id && !tombstones.has(item.id)) byId.set(item.id, item);
+      // En bootstrap: local primero, luego remoto pisa → la nube es la verdad
+      // para ids compartidos. Los locales nuevos (id no existente en remoto)
+      // se conservan hasta que se suban.
       for (const item of local) if (item && item.id && !tombstones.has(item.id)) byId.set(item.id, item);
+      for (const item of remote) if (item && item.id && !tombstones.has(item.id)) byId.set(item.id, item);
       const merged = Array.from(byId.values());
       localStorage.setItem(localKey, JSON.stringify(merged));
-      // Si el merge cambió respecto al remoto (agregados o borrados), sincronizar
+      // Si hay locales no presentes en remoto, o tombstones a aplicar, sincronizar
       if (merged.length !== remote.length || remote.some((r) => r?.id && tombstones.has(r.id))) {
         void uploadJson(blob, merged);
       }
