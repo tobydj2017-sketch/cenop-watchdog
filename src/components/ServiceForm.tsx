@@ -225,7 +225,7 @@ export default function ServiceForm({ onAdd, selectedDate, existingServices }: P
   };
 
   const focusNextTimeInput = (currentField: string) => {
-    const timeFields = ["horaSolicitud", "citaChofer", "citaCustodio", "salidaCenop", "llegadaServicio", "iniciaServicio", "llegadaDestino", "finalizaServicio", "llegadaCenop", "horaFrancoChofer", "horaFrancoCustodio"];
+    const timeFields = ["horaSolicitud", "citaChofer", "citaCustodio", "salidaCenop", "llegadaServicio", "iniciaServicio", "llegadaDestino", "finalizaServicio", "llegadaCenop", "horaFrancoChofer", "horaFrancoCustodio", "salidaCenopChofer", "llegadaCenopChofer", "salidaCenopCustodio", "llegadaCenopCustodio"];
     const idx = timeFields.indexOf(currentField);
     if (idx < 0 || idx >= timeFields.length - 1) return;
     const nextField = timeFields[idx + 1];
