@@ -9,7 +9,7 @@
 
 import { BLOB_KEYS, downloadJson, queueUpload, uploadJson, isAzureConfigured } from "./azureBlob";
 
-export type UserRole = "admin" | "chofer" | "custodio" | "administracion";
+export type UserRole = "admin" | "chofer" | "custodio" | "administracion" | "flota";
 
 export interface UserPermissions {
   // Servicios
@@ -28,6 +28,7 @@ export interface UserPermissions {
   // Vistas
   viewDashboard: boolean;
   viewReportes: boolean;
+  viewFleet: boolean;
   // Admin
   manageUsers: boolean;
 }
@@ -69,6 +70,7 @@ export const DEFAULT_PERMISSIONS: Record<UserRole, UserPermissions> = {
 
     viewDashboard: true,
     viewReportes: true,
+    viewFleet: true,
     manageUsers: true,
   },
   chofer: {
@@ -85,6 +87,7 @@ export const DEFAULT_PERMISSIONS: Record<UserRole, UserPermissions> = {
 
     viewDashboard: false,
     viewReportes: false,
+    viewFleet: false,
     manageUsers: false,
   },
   custodio: {
@@ -101,6 +104,7 @@ export const DEFAULT_PERMISSIONS: Record<UserRole, UserPermissions> = {
 
     viewDashboard: false,
     viewReportes: false,
+    viewFleet: false,
     manageUsers: false,
   },
   administracion: {
@@ -116,6 +120,23 @@ export const DEFAULT_PERMISSIONS: Record<UserRole, UserPermissions> = {
     manageMoviles: false,
     viewDashboard: true,
     viewReportes: true,
+    viewFleet: true,
+    manageUsers: false,
+  },
+  flota: {
+    createServices: false,
+    editAllServices: false,
+    editOwnServices: false,
+    deleteServices: false,
+    createFuel: false,
+    editFuel: false,
+    deleteFuel: false,
+    managePersonal: false,
+    manageClients: false,
+    manageMoviles: false,
+    viewDashboard: false,
+    viewReportes: false,
+    viewFleet: true,
     manageUsers: false,
   },
 };
@@ -134,6 +155,7 @@ export const PERMISSION_LABELS: Record<keyof UserPermissions, string> = {
 
   viewDashboard: "Ver Panel de Análisis",
   viewReportes: "Ver Reportes",
+  viewFleet: "Ver Panel de Flota (móviles y combustible)",
   manageUsers: "Gestionar Usuarios (admin)",
 };
 
