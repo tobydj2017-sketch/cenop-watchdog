@@ -27,6 +27,7 @@ const ROLE_LABELS: Record<UserRole, string> = {
   admin: "Administrador",
   chofer: "Chofer",
   custodio: "Custodio",
+  administracion: "Administración (solo lectura)",
 };
 
 export default function UserManager() {
@@ -265,8 +266,8 @@ function CreateUserDialog({
           </div>
           <div className="space-y-1.5">
             <Label className="text-xs">Rol</Label>
-            <div className="grid grid-cols-3 gap-2">
-              {(["admin", "chofer", "custodio"] as UserRole[]).map((r) => (
+            <div className="grid grid-cols-2 gap-2">
+              {(["admin", "administracion", "chofer", "custodio"] as UserRole[]).map((r) => (
                 <button
                   key={r}
                   type="button"

@@ -9,7 +9,7 @@
 
 import { BLOB_KEYS, downloadJson, queueUpload, uploadJson, isAzureConfigured } from "./azureBlob";
 
-export type UserRole = "admin" | "chofer" | "custodio";
+export type UserRole = "admin" | "chofer" | "custodio" | "administracion";
 
 export interface UserPermissions {
   // Servicios
@@ -101,6 +101,21 @@ export const DEFAULT_PERMISSIONS: Record<UserRole, UserPermissions> = {
 
     viewDashboard: false,
     viewReportes: false,
+    manageUsers: false,
+  },
+  administracion: {
+    createServices: false,
+    editAllServices: false,
+    editOwnServices: false,
+    deleteServices: false,
+    createFuel: false,
+    editFuel: false,
+    deleteFuel: false,
+    managePersonal: false,
+    manageClients: false,
+    manageMoviles: false,
+    viewDashboard: true,
+    viewReportes: true,
     manageUsers: false,
   },
 };
