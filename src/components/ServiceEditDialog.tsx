@@ -134,6 +134,7 @@ export default function ServiceEditDialog({ service, open, onClose, onSave, exis
     "horaSolicitud", "citaChofer", "citaCustodio", "salidaCenop", "llegadaServicio",
     "iniciaServicio", "llegadaDestino", "finalizaServicio", "llegadaCenop",
     "horaFrancoChofer", "horaFrancoCustodio",
+    "salidaCenopChofer", "llegadaCenopChofer", "salidaCenopCustodio", "llegadaCenopCustodio",
   ];
 
   const focusNextTimeField = (currentField: string) => {
