@@ -57,26 +57,29 @@ export function getServiceSegments(s: ServiceEntry): ServiceTimeline {
   const treatBaseAsImprod = isBase && !esPlayero;
   const segments: ServiceSegment[] = [];
 
-  // For chofer: citaChofer → salidaCenop (en base)
+  // REGLA: sólo el tiempo DENTRO del CENOP es improductivo.
+  // Todo lo que ocurre fuera (traslados, esperas, servicio) es productivo.
+
+  // Cita → salidaCenop (en base, improductivo)
   const citaTime = s.citaChofer || s.citaCustodio;
   if (citaTime && s.salidaCenop) {
     const r = seg("En Base (pre)", citaTime, s.salidaCenop, "improductivo", SEGMENT_COLORS.base);
     if (r) segments.push(r);
   }
 
-  // salidaCenop → llegadaServicio (traslado ida)
+  // salidaCenop → llegadaServicio (traslado ida, productivo)
   if (s.salidaCenop && s.llegadaServicio) {
     const r = seg("Traslado Ida", s.salidaCenop, s.llegadaServicio, "productivo", SEGMENT_COLORS.traslado);
     if (r) segments.push(r);
   }
 
-  // llegadaServicio → iniciaServicio (espera en lugar de servicio = productivo)
+  // llegadaServicio → iniciaServicio (espera fuera del CENOP, productivo)
   if (s.llegadaServicio && s.iniciaServicio) {
     const r = seg("Espera en Origen", s.llegadaServicio, s.iniciaServicio, "productivo", SEGMENT_COLORS.espera);
     if (r) segments.push(r);
   }
 
-  // iniciaServicio → finalizaServicio (servicio activo)
+  // iniciaServicio → finalizaServicio (servicio activo, productivo salvo permanencia en base sin playero)
   if (s.iniciaServicio && s.finalizaServicio) {
     const r = seg(
       treatBaseAsImprod ? "Permanencia Base" : (isBase ? "Trabajo en Base" : "Servicio Activo"),
@@ -88,18 +91,19 @@ export function getServiceSegments(s: ServiceEntry): ServiceTimeline {
     if (r) segments.push(r);
   }
 
-  // finalizaServicio → llegadaCenop (traslado vuelta)
+  // finalizaServicio → llegadaCenop (traslado vuelta, productivo)
   if (s.finalizaServicio && s.llegadaCenop) {
     const r = seg("Traslado Vuelta", s.finalizaServicio, s.llegadaCenop, "productivo", SEGMENT_COLORS.vuelta);
     if (r) segments.push(r);
   }
 
-  // llegadaCenop → horaFranco (en base post)
+  // llegadaCenop → franco (en base post, improductivo)
   const francoTime = s.horaFrancoChofer || s.horaFrancoCustodio;
   if (s.llegadaCenop && francoTime) {
     const r = seg("En Base (post)", s.llegadaCenop, francoTime, "improductivo", SEGMENT_COLORS.base);
     if (r) segments.push(r);
   }
+
 
   const totalProd = segments.filter(s => s.type === "productivo").reduce((a, s) => a + s.minutes, 0);
   const totalImprod = segments.filter(s => s.type === "improductivo").reduce((a, s) => a + s.minutes, 0);

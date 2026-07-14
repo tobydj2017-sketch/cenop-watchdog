@@ -1,4 +1,4 @@
-import { ServiceEntry, FuelEntry, isCountableServiceEntry } from "./types";
+import { ServiceEntry, FuelEntry, isCountableServiceEntry, computeServiceHours } from "./types";
 import { BLOB_KEYS, queueUploadMerged, uploadJson, addTombstone } from "./azureBlob";
 
 // La purga única ya se ejecutó en su momento. Este stub queda para no
@@ -37,16 +37,20 @@ function renumberDeterministic(list: ServiceEntry[]): ServiceEntry[] {
   return list;
 }
 
+function recomputeHours(list: ServiceEntry[]): ServiceEntry[] {
+  return list.map((s) => ({ ...s, ...computeServiceHours(s) }));
+}
+
 export function getServices(): ServiceEntry[] {
   const data = localStorage.getItem(SERVICES_KEY);
   const parsed: ServiceEntry[] = data ? JSON.parse(data) : [];
   const filtered = parsed.filter(isCountableServiceEntry).filter((s) => !isLegacy(s.fecha));
-  return renumberDeterministic(filtered);
+  return renumberDeterministic(recomputeHours(filtered));
 }
 
 export function saveServices(entries: ServiceEntry[]) {
   const clean = renumberDeterministic(
-    entries.filter(isCountableServiceEntry).filter((s) => !isLegacy(s.fecha))
+    recomputeHours(entries.filter(isCountableServiceEntry).filter((s) => !isLegacy(s.fecha)))
   );
   localStorage.setItem(SERVICES_KEY, JSON.stringify(clean));
   // Merge con remoto antes de subir para no pisar cargas de otros navegadores.
@@ -55,7 +59,7 @@ export function saveServices(entries: ServiceEntry[]) {
     () => JSON.parse(localStorage.getItem(SERVICES_KEY) || "[]"),
     (merged) => {
       const finalList = renumberDeterministic(
-        merged.filter(isCountableServiceEntry).filter((s) => !isLegacy(s.fecha))
+        recomputeHours(merged.filter(isCountableServiceEntry).filter((s) => !isLegacy(s.fecha)))
       );
       localStorage.setItem(SERVICES_KEY, JSON.stringify(finalList));
       window.dispatchEvent(new Event("cenop:services-synced"));

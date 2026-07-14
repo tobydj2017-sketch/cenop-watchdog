@@ -6,7 +6,7 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import SearchableSelect from "@/components/SearchableSelect";
 import TimeInput from "@/components/TimeInput";
-import { ServiceEntry, PeajeEntry, ComisionEntry, ServicioOperacionesEntry, generateId, calcTimeDiff, timeToMinutes, minutesToTime } from "@/lib/types";
+import { ServiceEntry, PeajeEntry, ComisionEntry, ServicioOperacionesEntry, generateId, calcTimeDiff, timeToMinutes, minutesToTime, computeServiceHours } from "@/lib/types";
 import { isValidDate, findServiceCollisions, formatCollisionMessages } from "@/lib/validation";
 import { getMoviles } from "@/lib/movilesStore";
 import { getActiveClientNames } from "@/lib/clientStore";
@@ -91,21 +91,8 @@ export default function ServiceEditDialog({ service, open, onClose, onSave, exis
 
 
 
-  const computeHours = (f: ServiceEntry) => {
-    const prod = calcTimeDiff(f.iniciaServicio, f.finalizaServicio);
-    const improd1 = calcTimeDiff(f.salidaCenop, f.iniciaServicio);
-    const endTime = f.horaFrancoChofer || f.horaFrancoCustodio || f.llegadaCenop;
-    const improd2 = calcTimeDiff(f.finalizaServicio, endTime);
-    const totalImprodMin = timeToMinutes(improd1) + timeToMinutes(improd2);
-    const totalMin = timeToMinutes(prod) + totalImprodMin;
-    return {
-      horasProductivas: prod,
-      horasImproductivas1: improd1,
-      horasImproductivas2: improd2,
-      horasImproductivas: minutesToTime(totalImprodMin),
-      horasTotales: minutesToTime(totalMin),
-    };
-  };
+  const computeHours = (f: ServiceEntry) => computeServiceHours(f);
+
 
   const handleSave = () => {
     if (!form) return;

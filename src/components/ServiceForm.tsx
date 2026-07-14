@@ -3,7 +3,7 @@ import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { ServiceEntry, PeajeEntry, ComisionEntry, ServicioOperacionesEntry, generateId, calcTimeDiff, timeToMinutes, minutesToTime } from "@/lib/types";
+import { ServiceEntry, PeajeEntry, ComisionEntry, ServicioOperacionesEntry, generateId, calcTimeDiff, timeToMinutes, minutesToTime, computeServiceHours } from "@/lib/types";
 import { isValidDate, findServiceCollisions, formatCollisionMessages } from "@/lib/validation";
 import { getMoviles } from "@/lib/movilesStore";
 import { getActiveClientNames } from "@/lib/clientStore";
@@ -167,21 +167,8 @@ export default function ServiceForm({ onAdd, selectedDate, existingServices }: P
     setComisiones((prev) => prev.filter((c) => c.id !== id));
   };
 
-  const calculateHours = () => {
-    const prod = calcTimeDiff(form.iniciaServicio, form.finalizaServicio);
-    const improd1 = calcTimeDiff(form.salidaCenop, form.iniciaServicio);
-    const endTime = form.horaFrancoChofer || form.horaFrancoCustodio || form.llegadaCenop;
-    const improd2 = calcTimeDiff(form.finalizaServicio, endTime);
-    const totalImprodMin = timeToMinutes(improd1) + timeToMinutes(improd2);
-    const totalMin = timeToMinutes(prod) + totalImprodMin;
-    return {
-      horasProductivas: prod,
-      horasImproductivas1: improd1,
-      horasImproductivas2: improd2,
-      horasImproductivas: minutesToTime(totalImprodMin),
-      horasTotales: minutesToTime(totalMin),
-    };
-  };
+  const calculateHours = () => computeServiceHours(form);
+
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
