@@ -552,3 +552,117 @@ export async function exportDownloadReportPDF(report: DownloadReport) {
   addFooter(doc);
   doc.save(`CENOP_${report.title.replace(/\s+/g, "_")}_${new Date().toISOString().slice(0, 10)}.pdf`);
 }
+
+// ========== PANEL DE FLOTA ==========
+interface FleetPDFInput {
+  porMovil: Array<{
+    movil: string; marca: string; modelo: string; asignacion: string;
+    cargas: number; litros: number; monto: number; kmFuel: number;
+    kmServ: number; servicios: number; ultKm: number; ultimaCarga: string;
+  }>;
+  fuel: FuelEntry[];
+  kpis: { totalMonto: number; totalLitros: number; totalKmFuel: number; totalKmServ: number; cargas: number; flotaActiva: number; precioLitro: number; rendimiento: number };
+  desde: string; hasta: string; movil: string;
+  porMes: Array<{ mes: string; monto: number; litros: number; km: number }>;
+}
+
+export async function exportFleetPDF(input: FleetPDFInput) {
+  const { porMovil, fuel, kpis, desde, hasta, movil, porMes } = input;
+  const doc = new jsPDF({ orientation: "landscape", format: "a4", unit: "mm" });
+  const logoDataUrl = await loadImageAsDataUrl(AM_LOGO_PATH);
+  const rangeLabel = `${desde ? desde.split("-").reverse().join("/") : "Inicio"} → ${hasta ? hasta.split("-").reverse().join("/") : "Hoy"}${movil !== "todos" ? ` · Móvil: ${movil}` : ""}`;
+  addHeader(doc, "Panel de Flota — Móviles y Combustible", `${porMovil.length} móviles · ${fuel.length} cargas · ${rangeLabel}`, logoDataUrl);
+
+  // KPIs en tabla compacta
+  autoTable(doc, {
+    startY: 56,
+    head: [["Indicador", "Valor", "Indicador", "Valor"]],
+    body: [
+      ["Gasto total", money(kpis.totalMonto), "Litros cargados", `${kpis.totalLitros.toFixed(1)} L`],
+      ["KM (combustible)", `${Math.round(kpis.totalKmFuel).toLocaleString("es-AR")} km`, "KM (servicios)", `${Math.round(kpis.totalKmServ).toLocaleString("es-AR")} km`],
+      ["Cargas", String(kpis.cargas), "Móviles activos", String(kpis.flotaActiva)],
+      ["Precio prom. L", money(kpis.precioLitro), "Rendimiento", `${kpis.rendimiento.toFixed(2)} km/L`],
+    ],
+    ...tableStyle(),
+    styles: { ...tableStyle().styles, fontSize: 9, cellPadding: 2 },
+  });
+
+  let y = (doc as any).lastAutoTable.finalY + 6;
+
+  // Gráfico de gasto por móvil
+  y = drawBarChart(
+    doc,
+    "Gasto por móvil",
+    porMovil.slice(0, 12).map((m) => ({ name: m.movil, value: Math.round(m.monto), label: money(m.monto) })),
+    y,
+    12,
+  );
+
+  // Tabla por móvil
+  autoTable(doc, {
+    startY: y + 4,
+    head: [["Móvil", "Marca / Modelo", "Asignación", "Cargas", "Litros", "Monto", "KM comb.", "KM serv.", "Km/L", "Últ. KM", "Últ. carga"]],
+    body: porMovil.map((m) => [
+      m.movil,
+      [m.marca, m.modelo].filter(Boolean).join(" ") || "—",
+      m.asignacion || "—",
+      String(m.cargas),
+      m.litros.toFixed(1),
+      money(m.monto),
+      Math.round(m.kmFuel).toLocaleString("es-AR"),
+      Math.round(m.kmServ).toLocaleString("es-AR"),
+      m.litros > 0 ? (m.kmFuel / m.litros).toFixed(2) : "—",
+      Math.round(m.ultKm).toLocaleString("es-AR"),
+      m.ultimaCarga ? m.ultimaCarga.split("-").reverse().join("/") : "—",
+    ]),
+    ...tableStyle(),
+    styles: { ...tableStyle().styles, fontSize: 8, cellPadding: 1.5 },
+  });
+
+  // Nueva página: detalle de cargas
+  doc.addPage();
+  addHeader(doc, "Detalle de cargas de combustible", `${fuel.length} registros · ${rangeLabel}`, logoDataUrl);
+  autoTable(doc, {
+    startY: 56,
+    head: [["Fecha", "Hora", "Móvil", "Chofer", "Estación", "Litros", "$/L", "Monto", "KM", "KM Rec.", "Km/L", "Remito"]],
+    body: [...fuel]
+      .sort((a, b) => (a.fecha + a.hora).localeCompare(b.fecha + b.hora))
+      .map((f) => {
+        const litros = Number(f.litros) || 0;
+        const kmRec = Number(f.kmRecorridos) || 0;
+        return [
+          f.fecha ? f.fecha.split("-").reverse().join("/") : "—",
+          f.hora || "—",
+          f.movil || "—",
+          f.chofer || "—",
+          f.estacion || "—",
+          litros.toFixed(2),
+          money(Number(f.precioPorLitro) || 0),
+          money(Number(f.monto) || 0),
+          (Number(f.kilometraje) || 0).toLocaleString("es-AR"),
+          kmRec.toLocaleString("es-AR"),
+          litros > 0 ? (kmRec / litros).toFixed(2) : "—",
+          f.numeroRemito || "—",
+        ];
+      }),
+    ...tableStyle(),
+    styles: { ...tableStyle().styles, fontSize: 7.5, cellPadding: 1.3 },
+  });
+
+  if (porMes.length > 0) {
+    doc.addPage();
+    addHeader(doc, "Evolución mensual", rangeLabel, logoDataUrl);
+    autoTable(doc, {
+      startY: 56,
+      head: [["Mes", "Monto", "Litros", "KM"]],
+      body: porMes.map((m) => [
+        m.mes, money(m.monto), m.litros.toFixed(1),
+        Math.round(m.km).toLocaleString("es-AR"),
+      ]),
+      ...tableStyle(),
+    });
+  }
+
+  addFooter(doc);
+  doc.save(`CENOP_Flota_${new Date().toISOString().slice(0, 10)}.pdf`);
+}
