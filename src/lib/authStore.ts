@@ -9,7 +9,7 @@
 
 import { BLOB_KEYS, downloadJson, queueUpload, uploadJson, isAzureConfigured } from "./azureBlob";
 
-export type UserRole = "admin" | "chofer" | "custodio" | "administracion";
+export type UserRole = "admin" | "chofer" | "custodio" | "administracion" | "flota";
 
 export interface UserPermissions {
   // Servicios
