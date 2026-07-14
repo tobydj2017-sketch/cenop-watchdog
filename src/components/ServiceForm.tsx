@@ -47,6 +47,10 @@ const defaultEntry = {
   kmSalida: "",
   kmLlegada: "",
   kmRecorridos: "",
+  salidaCenopChofer: "",
+  llegadaCenopChofer: "",
+  salidaCenopCustodio: "",
+  llegadaCenopCustodio: "",
 };
 
 export default function ServiceForm({ onAdd, selectedDate, existingServices }: Props) {
