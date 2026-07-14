@@ -70,6 +70,7 @@ export const DEFAULT_PERMISSIONS: Record<UserRole, UserPermissions> = {
 
     viewDashboard: true,
     viewReportes: true,
+    viewFleet: true,
     manageUsers: true,
   },
   chofer: {
