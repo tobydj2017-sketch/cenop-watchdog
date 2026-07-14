@@ -91,21 +91,8 @@ export default function ServiceEditDialog({ service, open, onClose, onSave, exis
 
 
 
-  const computeHours = (f: ServiceEntry) => {
-    const prod = calcTimeDiff(f.iniciaServicio, f.finalizaServicio);
-    const improd1 = calcTimeDiff(f.salidaCenop, f.iniciaServicio);
-    const endTime = f.horaFrancoChofer || f.horaFrancoCustodio || f.llegadaCenop;
-    const improd2 = calcTimeDiff(f.finalizaServicio, endTime);
-    const totalImprodMin = timeToMinutes(improd1) + timeToMinutes(improd2);
-    const totalMin = timeToMinutes(prod) + totalImprodMin;
-    return {
-      horasProductivas: prod,
-      horasImproductivas1: improd1,
-      horasImproductivas2: improd2,
-      horasImproductivas: minutesToTime(totalImprodMin),
-      horasTotales: minutesToTime(totalMin),
-    };
-  };
+  const computeHours = (f: ServiceEntry) => computeServiceHours(f);
+
 
   const handleSave = () => {
     if (!form) return;
