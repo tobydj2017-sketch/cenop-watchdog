@@ -114,6 +114,34 @@ export function timeToMinutes(t: string): number {
   return (parts[0] || 0) * 60 + (parts[1] || 0);
 }
 
+/**
+ * Cálculo canónico de horas productivas/improductivas.
+ * REGLA: sólo cuenta como IMPRODUCTIVO el tiempo dentro del CENOP:
+ *   - Desde la cita (chofer/custodio) hasta salidaCenop.
+ *   - Desde llegadaCenop hasta la hora de franco (chofer/custodio).
+ * Todo lo que ocurre fuera del CENOP (traslados, esperas, servicio) es PRODUCTIVO.
+ */
+export function computeServiceHours(f: {
+  citaChofer?: string; citaCustodio?: string;
+  salidaCenop?: string; llegadaCenop?: string;
+  horaFrancoChofer?: string; horaFrancoCustodio?: string;
+}) {
+  const cita = f.citaChofer || f.citaCustodio || "";
+  const franco = f.horaFrancoChofer || f.horaFrancoCustodio || "";
+  const improd1 = cita && f.salidaCenop ? calcTimeDiff(cita, f.salidaCenop) : "0:00:00";
+  const improd2 = f.llegadaCenop && franco ? calcTimeDiff(f.llegadaCenop, franco) : "0:00:00";
+  const prod = f.salidaCenop && f.llegadaCenop ? calcTimeDiff(f.salidaCenop, f.llegadaCenop) : "0:00:00";
+  const totalImprodMin = timeToMinutes(improd1) + timeToMinutes(improd2);
+  const totalMin = timeToMinutes(prod) + totalImprodMin;
+  return {
+    horasProductivas: prod,
+    horasImproductivas1: improd1,
+    horasImproductivas2: improd2,
+    horasImproductivas: minutesToTime(totalImprodMin),
+    horasTotales: minutesToTime(totalMin),
+  };
+}
+
 export function normalizeClientName(cliente?: string): string {
   const normalized = cliente?.trim().toUpperCase();
   return normalized || "CENOP";
