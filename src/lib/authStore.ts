@@ -103,6 +103,21 @@ export const DEFAULT_PERMISSIONS: Record<UserRole, UserPermissions> = {
     viewReportes: false,
     manageUsers: false,
   },
+  administracion: {
+    createServices: false,
+    editAllServices: false,
+    editOwnServices: false,
+    deleteServices: false,
+    createFuel: false,
+    editFuel: false,
+    deleteFuel: false,
+    managePersonal: false,
+    manageClients: false,
+    manageMoviles: false,
+    viewDashboard: true,
+    viewReportes: true,
+    manageUsers: false,
+  },
 };
 
 export const PERMISSION_LABELS: Record<keyof UserPermissions, string> = {
