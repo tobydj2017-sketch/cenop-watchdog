@@ -31,6 +31,7 @@ import PersonalManager from "@/components/PersonalManager";
 import ClientManager from "@/components/ClientManager";
 import MovilesManager from "@/components/MovilesManager";
 import UserManager from "@/components/UserManager";
+import FleetDashboard from "@/components/FleetDashboard";
 
 import amCustodiasDoorAsset from "@/assets/am-custodias-door-400.png.asset.json";
 import amGuardPhoneAsset from "@/assets/am-guard-phone.png.asset.json";
