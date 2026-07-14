@@ -449,6 +449,20 @@ export default function ServiceForm({ onAdd, selectedDate, existingServices }: P
             {renderField({ label: "Hora Franco Chofer", field: "horaFrancoChofer", type: "time" })}
             {renderField({ label: "Hora Franco Custodio", field: "horaFrancoCustodio", type: "time" })}
           </div>
+          <details className="rounded-md border border-border/60 p-3">
+            <summary className="cursor-pointer text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+              Horarios individuales (opcional) — usar solo si chofer y custodio se separan
+            </summary>
+            <p className="text-[11px] text-muted-foreground mt-2">
+              Ej.: le dan franco al custodio antes y el chofer sigue trabajando. Si quedan vacíos, se usan los horarios de arriba para ambos.
+            </p>
+            <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-3 mt-3">
+              {renderField({ label: "Salida CENOP Chofer", field: "salidaCenopChofer", type: "time" })}
+              {renderField({ label: "Llegada CENOP Chofer", field: "llegadaCenopChofer", type: "time" })}
+              {renderField({ label: "Salida CENOP Custodio", field: "salidaCenopCustodio", type: "time" })}
+              {renderField({ label: "Llegada CENOP Custodio", field: "llegadaCenopCustodio", type: "time" })}
+            </div>
+          </details>
         </div>
       )}
 
