@@ -6,7 +6,7 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import SearchableSelect from "@/components/SearchableSelect";
 import TimeInput from "@/components/TimeInput";
-import { ServiceEntry, PeajeEntry, ComisionEntry, ServicioOperacionesEntry, generateId, calcTimeDiff, timeToMinutes, minutesToTime } from "@/lib/types";
+import { ServiceEntry, PeajeEntry, ComisionEntry, ServicioOperacionesEntry, generateId, calcTimeDiff, timeToMinutes, minutesToTime, computeServiceHours } from "@/lib/types";
 import { isValidDate, findServiceCollisions, formatCollisionMessages } from "@/lib/validation";
 import { getMoviles } from "@/lib/movilesStore";
 import { getActiveClientNames } from "@/lib/clientStore";
