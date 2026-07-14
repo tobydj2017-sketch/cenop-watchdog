@@ -28,6 +28,7 @@ const ROLE_LABELS: Record<UserRole, string> = {
   chofer: "Chofer",
   custodio: "Custodio",
   administracion: "Administración (solo lectura)",
+  flota: "Flota (móviles y combustible)",
 };
 
 export default function UserManager() {
