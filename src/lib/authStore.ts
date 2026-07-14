@@ -28,6 +28,7 @@ export interface UserPermissions {
   // Vistas
   viewDashboard: boolean;
   viewReportes: boolean;
+  viewFleet: boolean;
   // Admin
   manageUsers: boolean;
 }
