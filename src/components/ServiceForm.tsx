@@ -167,21 +167,8 @@ export default function ServiceForm({ onAdd, selectedDate, existingServices }: P
     setComisiones((prev) => prev.filter((c) => c.id !== id));
   };
 
-  const calculateHours = () => {
-    const prod = calcTimeDiff(form.iniciaServicio, form.finalizaServicio);
-    const improd1 = calcTimeDiff(form.salidaCenop, form.iniciaServicio);
-    const endTime = form.horaFrancoChofer || form.horaFrancoCustodio || form.llegadaCenop;
-    const improd2 = calcTimeDiff(form.finalizaServicio, endTime);
-    const totalImprodMin = timeToMinutes(improd1) + timeToMinutes(improd2);
-    const totalMin = timeToMinutes(prod) + totalImprodMin;
-    return {
-      horasProductivas: prod,
-      horasImproductivas1: improd1,
-      horasImproductivas2: improd2,
-      horasImproductivas: minutesToTime(totalImprodMin),
-      horasTotales: minutesToTime(totalMin),
-    };
-  };
+  const calculateHours = () => computeServiceHours(form);
+
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
