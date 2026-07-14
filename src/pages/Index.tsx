@@ -48,11 +48,12 @@ import { exportCargaDiaExcel } from "@/lib/excelExport";
 import { useAuth } from "@/lib/authContext";
 import { isOwnService } from "@/lib/authStore";
 
-type AppTab = "carga" | "dashboard" | "personal" | "clientes" | "moviles" | "reportes" | "usuarios";
+type AppTab = "carga" | "dashboard" | "personal" | "clientes" | "moviles" | "flota" | "reportes" | "usuarios";
 
 const ALL_NAV_ITEMS = [
   { key: "carga", label: "Carga de Datos", icon: ClipboardList, perm: null },
   { key: "dashboard", label: "Panel de Análisis", icon: BarChart3, perm: "viewDashboard" as const },
+  { key: "flota", label: "Panel de Flota", icon: Fuel, perm: "viewFleet" as const },
   { key: "personal", label: "Personal", icon: Users, perm: "managePersonal" as const },
   { key: "clientes", label: "Clientes", icon: Building2, perm: "manageClients" as const },
   { key: "moviles", label: "Móviles", icon: Car, perm: "manageMoviles" as const },
