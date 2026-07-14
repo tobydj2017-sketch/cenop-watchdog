@@ -37,11 +37,15 @@ function renumberDeterministic(list: ServiceEntry[]): ServiceEntry[] {
   return list;
 }
 
+function recomputeHours(list: ServiceEntry[]): ServiceEntry[] {
+  return list.map((s) => ({ ...s, ...computeServiceHours(s) }));
+}
+
 export function getServices(): ServiceEntry[] {
   const data = localStorage.getItem(SERVICES_KEY);
   const parsed: ServiceEntry[] = data ? JSON.parse(data) : [];
   const filtered = parsed.filter(isCountableServiceEntry).filter((s) => !isLegacy(s.fecha));
-  return renumberDeterministic(filtered);
+  return renumberDeterministic(recomputeHours(filtered));
 }
 
 export function saveServices(entries: ServiceEntry[]) {
