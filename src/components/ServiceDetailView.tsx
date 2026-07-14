@@ -161,20 +161,52 @@ export default function ServiceDetailView({ services, onClose, onEdit }: Props) 
           </div>
         </div>
 
-        {/* Horas */}
-        <div className="grid grid-cols-3 gap-3">
-          <div className="rounded-lg border border-border p-4 text-center">
-            <span className="text-xs text-muted-foreground uppercase tracking-wider block mb-1">Productivas</span>
-            <span className="text-xl font-bold font-mono text-success">{cleanTime(s.horasProductivas)}</span>
-          </div>
-          <div className="rounded-lg border border-border p-4 text-center">
-            <span className="text-xs text-muted-foreground uppercase tracking-wider block mb-1">Improductivas</span>
-            <span className="text-xl font-bold font-mono text-destructive">{cleanTime(s.horasImproductivas)}</span>
-          </div>
-          <div className="rounded-lg border border-border p-4 text-center">
-            <span className="text-xs text-muted-foreground uppercase tracking-wider block mb-1">Total</span>
-            <span className="text-xl font-bold font-mono">{cleanTime(s.horasTotales)}</span>
-          </div>
+        {/* Horas por persona */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+          {s.chofer && (
+            <div className="rounded-lg border border-border p-4 space-y-2">
+              <div className="flex items-center justify-between">
+                <span className="text-xs text-muted-foreground uppercase tracking-wider">Chofer</span>
+                <span className="text-xs font-semibold truncate max-w-[60%] text-right">{s.chofer}</span>
+              </div>
+              <div className="grid grid-cols-3 gap-2 text-center">
+                <div>
+                  <span className="text-[10px] text-muted-foreground block">Prod.</span>
+                  <span className="text-base font-bold font-mono text-success">{cleanTime(s.horasProductivasChofer || "0:00")}</span>
+                </div>
+                <div>
+                  <span className="text-[10px] text-muted-foreground block">Improd.</span>
+                  <span className="text-base font-bold font-mono text-destructive">{cleanTime(s.horasImproductivasChofer || "0:00")}</span>
+                </div>
+                <div>
+                  <span className="text-[10px] text-muted-foreground block">Total</span>
+                  <span className="text-base font-bold font-mono">{cleanTime(s.horasTotalesChofer || "0:00")}</span>
+                </div>
+              </div>
+            </div>
+          )}
+          {s.custodio && (
+            <div className="rounded-lg border border-border p-4 space-y-2">
+              <div className="flex items-center justify-between">
+                <span className="text-xs text-muted-foreground uppercase tracking-wider">Custodio</span>
+                <span className="text-xs font-semibold truncate max-w-[60%] text-right">{s.custodio}</span>
+              </div>
+              <div className="grid grid-cols-3 gap-2 text-center">
+                <div>
+                  <span className="text-[10px] text-muted-foreground block">Prod.</span>
+                  <span className="text-base font-bold font-mono text-success">{cleanTime(s.horasProductivasCustodio || "0:00")}</span>
+                </div>
+                <div>
+                  <span className="text-[10px] text-muted-foreground block">Improd.</span>
+                  <span className="text-base font-bold font-mono text-destructive">{cleanTime(s.horasImproductivasCustodio || "0:00")}</span>
+                </div>
+                <div>
+                  <span className="text-[10px] text-muted-foreground block">Total</span>
+                  <span className="text-base font-bold font-mono">{cleanTime(s.horasTotalesCustodio || "0:00")}</span>
+                </div>
+              </div>
+            </div>
+          )}
         </div>
 
         {/* Documentación */}
