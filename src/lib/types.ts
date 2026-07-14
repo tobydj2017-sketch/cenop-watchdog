@@ -134,24 +134,81 @@ export function timeToMinutes(t: string): number {
  *   - Desde llegadaCenop hasta la hora de franco (chofer/custodio).
  * Todo lo que ocurre fuera del CENOP (traslados, esperas, servicio) es PRODUCTIVO.
  */
+export type PersonRole = "chofer" | "custodio";
+
+/**
+ * Horas de UNA persona (chofer o custodio) del servicio.
+ * Usa overrides propios de la persona (salidaCenopChofer, llegadaCenopCustodio, etc.)
+ * y cae a los tiempos compartidos si no están definidos.
+ */
+export function computeHoursForPerson(
+  f: {
+    citaChofer?: string; citaCustodio?: string;
+    salidaCenop?: string; llegadaCenop?: string;
+    horaFrancoChofer?: string; horaFrancoCustodio?: string;
+    salidaCenopChofer?: string; llegadaCenopChofer?: string;
+    salidaCenopCustodio?: string; llegadaCenopCustodio?: string;
+  },
+  role: PersonRole,
+) {
+  const cita = role === "chofer" ? (f.citaChofer || "") : (f.citaCustodio || "");
+  const franco = role === "chofer" ? (f.horaFrancoChofer || "") : (f.horaFrancoCustodio || "");
+  const salida = (role === "chofer" ? f.salidaCenopChofer : f.salidaCenopCustodio) || f.salidaCenop || "";
+  const llegada = (role === "chofer" ? f.llegadaCenopChofer : f.llegadaCenopCustodio) || f.llegadaCenop || "";
+  const improd1 = cita && salida ? calcTimeDiff(cita, salida) : "0:00:00";
+  const improd2 = llegada && franco ? calcTimeDiff(llegada, franco) : "0:00:00";
+  const prod = salida && llegada ? calcTimeDiff(salida, llegada) : "0:00:00";
+  const improdMin = timeToMinutes(improd1) + timeToMinutes(improd2);
+  const prodMin = timeToMinutes(prod);
+  return {
+    productivas: prod,
+    improductivas: minutesToTime(improdMin),
+    total: minutesToTime(prodMin + improdMin),
+    productivasMin: prodMin,
+    improductivasMin: improdMin,
+  };
+}
+
+/**
+ * Cálculo canónico de horas productivas/improductivas del SERVICIO (agregado).
+ * Toma el MÁXIMO span entre chofer y custodio para reflejar el servicio completo,
+ * y guarda además las horas de cada persona por separado.
+ * REGLA: sólo es IMPRODUCTIVO el tiempo dentro del CENOP (cita→salida y llegada→franco).
+ */
 export function computeServiceHours(f: {
   citaChofer?: string; citaCustodio?: string;
   salidaCenop?: string; llegadaCenop?: string;
   horaFrancoChofer?: string; horaFrancoCustodio?: string;
+  chofer?: string; custodio?: string;
+  salidaCenopChofer?: string; llegadaCenopChofer?: string;
+  salidaCenopCustodio?: string; llegadaCenopCustodio?: string;
 }) {
-  const cita = f.citaChofer || f.citaCustodio || "";
-  const franco = f.horaFrancoChofer || f.horaFrancoCustodio || "";
-  const improd1 = cita && f.salidaCenop ? calcTimeDiff(cita, f.salidaCenop) : "0:00:00";
-  const improd2 = f.llegadaCenop && franco ? calcTimeDiff(f.llegadaCenop, franco) : "0:00:00";
-  const prod = f.salidaCenop && f.llegadaCenop ? calcTimeDiff(f.salidaCenop, f.llegadaCenop) : "0:00:00";
-  const totalImprodMin = timeToMinutes(improd1) + timeToMinutes(improd2);
-  const totalMin = timeToMinutes(prod) + totalImprodMin;
+  const ch = computeHoursForPerson(f, "chofer");
+  const cu = computeHoursForPerson(f, "custodio");
+  const hasCh = !!(f.chofer && (f.citaChofer || f.horaFrancoChofer));
+  const hasCu = !!(f.custodio && (f.citaCustodio || f.horaFrancoCustodio));
+  // Agregado del servicio: el mayor de ambos (cubre el span total en el que hubo personal).
+  const pickMax = (a: number, b: number) => (hasCh && hasCu ? Math.max(a, b) : hasCh ? a : b);
+  const prodMin = pickMax(ch.productivasMin, cu.productivasMin);
+  const improdMin = pickMax(ch.improductivasMin, cu.improductivasMin);
+  // Improd 1 / 2 solo para retro-compatibilidad; usamos los del chofer si existe.
+  const ref = hasCh ? ch : cu;
+  const improd1 = f.citaChofer && f.salidaCenop ? calcTimeDiff(f.citaChofer, f.salidaCenop)
+    : f.citaCustodio && f.salidaCenop ? calcTimeDiff(f.citaCustodio, f.salidaCenop) : "0:00:00";
+  const improd2 = f.llegadaCenop && f.horaFrancoChofer ? calcTimeDiff(f.llegadaCenop, f.horaFrancoChofer)
+    : f.llegadaCenop && f.horaFrancoCustodio ? calcTimeDiff(f.llegadaCenop, f.horaFrancoCustodio) : "0:00:00";
   return {
-    horasProductivas: prod,
+    horasProductivas: minutesToTime(prodMin),
     horasImproductivas1: improd1,
     horasImproductivas2: improd2,
-    horasImproductivas: minutesToTime(totalImprodMin),
-    horasTotales: minutesToTime(totalMin),
+    horasImproductivas: minutesToTime(improdMin),
+    horasTotales: minutesToTime(prodMin + improdMin),
+    horasProductivasChofer: ch.productivas,
+    horasImproductivasChofer: ch.improductivas,
+    horasTotalesChofer: ch.total,
+    horasProductivasCustodio: cu.productivas,
+    horasImproductivasCustodio: cu.improductivas,
+    horasTotalesCustodio: cu.total,
   };
 }
 
