@@ -59,6 +59,19 @@ export interface ServiceEntry {
   kmSalida?: string;
   kmLlegada?: string;
   kmRecorridos?: string;
+  // Overrides opcionales por persona (para casos donde chofer y custodio
+  // no entran/salen del CENOP juntos: ej. le dan franco al custodio antes).
+  salidaCenopChofer?: string;
+  llegadaCenopChofer?: string;
+  salidaCenopCustodio?: string;
+  llegadaCenopCustodio?: string;
+  // Horas calculadas por persona (para vistas y reportes).
+  horasProductivasChofer?: string;
+  horasImproductivasChofer?: string;
+  horasTotalesChofer?: string;
+  horasProductivasCustodio?: string;
+  horasImproductivasCustodio?: string;
+  horasTotalesCustodio?: string;
   fecha: string;
   peajes?: PeajeEntry[];
   comisiones?: ComisionEntry[];
