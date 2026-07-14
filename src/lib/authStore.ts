@@ -87,6 +87,7 @@ export const DEFAULT_PERMISSIONS: Record<UserRole, UserPermissions> = {
 
     viewDashboard: false,
     viewReportes: false,
+    viewFleet: false,
     manageUsers: false,
   },
   custodio: {
