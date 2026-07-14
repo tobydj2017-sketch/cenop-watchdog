@@ -375,6 +375,8 @@ export default function Index() {
           <ClientManager />
         ) : activeTab === "moviles" ? (
           <MovilesManager />
+        ) : activeTab === "flota" ? (
+          <FleetDashboard services={cleanServices} fuelEntries={fuelEntries} />
         ) : activeTab === "reportes" ? (
 
           <DashboardReportes services={cleanServices} fuelEntries={fuelEntries} />
