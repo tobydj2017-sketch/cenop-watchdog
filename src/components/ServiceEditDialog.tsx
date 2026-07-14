@@ -134,6 +134,7 @@ export default function ServiceEditDialog({ service, open, onClose, onSave, exis
     "horaSolicitud", "citaChofer", "citaCustodio", "salidaCenop", "llegadaServicio",
     "iniciaServicio", "llegadaDestino", "finalizaServicio", "llegadaCenop",
     "horaFrancoChofer", "horaFrancoCustodio",
+    "salidaCenopChofer", "llegadaCenopChofer", "salidaCenopCustodio", "llegadaCenopCustodio",
   ];
 
   const focusNextTimeField = (currentField: string) => {
@@ -286,6 +287,16 @@ export default function ServiceEditDialog({ service, open, onClose, onSave, exis
               {renderField({ label: "Llegada a CENOP", field: "llegadaCenop", type: "time" })}
               {renderField({ label: "Hora Franco Chofer", field: "horaFrancoChofer", type: "time" })}
               {renderField({ label: "Hora Franco Custodio", field: "horaFrancoCustodio", type: "time" })}
+            </div>
+            <p className="text-xs text-muted-foreground mt-2">
+              Opcional: si el chofer y el custodio no entran/salen del CENOP juntos (p. ej. le dan franco al custodio antes),
+              cargá acá los horarios individuales. Si quedan vacíos, se usan los de arriba para ambos.
+            </p>
+            <div className="grid md:grid-cols-4 gap-4">
+              {renderField({ label: "Salida CENOP Chofer", field: "salidaCenopChofer", type: "time" })}
+              {renderField({ label: "Llegada CENOP Chofer", field: "llegadaCenopChofer", type: "time" })}
+              {renderField({ label: "Salida CENOP Custodio", field: "salidaCenopCustodio", type: "time" })}
+              {renderField({ label: "Llegada CENOP Custodio", field: "llegadaCenopCustodio", type: "time" })}
             </div>
           </section>
 
