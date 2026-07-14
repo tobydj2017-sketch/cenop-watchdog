@@ -1,4 +1,4 @@
-import { ServiceEntry, FuelEntry, isCountableServiceEntry } from "./types";
+import { ServiceEntry, FuelEntry, isCountableServiceEntry, computeServiceHours } from "./types";
 import { BLOB_KEYS, queueUploadMerged, uploadJson, addTombstone } from "./azureBlob";
 
 // La purga única ya se ejecutó en su momento. Este stub queda para no
