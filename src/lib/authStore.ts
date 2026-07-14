@@ -155,6 +155,7 @@ export const PERMISSION_LABELS: Record<keyof UserPermissions, string> = {
 
   viewDashboard: "Ver Panel de Análisis",
   viewReportes: "Ver Reportes",
+  viewFleet: "Ver Panel de Flota (móviles y combustible)",
   manageUsers: "Gestionar Usuarios (admin)",
 };
 
