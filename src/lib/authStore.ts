@@ -104,6 +104,7 @@ export const DEFAULT_PERMISSIONS: Record<UserRole, UserPermissions> = {
 
     viewDashboard: false,
     viewReportes: false,
+    viewFleet: false,
     manageUsers: false,
   },
   administracion: {
@@ -119,6 +120,23 @@ export const DEFAULT_PERMISSIONS: Record<UserRole, UserPermissions> = {
     manageMoviles: false,
     viewDashboard: true,
     viewReportes: true,
+    viewFleet: true,
+    manageUsers: false,
+  },
+  flota: {
+    createServices: false,
+    editAllServices: false,
+    editOwnServices: false,
+    deleteServices: false,
+    createFuel: false,
+    editFuel: false,
+    deleteFuel: false,
+    managePersonal: false,
+    manageClients: false,
+    manageMoviles: false,
+    viewDashboard: false,
+    viewReportes: false,
+    viewFleet: true,
     manageUsers: false,
   },
 };
