@@ -50,7 +50,7 @@ export function getServices(): ServiceEntry[] {
 
 export function saveServices(entries: ServiceEntry[]) {
   const clean = renumberDeterministic(
-    entries.filter(isCountableServiceEntry).filter((s) => !isLegacy(s.fecha))
+    recomputeHours(entries.filter(isCountableServiceEntry).filter((s) => !isLegacy(s.fecha)))
   );
   localStorage.setItem(SERVICES_KEY, JSON.stringify(clean));
   // Merge con remoto antes de subir para no pisar cargas de otros navegadores.
@@ -59,7 +59,7 @@ export function saveServices(entries: ServiceEntry[]) {
     () => JSON.parse(localStorage.getItem(SERVICES_KEY) || "[]"),
     (merged) => {
       const finalList = renumberDeterministic(
-        merged.filter(isCountableServiceEntry).filter((s) => !isLegacy(s.fecha))
+        recomputeHours(merged.filter(isCountableServiceEntry).filter((s) => !isLegacy(s.fecha)))
       );
       localStorage.setItem(SERVICES_KEY, JSON.stringify(finalList));
       window.dispatchEvent(new Event("cenop:services-synced"));
