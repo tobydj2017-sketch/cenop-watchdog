@@ -113,6 +113,7 @@ function buildKpiDetailData(
   const clienteData = byCliente.map((c) => ({ name: c.cliente, prod: c.prod, improd: c.improd, total: c.total, servicios: c.servicios }));
   const cenopData = [...cenopPersonMap.entries()].map(([name, value]) => ({ name, prod: value.prod, servicios: value.servicios.size })).sort((a, b) => b.prod - a.prod);
   const fuelData = [...fuelByMovil.entries()].map(([name, value]) => ({ name, monto: value.monto, litros: value.litros, cargas: value.cargas })).sort((a, b) => b.monto - a.monto);
+  const kmData = [...kmByMovil.entries()].map(([name, value]) => ({ name, km: Math.round(value.km), servicios: value.servicios.size })).sort((a, b) => b.km - a.km);
 
   return {
     servicios: { title: "Detalle de Total Servicios", description: "Servicios únicos agrupados por fecha y solicitud, con evolución diaria y carga operativa.", metrics: [{ label: "Servicios únicos", value: totalServicios.toString() }, { label: "Promedio diario", value: daysMap.size ? Math.round(totalServicios / daysMap.size).toString() : "0" }, { label: "Días con actividad", value: daysMap.size.toString() }], chartTitle: "Servicios por día", chartType: "line", data: dailyData, xKey: "fecha", bars: [{ key: "servicios", name: "Servicios" }], tableTitle: "Días con mayor movimiento", columns: ["Fecha", "Servicios", "Hs Prod."], rows: dailyData.slice().sort((a, b) => Number(b.servicios) - Number(a.servicios)).slice(0, 12).map((d) => [d.fecha, d.servicios, formatHoursMinutes(Number(d.prod))]) },
