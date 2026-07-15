@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Shield, Clock, TrendingUp, TrendingDown, Truck, Fuel, Briefcase } from "lucide-react";
+import { Shield, Clock, TrendingUp, TrendingDown, Truck, Fuel, Briefcase, Route } from "lucide-react";
 import { ServiceEntry, FuelEntry, getAdjustedHours, getServiceKey, getCenopEnOperacionesMinutes } from "@/lib/types";
 import { formatHoursMinutes } from "@/lib/formatTime";
 import StatDetailPanel from "./StatDetailPanel";
