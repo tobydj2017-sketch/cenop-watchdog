@@ -65,11 +65,11 @@ export default function MovilesHub({ services, fuelEntries, amLightTheme, setAmL
   const metrics = useMemo(() => {
     const map = new Map<string, {
       cargas: number; litros: number; monto: number; kmFuel: number;
-      servicios: number; kmServ: number; ultKm: number; ultimaFecha: string;
-      peajesTotal: number;
+      servicios: number; kmServ: number; ultKm: number; ultimaFecha: string; ultimaHora: string;
+      peajesTotal: number; ultimoServicio: string; ultimoServicioHora: string;
     }>();
     for (const p of allPatentes) {
-      map.set(p, { cargas: 0, litros: 0, monto: 0, kmFuel: 0, servicios: 0, kmServ: 0, ultKm: 0, ultimaFecha: "", peajesTotal: 0 });
+      map.set(p, { cargas: 0, litros: 0, monto: 0, kmFuel: 0, servicios: 0, kmServ: 0, ultKm: 0, ultimaFecha: "", ultimaHora: "", peajesTotal: 0, ultimoServicio: "", ultimoServicioHora: "" });
     }
     for (const f of fuelEntries) {
       const cur = map.get(f.movil);
@@ -80,7 +80,9 @@ export default function MovilesHub({ services, fuelEntries, amLightTheme, setAmL
       cur.kmFuel += toNum(f.kmRecorridos);
       const km = toNum(f.kilometraje);
       if (km > cur.ultKm) cur.ultKm = km;
-      if (!cur.ultimaFecha || f.fecha > cur.ultimaFecha) cur.ultimaFecha = f.fecha;
+      const key = (f.fecha || "") + " " + (f.hora || "");
+      const curKey = cur.ultimaFecha + " " + cur.ultimaHora;
+      if (!cur.ultimaFecha || key > curKey) { cur.ultimaFecha = f.fecha; cur.ultimaHora = f.hora || ""; }
     }
     for (const s of services) {
       const cur = map.get(s.movil);
