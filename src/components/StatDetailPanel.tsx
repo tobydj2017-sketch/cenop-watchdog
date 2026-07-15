@@ -202,56 +202,172 @@ function CenopOpsDetail({ services }: { services: ServiceEntry[] }) {
   );
 }
 
-function MovilesDetail({ services }: { services: ServiceEntry[] }) {
+function MovilesDetail({ services, fuelEntries }: { services: ServiceEntry[]; fuelEntries: FuelEntry[] }) {
+  const [selected, setSelected] = useState<string | null>(null);
+
   const data = useMemo(() => {
-    const map = new Map<string, { servicios: number; prod: number; improd: number }>();
-    services.forEach((s) => {
-      if (!s.movil) return;
-      const key = getServiceKey(s);
-      const existing = map.get(s.movil) || { servicios: 0, prod: 0, improd: 0 };
-      const h = getAdjustedHours(s);
-      existing.prod += h.prod;
-      existing.improd += h.improd;
-      map.set(s.movil, existing);
-    });
-    // Count unique services per movil
+    const map = new Map<string, { prod: number }>();
     const svcMap = new Map<string, Set<string>>();
     services.forEach((s) => {
       if (!s.movil) return;
-      const key = getServiceKey(s);
+      const existing = map.get(s.movil) || { prod: 0 };
+      const h = getAdjustedHours(s);
+      existing.prod += h.prod;
+      map.set(s.movil, existing);
       if (!svcMap.has(s.movil)) svcMap.set(s.movil, new Set());
-      svcMap.get(s.movil)!.add(key);
+      svcMap.get(s.movil)!.add(getServiceKey(s));
     });
-    return Array.from(map.entries())
-      .map(([name, d]) => ({
+    const cargasMap = new Map<string, number>();
+    fuelEntries.forEach((f) => {
+      if (!f.movil) return;
+      cargasMap.set(f.movil, (cargasMap.get(f.movil) || 0) + 1);
+    });
+    const allMoviles = new Set<string>([...map.keys(), ...cargasMap.keys()]);
+    return Array.from(allMoviles)
+      .map((name) => ({
         name,
         servicios: svcMap.get(name)?.size || 0,
-        prod: d.prod,
-        improd: d.improd,
-        prodLabel: formatHoursMinutes(d.prod),
-        improdLabel: formatHoursMinutes(d.improd),
+        cargas: cargasMap.get(name) || 0,
+        prod: map.get(name)?.prod || 0,
+        prodLabel: formatHoursMinutes(map.get(name)?.prod || 0),
       }))
       .sort((a, b) => b.prod - a.prod);
-  }, [services]);
+  }, [services, fuelEntries]);
+
+  const selectedServices = useMemo(
+    () => selected ? services.filter((s) => s.movil === selected) : [],
+    [services, selected],
+  );
+  const selectedFuel = useMemo(
+    () => selected ? fuelEntries.filter((f) => f.movil === selected).sort((a, b) => (b.fecha + (b.hora || "")).localeCompare(a.fecha + (a.hora || ""))) : [],
+    [fuelEntries, selected],
+  );
 
   return (
     <div>
       <h3 className="text-sm font-bold uppercase tracking-wider text-muted-foreground mb-4">Detalle de Móviles</h3>
-      <div className="h-72">
-        <ResponsiveContainer width="100%" height="100%">
-          <BarChart data={data} layout="vertical">
-            <XAxis type="number" tick={{ fontSize: 11, fill: "hsl(var(--muted-foreground))" }} tickFormatter={(v) => formatHoursMinutes(v)} />
-            <YAxis type="category" dataKey="name" width={80} tick={{ fontSize: 11, fill: "hsl(var(--muted-foreground))" }} />
-            <Tooltip
-              contentStyle={{ background: "hsl(var(--card))", border: "1px solid hsl(var(--border))", borderRadius: 8, fontSize: 12 }}
-              formatter={(v: number, name: string) => [formatHoursMinutes(v), name === "prod" ? "Productivas" : "Improductivas"]}
-            />
-            <Legend formatter={(v) => v === "prod" ? "Productivas" : "Improductivas"} />
-            <Bar dataKey="prod" stackId="a" fill="hsl(var(--success))" radius={[0, 0, 0, 0]} />
-            <Bar dataKey="improd" stackId="a" fill="hsl(var(--destructive))" radius={[0, 4, 4, 0]} />
-          </BarChart>
-        </ResponsiveContainer>
+      <div className="grid lg:grid-cols-2 gap-4">
+        <div className="h-72">
+          <ResponsiveContainer width="100%" height="100%">
+            <BarChart data={data} layout="vertical" onClick={(e: any) => e?.activeLabel && setSelected(String(e.activeLabel))}>
+              <XAxis type="number" tick={{ fontSize: 11, fill: "hsl(var(--muted-foreground))" }} tickFormatter={(v) => formatHoursMinutes(v)} />
+              <YAxis type="category" dataKey="name" width={80} tick={{ fontSize: 11, fill: "hsl(var(--muted-foreground))" }} />
+              <Tooltip
+                contentStyle={{ background: "hsl(var(--card))", border: "1px solid hsl(var(--border))", borderRadius: 8, fontSize: 12 }}
+                formatter={(v: number) => [formatHoursMinutes(v), "Hs Productivas"]}
+              />
+              <Bar dataKey="prod" fill="hsl(var(--success))" radius={[0, 4, 4, 0]} style={{ cursor: "pointer" }} />
+            </BarChart>
+          </ResponsiveContainer>
+        </div>
+        <div className="space-y-1.5 max-h-72 overflow-y-auto">
+          {data.map((d) => (
+            <button
+              key={d.name}
+              onClick={() => setSelected(d.name === selected ? null : d.name)}
+              className={`w-full text-left px-3 py-2 rounded-lg text-sm transition-colors ${selected === d.name ? "bg-primary/20 border border-primary/40" : "bg-secondary/30 hover:bg-secondary/60"}`}
+            >
+              <div className="flex items-center justify-between">
+                <span className="font-mono font-bold">{d.name}</span>
+                <span className="text-xs text-success font-bold">{d.prodLabel}</span>
+              </div>
+              <div className="text-[11px] text-muted-foreground mt-0.5">
+                {d.servicios} servicios · {d.cargas} cargas de combustible
+              </div>
+            </button>
+          ))}
+          {data.length === 0 && <p className="text-sm text-muted-foreground text-center py-4">Sin datos</p>}
+        </div>
       </div>
+
+      {selected && (
+        <div className="mt-5 space-y-4 animate-in fade-in slide-in-from-top-2 duration-300">
+          <div className="flex items-center justify-between border-t border-border pt-4">
+            <h4 className="text-sm font-bold">
+              Detalle del móvil <span className="font-mono text-primary">{selected}</span>
+            </h4>
+            <button onClick={() => setSelected(null)} className="text-xs text-muted-foreground hover:text-foreground underline">
+              Cerrar
+            </button>
+          </div>
+
+          <div>
+            <div className="text-xs uppercase tracking-wider text-muted-foreground mb-2">
+              Cargas de combustible ({selectedFuel.length})
+            </div>
+            <div className="max-h-64 overflow-y-auto rounded-lg border border-border">
+              <table className="w-full text-xs">
+                <thead className="sticky top-0 bg-card z-10">
+                  <tr className="border-b border-border">
+                    <th className="px-2 py-1.5 text-left font-semibold">Fecha</th>
+                    <th className="px-2 py-1.5 text-left font-semibold">Hora</th>
+                    <th className="px-2 py-1.5 text-left font-semibold">Chofer</th>
+                    <th className="px-2 py-1.5 text-left font-semibold">Estación</th>
+                    <th className="px-2 py-1.5 text-right font-semibold">Litros</th>
+                    <th className="px-2 py-1.5 text-right font-semibold">Monto</th>
+                    <th className="px-2 py-1.5 text-right font-semibold">KM</th>
+                    <th className="px-2 py-1.5 text-right font-semibold">KM Rec.</th>
+                    <th className="px-2 py-1.5 text-left font-semibold">Remito</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {selectedFuel.map((f) => (
+                    <tr key={f.id} className="border-b border-border/40 hover:bg-secondary/30">
+                      <td className="px-2 py-1.5">{f.fecha?.split("-").reverse().join("/") || "—"}</td>
+                      <td className="px-2 py-1.5">{f.hora || "—"}</td>
+                      <td className="px-2 py-1.5">{f.chofer || "—"}</td>
+                      <td className="px-2 py-1.5">{f.estacion || f.lugarCarga || "—"}</td>
+                      <td className="px-2 py-1.5 text-right font-mono">{Number(f.litros || 0).toFixed(2)}</td>
+                      <td className="px-2 py-1.5 text-right font-mono">${Number(f.monto || 0).toLocaleString("es-AR")}</td>
+                      <td className="px-2 py-1.5 text-right font-mono">{Number(f.kilometraje || 0).toLocaleString("es-AR")}</td>
+                      <td className="px-2 py-1.5 text-right font-mono">{Number(f.kmRecorridos || 0).toLocaleString("es-AR")}</td>
+                      <td className="px-2 py-1.5 font-mono">{f.numeroRemito || "—"}</td>
+                    </tr>
+                  ))}
+                  {selectedFuel.length === 0 && (
+                    <tr><td colSpan={9} className="px-2 py-4 text-center text-muted-foreground">Sin cargas registradas</td></tr>
+                  )}
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+          <div>
+            <div className="text-xs uppercase tracking-wider text-muted-foreground mb-2">
+              Servicios realizados ({selectedServices.length})
+            </div>
+            <div className="max-h-64 overflow-y-auto rounded-lg border border-border">
+              <table className="w-full text-xs">
+                <thead className="sticky top-0 bg-card z-10">
+                  <tr className="border-b border-border">
+                    <th className="px-2 py-1.5 text-left font-semibold">Fecha</th>
+                    <th className="px-2 py-1.5 text-left font-semibold">Sol.</th>
+                    <th className="px-2 py-1.5 text-left font-semibold">Cliente</th>
+                    <th className="px-2 py-1.5 text-left font-semibold">Chofer</th>
+                    <th className="px-2 py-1.5 text-left font-semibold">Custodio</th>
+                    <th className="px-2 py-1.5 text-right font-semibold">Hs Prod.</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {selectedServices.map((s, i) => (
+                    <tr key={i} className="border-b border-border/40 hover:bg-secondary/30">
+                      <td className="px-2 py-1.5">{s.fecha?.split("-").reverse().join("/") || "—"}</td>
+                      <td className="px-2 py-1.5 font-mono">{s.solicitud || "—"}</td>
+                      <td className="px-2 py-1.5">{normalizeClientName(s.cliente) || "—"}</td>
+                      <td className="px-2 py-1.5">{s.chofer || "—"}</td>
+                      <td className="px-2 py-1.5">{s.custodio || "—"}</td>
+                      <td className="px-2 py-1.5 text-right font-mono text-success">{formatHoursMinutes(getAdjustedHours(s).prod)}</td>
+                    </tr>
+                  ))}
+                  {selectedServices.length === 0 && (
+                    <tr><td colSpan={6} className="px-2 py-4 text-center text-muted-foreground">Sin servicios registrados</td></tr>
+                  )}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
