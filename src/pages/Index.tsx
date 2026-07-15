@@ -31,7 +31,7 @@ import PersonalManager from "@/components/PersonalManager";
 import ClientManager from "@/components/ClientManager";
 import MovilesManager from "@/components/MovilesManager";
 import UserManager from "@/components/UserManager";
-import FleetDashboard from "@/components/FleetDashboard";
+import MovilesUnified from "@/components/MovilesUnified";
 import MovilesHub from "@/components/MovilesHub";
 
 import amCustodiasDoorAsset from "@/assets/am-custodias-door-400.png.asset.json";
@@ -54,10 +54,9 @@ type AppTab = "carga" | "dashboard" | "personal" | "clientes" | "moviles" | "flo
 const ALL_NAV_ITEMS = [
   { key: "carga", label: "Carga de Datos", icon: ClipboardList, perm: null },
   { key: "dashboard", label: "Panel de Análisis", icon: BarChart3, perm: "viewDashboard" as const },
-  { key: "flota", label: "Panel de Flota", icon: Fuel, perm: "viewFleet" as const },
   { key: "personal", label: "Personal", icon: Users, perm: "managePersonal" as const },
   { key: "clientes", label: "Clientes", icon: Building2, perm: "manageClients" as const },
-  { key: "moviles", label: "Móviles", icon: Car, perm: "manageMoviles" as const },
+  { key: "moviles", label: "Móviles y Flota", icon: Car, perm: "manageMoviles" as const },
   { key: "reportes", label: "Reportes", icon: FileText, perm: "viewReportes" as const },
   { key: "usuarios", label: "Usuarios", icon: ShieldCheck, perm: "manageUsers" as const },
 ] as const;
@@ -389,9 +388,9 @@ export default function Index() {
         ) : activeTab === "clientes" ? (
           <ClientManager />
         ) : activeTab === "moviles" ? (
-          <MovilesManager />
+          <MovilesUnified services={cleanServices} fuelEntries={fuelEntries} />
         ) : activeTab === "flota" ? (
-          <FleetDashboard services={cleanServices} fuelEntries={fuelEntries} />
+          <MovilesUnified services={cleanServices} fuelEntries={fuelEntries} />
         ) : activeTab === "reportes" ? (
 
           <DashboardReportes services={cleanServices} fuelEntries={fuelEntries} />
