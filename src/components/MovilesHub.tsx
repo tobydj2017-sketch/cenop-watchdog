@@ -90,7 +90,13 @@ export default function MovilesHub({ services, fuelEntries, amLightTheme, setAmL
       cur.servicios += 1;
       cur.kmServ += toNum(s.kmRecorridos);
       (s.peajes || []).forEach((p) => { cur.peajesTotal += toNum(p.monto); });
+      const sHora = s.horaSalida || s.horaCita || "";
+      const key = (s.fecha || "") + " " + sHora;
+      const curKey = cur.ultimoServicio + " " + cur.ultimoServicioHora;
+      if (!cur.ultimoServicio || key > curKey) { cur.ultimoServicio = s.fecha; cur.ultimoServicioHora = sHora; }
     }
+    return map;
+  }, [allPatentes, fuelEntries, services]);
     return map;
   }, [allPatentes, fuelEntries, services]);
 
