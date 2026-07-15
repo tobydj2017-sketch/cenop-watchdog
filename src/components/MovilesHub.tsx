@@ -317,18 +317,27 @@ export default function MovilesHub({ services, fuelEntries, amLightTheme, setAmL
         </div>
 
 
-        {/* KPIs */}
-        <div className="grid grid-cols-2 md:grid-cols-4 xl:grid-cols-8 gap-3">
-          {kpis.map(({ label, value, icon: Icon, tint }) => (
-            <div key={label} className={`glass-card p-3 bg-gradient-to-br ${tint} border-border`}>
-              <Icon className="w-4 h-4 text-primary" />
+        {/* KPIs — clickeables: cada uno abre un detalle completo */}
+        <div className="grid grid-cols-2 md:grid-cols-4 xl:grid-cols-7 gap-3">
+          {kpis.map(({ key, label, value, icon: Icon, tint }) => (
+            <button
+              key={label}
+              onClick={() => setDrill(key)}
+              className={`text-left glass-card p-3 bg-gradient-to-br ${tint} border-border hover:border-primary hover:shadow-[0_0_0_1px_hsl(var(--primary)/0.5),0_10px_30px_-10px_hsl(var(--primary)/0.5)] hover:-translate-y-0.5 transition-all cursor-pointer group`}
+              title={`Ver detalle de ${label}`}
+            >
+              <div className="flex items-center justify-between">
+                <Icon className="w-4 h-4 text-primary" />
+                <span className="text-[9px] uppercase tracking-widest text-primary/70 group-hover:text-primary opacity-0 group-hover:opacity-100 transition">Ver detalle →</span>
+              </div>
               <div className="mt-2">
                 <div className="text-lg font-extrabold tracking-tight">{value}</div>
                 <div className="text-[10px] uppercase tracking-widest text-muted-foreground">{label}</div>
               </div>
-            </div>
+            </button>
           ))}
         </div>
+
 
         {/* Gráficos día a día */}
         <div className="grid lg:grid-cols-2 gap-4">
