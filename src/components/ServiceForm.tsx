@@ -654,11 +654,11 @@ export default function ServiceForm({ onAdd, selectedDate, existingServices }: P
           <ChevronLeft className="w-4 h-4" /> Anterior
         </Button>
         {step < 5 ? (
-          <Button type="button" onClick={() => setStep((current) => Math.min(5, current + 1))} className="h-9 px-5 text-sm gap-2">
+          <Button key="next-btn" type="button" onClick={() => setStep((current) => Math.min(5, current + 1))} className="h-9 px-5 text-sm gap-2">
             Siguiente <ChevronRight className="w-4 h-4" />
           </Button>
         ) : (
-          <Button type="submit" className="h-9 px-5 text-sm gap-2">
+          <Button key="save-btn" type="submit" className="h-9 px-5 text-sm gap-2">
             <Plus className="w-4 h-4" /> Guardar Servicio
           </Button>
         )}
