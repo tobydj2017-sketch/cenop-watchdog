@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Shield, Clock, TrendingUp, TrendingDown, Truck, Fuel, Briefcase } from "lucide-react";
+import { Shield, Clock, TrendingUp, TrendingDown, Truck, Fuel, Briefcase, Route } from "lucide-react";
 import { ServiceEntry, FuelEntry, getAdjustedHours, getServiceKey, getCenopEnOperacionesMinutes } from "@/lib/types";
 import { formatHoursMinutes } from "@/lib/formatTime";
 import StatDetailPanel from "./StatDetailPanel";
@@ -10,7 +10,7 @@ interface Props {
   selectedDate: string;
 }
 
-const STAT_KEYS = ["servicios", "productivas", "improductivas", "cenop_ops", "moviles", "combustible", "eficiencia"] as const;
+const STAT_KEYS = ["servicios", "productivas", "improductivas", "cenop_ops", "moviles", "combustible", "eficiencia", "km"] as const;
 type StatKey = typeof STAT_KEYS[number];
 
 export default function DashboardStats({ services, fuelEntries, selectedDate }: Props) {
@@ -25,6 +25,7 @@ export default function DashboardStats({ services, fuelEntries, selectedDate }: 
   const totalFuel = dayFuel.reduce((acc, f) => acc + f.monto, 0);
   const uniqueMoviles = new Set(dayServices.map((s) => s.movil).filter(Boolean)).size;
   const cenopEnOps = getCenopEnOperacionesMinutes(dayServices);
+  const totalKm = dayServices.reduce((acc, s) => acc + (parseFloat((s.kmRecorridos || "0").replace(/,/g, ".")) || 0), 0);
 
   const stats: { key: StatKey; label: string; value: string | number; icon: typeof Shield; color: string }[] = [
     { key: "servicios", label: "Servicios", value: totalServicios, icon: Shield, color: "text-primary" },
@@ -34,6 +35,7 @@ export default function DashboardStats({ services, fuelEntries, selectedDate }: 
     { key: "moviles", label: "Móviles", value: uniqueMoviles, icon: Truck, color: "text-primary" },
     { key: "combustible", label: "Combustible", value: `$${totalFuel.toLocaleString("es-AR")}`, icon: Fuel, color: "text-warning" },
     { key: "eficiencia", label: "Eficiencia", value: totalProd + totalImprod > 0 ? `${Math.round((totalProd / (totalProd + totalImprod)) * 100)}%` : "—", icon: Clock, color: "text-primary" },
+    { key: "km", label: "Km Recorridos", value: `${Math.round(totalKm).toLocaleString("es-AR")} km`, icon: Route, color: "text-primary" },
   ];
 
   return (

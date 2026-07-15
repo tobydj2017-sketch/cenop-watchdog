@@ -21,7 +21,7 @@ interface Props {
   fuelEntries: FuelEntry[];
 }
 
-type KpiId = "servicios" | "dias" | "prod" | "improd" | "cenop" | "eficiencia" | "total-horas" | "personal" | "moviles" | "clientes" | "combustible";
+type KpiId = "servicios" | "dias" | "prod" | "improd" | "cenop" | "eficiencia" | "total-horas" | "personal" | "moviles" | "clientes" | "combustible" | "km-recorridos";
 type ChartRow = Record<string, string | number>;
 type DetailMetric = { label: string; value: string; tone?: string };
 type KpiDetail = {
@@ -42,6 +42,7 @@ type KpiDetail = {
 
 const tooltipFormatter = (value: number) => formatHoursMinutes(value);
 const moneyFormatter = (value: number) => `$${value.toLocaleString("es-AR")}`;
+const kmFormatter = (value: number) => `${value.toLocaleString("es-AR")} km`;
 const chartColor = (index: number) => `hsl(var(--chart-${(index % 5) + 1}))`;
 
 function shortDate(fecha: string) {
@@ -64,6 +65,8 @@ function buildKpiDetailData(
   const daysMap = new Map<string, { fecha: string; servicios: Set<string>; prod: number; improd: number }>();
   const cenopPersonMap = new Map<string, { prod: number; servicios: Set<string> }>();
   const fuelByMovil = new Map<string, { monto: number; litros: number; cargas: number }>();
+  const kmByMovil = new Map<string, { km: number; servicios: Set<string> }>();
+  let totalKmRecorridos = 0;
 
   services.forEach((service) => {
     const hours = getAdjustedHours(service);
@@ -72,6 +75,15 @@ function buildKpiDetailData(
     day.prod += hours.prod;
     day.improd += hours.improd;
     daysMap.set(service.fecha, day);
+
+    const km = parseFloat((service.kmRecorridos || "0").replace(/,/g, ".")) || 0;
+    if (km > 0 && service.movil) {
+      totalKmRecorridos += km;
+      const current = kmByMovil.get(service.movil) || { km: 0, servicios: new Set<string>() };
+      current.km += km;
+      current.servicios.add(getServiceKey(service));
+      kmByMovil.set(service.movil, current);
+    }
 
     [
       { nombre: service.chofer, activo: service.choferEsOperaciones },
@@ -102,6 +114,7 @@ function buildKpiDetailData(
   const clienteData = byCliente.map((c) => ({ name: c.cliente, prod: c.prod, improd: c.improd, total: c.total, servicios: c.servicios }));
   const cenopData = [...cenopPersonMap.entries()].map(([name, value]) => ({ name, prod: value.prod, servicios: value.servicios.size })).sort((a, b) => b.prod - a.prod);
   const fuelData = [...fuelByMovil.entries()].map(([name, value]) => ({ name, monto: value.monto, litros: value.litros, cargas: value.cargas })).sort((a, b) => b.monto - a.monto);
+  const kmData = [...kmByMovil.entries()].map(([name, value]) => ({ name, km: Math.round(value.km), servicios: value.servicios.size })).sort((a, b) => b.km - a.km);
 
   return {
     servicios: { title: "Detalle de Total Servicios", description: "Servicios únicos agrupados por fecha y solicitud, con evolución diaria y carga operativa.", metrics: [{ label: "Servicios únicos", value: totalServicios.toString() }, { label: "Promedio diario", value: daysMap.size ? Math.round(totalServicios / daysMap.size).toString() : "0" }, { label: "Días con actividad", value: daysMap.size.toString() }], chartTitle: "Servicios por día", chartType: "line", data: dailyData, xKey: "fecha", bars: [{ key: "servicios", name: "Servicios" }], tableTitle: "Días con mayor movimiento", columns: ["Fecha", "Servicios", "Hs Prod."], rows: dailyData.slice().sort((a, b) => Number(b.servicios) - Number(a.servicios)).slice(0, 12).map((d) => [d.fecha, d.servicios, formatHoursMinutes(Number(d.prod))]) },
@@ -115,6 +128,7 @@ function buildKpiDetailData(
     moviles: { title: "Detalle de Móviles Utilizados", description: "Uso de móviles por patente, cantidad de servicios y horas productivas vinculadas.", metrics: [{ label: "Móviles", value: byMovil.length.toString() }, { label: "Servicios", value: byMovil.reduce((s, m) => s + m.servicios, 0).toString() }, { label: "Mayor uso", value: movilData[0]?.name || "—" }], chartTitle: "Horas productivas por móvil", chartType: "bar", data: movilData.slice(0, 12), xKey: "name", bars: [{ key: "prod", name: "Hs Prod." }], formatter: tooltipFormatter, tableTitle: "Uso por móvil", columns: ["Móvil", "Servicios", "Hs Prod."], rows: movilData.slice(0, 15).map((m) => [m.name, m.servicios, formatHoursMinutes(Number(m.prod))]) },
     clientes: { title: "Detalle de Clientes Atendidos", description: "Clientes con servicios registrados y horas productivas dentro del período.", metrics: [{ label: "Clientes", value: byCliente.length.toString() }, { label: "Servicios", value: byCliente.reduce((s, c) => s + c.servicios, 0).toString() }, { label: "Principal", value: clienteData[0]?.name || "—" }], chartTitle: "Horas productivas por cliente", chartType: "bar", data: clienteData.slice(0, 12), xKey: "name", bars: [{ key: "prod", name: "Hs Prod." }], formatter: tooltipFormatter, tableTitle: "Carga por cliente", columns: ["Cliente", "Servicios", "Hs Prod."], rows: clienteData.slice(0, 15).map((c) => [c.name, c.servicios, formatHoursMinutes(Number(c.prod))]) },
     combustible: { title: "Detalle de Combustible Total", description: "Cargas de combustible agrupadas por móvil, monto, litros y cantidad de registros.", metrics: [{ label: "Monto total", value: moneyFormatter(fuelEntries.reduce((s, f) => s + f.monto, 0)) }, { label: "Litros", value: fuelEntries.reduce((s, f) => s + f.litros, 0).toLocaleString("es-AR") }, { label: "Cargas", value: fuelEntries.length.toString() }], chartTitle: "Gasto por móvil", chartType: "bar", data: fuelData, xKey: "name", bars: [{ key: "monto", name: "Monto" }], formatter: moneyFormatter, tableTitle: "Consumo por móvil", columns: ["Móvil", "Cargas", "Litros", "Monto"], rows: fuelData.map((f) => [f.name, f.cargas, Number(f.litros).toLocaleString("es-AR"), moneyFormatter(Number(f.monto))]) },
+    "km-recorridos": { title: "Detalle de Kilometraje Recorrido", description: "Kilómetros recorridos acumulados por los móviles a partir de los servicios cargados.", metrics: [{ label: "Km totales", value: kmFormatter(Math.round(totalKmRecorridos)), tone: "text-primary" }, { label: "Móviles con KM", value: kmData.length.toString() }, { label: "Mayor recorrido", value: kmData[0]?.name || "—" }], chartTitle: "Km por móvil", chartType: "bar", data: kmData, xKey: "name", bars: [{ key: "km", name: "Kilómetros" }], formatter: kmFormatter, tableTitle: "Recorrido por móvil", columns: ["Móvil", "Servicios", "Km Recorridos"], rows: kmData.map((m) => [m.name, m.servicios, kmFormatter(Number(m.km))]) },
   };
 }
 
@@ -156,6 +170,7 @@ export default function DashboardResumen({ services, fuelEntries, byPerson, byMo
         <StatCard label="Móviles Utilizados" value={byMovil.length} active={selectedKpi === "moviles"} onClick={() => setSelectedKpi(selectedKpi === "moviles" ? null : "moviles")} />
         <StatCard label="Clientes Atendidos" value={byCliente.length} active={selectedKpi === "clientes"} onClick={() => setSelectedKpi(selectedKpi === "clientes" ? null : "clientes")} />
         <StatCard label="Combustible Total" value={`$${totalFuel.toLocaleString("es-AR")}`} active={selectedKpi === "combustible"} onClick={() => setSelectedKpi(selectedKpi === "combustible" ? null : "combustible")} />
+        <StatCard label="Km Recorridos" value={`${Math.round(services.reduce((acc, s) => acc + (parseFloat((s.kmRecorridos || "0").replace(/,/g, ".")) || 0), 0)).toLocaleString("es-AR")} km`} active={selectedKpi === "km-recorridos"} onClick={() => setSelectedKpi(selectedKpi === "km-recorridos" ? null : "km-recorridos")} />
       </div>
 
       {selectedDetail && (
