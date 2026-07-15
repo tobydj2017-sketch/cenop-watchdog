@@ -79,33 +79,50 @@ export default function TimeInput({ value, onChange, className, tabIndex, onComp
   }
 
   return (
-    <input
-      ref={inputRef}
-      type="text"
-      inputMode="numeric"
-      tabIndex={tabIndex}
-      value={display}
-      placeholder="--:--"
-      readOnly
-      onKeyDown={handleKeyDown}
-      onFocus={() => {
-        setFocused(true);
-        setRaw("");
-      }}
-      onBlur={() => {
-        setFocused(false);
-        // If partial entry, clear
-        if (raw.length > 0 && raw.length < 4) {
+    <div className="relative">
+      <input
+        ref={inputRef}
+        type="text"
+        inputMode="numeric"
+        tabIndex={tabIndex}
+        value={display}
+        placeholder="--:--"
+        readOnly
+        onKeyDown={handleKeyDown}
+        onFocus={() => {
+          setFocused(true);
           setRaw("");
-        }
-      }}
-      className={cn(
-        "flex h-9 w-full rounded-md border border-input bg-background px-3 py-1 text-sm text-center font-mono tracking-widest shadow-sm transition-colors",
-        "placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-1 focus:ring-offset-background",
-        "cursor-text caret-transparent",
-        focused && "ring-2 ring-ring",
-        className
+        }}
+        onBlur={() => {
+          setFocused(false);
+          if (raw.length > 0 && raw.length < 4) {
+            setRaw("");
+          }
+        }}
+        className={cn(
+          "flex h-9 w-full rounded-md border border-input bg-background px-3 py-1 text-sm text-center font-mono tracking-widest shadow-sm transition-colors",
+          "placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-1 focus:ring-offset-background",
+          "cursor-text caret-transparent",
+          focused && "ring-2 ring-ring",
+          value && "pr-7",
+          className
+        )}
+      />
+      {value && !focused && (
+        <button
+          type="button"
+          aria-label="Borrar horario"
+          onMouseDown={(e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            setRaw("");
+            onChange("");
+          }}
+          className="absolute right-1.5 top-1/2 -translate-y-1/2 p-0.5 rounded hover:bg-muted text-muted-foreground hover:text-foreground"
+        >
+          <X className="w-3.5 h-3.5" />
+        </button>
       )}
-    />
+    </div>
   );
 }
