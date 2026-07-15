@@ -203,61 +203,110 @@ export default function MovilesHub({ services, fuelEntries, amLightTheme, setAmL
 
     return (
       <div className="space-y-5">
-        <div className="flex items-center justify-between flex-wrap gap-3">
-          <Button variant="outline" size="sm" className="gap-2" onClick={() => setSelected("")}>
-            <ArrowLeft className="w-4 h-4" /> Volver a la flota
-          </Button>
-          <div className="flex items-center gap-2">
-            <div className="hidden sm:flex items-center gap-2 rounded-lg border border-border bg-card px-3 py-1.5 text-xs">
-              <span className="text-muted-foreground">Usuario:</span>
-              <span className="font-mono font-bold">{user?.username}</span>
+        {/* Barra superior sticky: flecha grande + acciones */}
+        <div className="sticky top-0 z-30 -mx-4 px-4 py-3 bg-background/85 backdrop-blur-xl border-b border-border/60">
+          <div className="flex items-center justify-between flex-wrap gap-3">
+            <button
+              onClick={() => setSelected("")}
+              className="group flex items-center gap-2 rounded-full pl-2 pr-4 py-2 bg-card border border-border hover:border-primary hover:bg-primary/10 transition-all"
+              title="Volver a la flota"
+            >
+              <span className="flex h-8 w-8 items-center justify-center rounded-full bg-primary/15 ring-1 ring-primary/30 group-hover:bg-primary group-hover:ring-primary transition-all">
+                <ArrowLeft className="w-4 h-4 text-primary group-hover:text-primary-foreground transition-colors" />
+              </span>
+              <span className="text-sm font-semibold">Volver a la flota</span>
+            </button>
+            <div className="flex items-center gap-2">
+              <div className="hidden sm:flex items-center gap-2 rounded-lg border border-border bg-card px-3 py-1.5 text-xs">
+                <span className="text-muted-foreground">Usuario:</span>
+                <span className="font-mono font-bold">{user?.username}</span>
+              </div>
+              <div className="flex items-center gap-2 rounded-lg border border-border bg-card px-3 py-2">
+                <Moon className="w-4 h-4 text-muted-foreground" />
+                <Switch checked={amLightTheme} onCheckedChange={setAmLightTheme} aria-label="Cambiar tema" />
+                <Sun className="w-4 h-4 text-primary" />
+              </div>
+              <Button variant="outline" size="sm" className="gap-1.5 text-xs" onClick={logout}>
+                <LogOut className="w-3.5 h-3.5" /> Salir
+              </Button>
             </div>
-            <div className="flex items-center gap-2 rounded-lg border border-border bg-card px-3 py-2">
-              <Moon className="w-4 h-4 text-muted-foreground" />
-              <Switch checked={amLightTheme} onCheckedChange={setAmLightTheme} aria-label="Cambiar tema" />
-              <Sun className="w-4 h-4 text-primary" />
-            </div>
-            <Button variant="outline" size="sm" className="gap-1.5 text-xs" onClick={logout}>
-              <LogOut className="w-3.5 h-3.5" /> Salir
-            </Button>
           </div>
         </div>
 
-        {/* Encabezado del móvil */}
-        <div className="glass-card p-5 bg-gradient-to-br from-primary/15 to-transparent">
-          <div className="flex items-center justify-between flex-wrap gap-4">
-            <div className="flex items-center gap-4">
-              <div className="flex h-16 w-16 items-center justify-center rounded-xl bg-primary/20 ring-1 ring-primary/40">
-                <Car className="w-8 h-8 text-primary" />
+        {/* Encabezado del móvil — patente monumental + chips ordenados */}
+        <div className="relative overflow-hidden rounded-2xl border border-border bg-gradient-to-br from-primary/20 via-card to-card p-6 shadow-lg">
+          <div className="absolute -top-16 -right-16 h-56 w-56 rounded-full bg-primary/15 blur-3xl pointer-events-none" />
+          <div className="relative flex items-start justify-between flex-wrap gap-6">
+            <div className="flex items-center gap-5 min-w-0">
+              <div className="flex h-20 w-20 shrink-0 items-center justify-center rounded-2xl bg-primary/25 ring-2 ring-primary/50 shadow-[0_0_30px_-6px_hsl(var(--primary)/0.6)]">
+                <Car className="w-10 h-10 text-primary" />
               </div>
-              <div>
-                <div className="text-2xl font-extrabold tracking-tight">{selected}</div>
-                <div className="text-sm text-muted-foreground">
-                  {[info?.marca, info?.modelo, info?.anio].filter(Boolean).join(" · ") || "Sin datos de ficha"}
+              <div className="min-w-0">
+                <div className="text-[10px] uppercase tracking-[0.25em] text-primary font-bold">Patente</div>
+                <div className="text-4xl md:text-5xl font-black tracking-tight leading-none font-mono">
+                  {selected}
+                </div>
+                <div className="mt-2 flex flex-wrap items-center gap-x-3 gap-y-1 text-sm text-muted-foreground">
+                  {info?.marca && <span className="font-semibold text-foreground">{info.marca}</span>}
+                  {info?.modelo && <span>{info.modelo}</span>}
+                  {info?.anio && (
+                    <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-secondary text-secondary-foreground">
+                      {info.anio}
+                    </span>
+                  )}
+                  {!info?.marca && !info?.modelo && <span className="italic">Sin ficha técnica</span>}
                 </div>
                 {info?.asignacion && (
-                  <div className="text-xs mt-1 text-primary font-semibold uppercase tracking-wider">
-                    Asignado: {info.asignacion}
+                  <div className="mt-3 inline-flex items-center gap-2 rounded-full bg-primary/15 border border-primary/30 px-3 py-1">
+                    <Users className="w-3.5 h-3.5 text-primary" />
+                    <span className="text-xs font-bold uppercase tracking-wider text-primary">{info.asignacion}</span>
                   </div>
                 )}
               </div>
             </div>
-            <div className="grid grid-cols-2 gap-3 text-sm">
+
+            {/* Chips de ficha */}
+            <div className="flex flex-wrap gap-2 max-w-md">
               {info?.tipoCombustible && (
-                <div><span className="text-muted-foreground">Combustible:</span> <span className="font-semibold">{info.tipoCombustible}</span></div>
+                <div className="flex items-center gap-2 rounded-lg bg-background/60 border border-border px-3 py-2">
+                  <Fuel className="w-4 h-4 text-primary" />
+                  <div>
+                    <div className="text-[9px] uppercase tracking-wider text-muted-foreground leading-none">Combustible</div>
+                    <div className="text-xs font-bold mt-0.5">{info.tipoCombustible}</div>
+                  </div>
+                </div>
               )}
               {info?.consumoIdeal && (
-                <div><span className="text-muted-foreground">Consumo ideal:</span> <span className="font-semibold">{info.consumoIdeal} L/100km</span></div>
+                <div className="flex items-center gap-2 rounded-lg bg-background/60 border border-border px-3 py-2">
+                  <Gauge className="w-4 h-4 text-primary" />
+                  <div>
+                    <div className="text-[9px] uppercase tracking-wider text-muted-foreground leading-none">Consumo ideal</div>
+                    <div className="text-xs font-bold mt-0.5">{info.consumoIdeal} L/100km</div>
+                  </div>
+                </div>
               )}
               {info?.telefono && (
-                <div><span className="text-muted-foreground">Teléfono:</span> <span className="font-mono">{info.telefono}</span></div>
+                <div className="flex items-center gap-2 rounded-lg bg-background/60 border border-border px-3 py-2">
+                  <span className="text-primary text-sm">📱</span>
+                  <div>
+                    <div className="text-[9px] uppercase tracking-wider text-muted-foreground leading-none">Teléfono</div>
+                    <div className="text-xs font-bold mt-0.5 font-mono">{info.telefono}</div>
+                  </div>
+                </div>
               )}
               {info?.lugarCarga && (
-                <div><span className="text-muted-foreground">Lugar de carga:</span> <span className="font-semibold">{info.lugarCarga}</span></div>
+                <div className="flex items-center gap-2 rounded-lg bg-background/60 border border-border px-3 py-2">
+                  <MapPin className="w-4 h-4 text-primary" />
+                  <div>
+                    <div className="text-[9px] uppercase tracking-wider text-muted-foreground leading-none">Lugar de carga</div>
+                    <div className="text-xs font-bold mt-0.5">{info.lugarCarga}</div>
+                  </div>
+                </div>
               )}
             </div>
           </div>
         </div>
+
 
         {/* KPIs */}
         <div className="grid grid-cols-2 md:grid-cols-4 xl:grid-cols-8 gap-3">
