@@ -196,9 +196,9 @@ export default function MovilesHub({ services, fuelEntries, amLightTheme, setAmL
       { label: "Gasto en combustible", value: money(detail.totalMonto), icon: DollarSign, tint: "from-emerald-500/25 to-emerald-500/5" },
       { label: "Litros cargados", value: `${num(detail.totalLitros, 1)} L`, icon: Fuel, tint: "from-amber-500/25 to-amber-500/5" },
       { label: "Rendimiento", value: `${num(detail.kmL, 2)} km/L`, icon: TrendingUp, tint: "from-teal-500/25 to-teal-500/5" },
-      { label: "Precio prom. litro", value: money(detail.precioL), icon: DollarSign, tint: "from-lime-500/25 to-lime-500/5" },
       { label: "Servicios realizados", value: num(detail.srv.length), icon: Car, tint: "from-fuchsia-500/25 to-fuchsia-500/5" },
       { label: "Peajes acumulados", value: money(detail.peajesTotal), icon: Receipt, tint: "from-rose-500/25 to-rose-500/5" },
+
     ];
 
     return (
