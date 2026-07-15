@@ -388,9 +388,9 @@ export default function Index() {
         ) : activeTab === "clientes" ? (
           <ClientManager />
         ) : activeTab === "moviles" ? (
-          <MovilesManager />
+          <MovilesUnified services={cleanServices} fuelEntries={fuelEntries} />
         ) : activeTab === "flota" ? (
-          <FleetDashboard services={cleanServices} fuelEntries={fuelEntries} />
+          <MovilesUnified services={cleanServices} fuelEntries={fuelEntries} />
         ) : activeTab === "reportes" ? (
 
           <DashboardReportes services={cleanServices} fuelEntries={fuelEntries} />
