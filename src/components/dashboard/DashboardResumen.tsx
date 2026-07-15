@@ -75,6 +75,15 @@ function buildKpiDetailData(
     day.improd += hours.improd;
     daysMap.set(service.fecha, day);
 
+    const km = parseFloat((service.kmRecorridos || "0").replace(/,/g, ".")) || 0;
+    if (km > 0 && service.movil) {
+      totalKmRecorridos += km;
+      const current = kmByMovil.get(service.movil) || { km: 0, servicios: new Set<string>() };
+      current.km += km;
+      current.servicios.add(getServiceKey(service));
+      kmByMovil.set(service.movil, current);
+    }
+
     [
       { nombre: service.chofer, activo: service.choferEsOperaciones },
       { nombre: service.custodio, activo: service.custodioEsOperaciones },
