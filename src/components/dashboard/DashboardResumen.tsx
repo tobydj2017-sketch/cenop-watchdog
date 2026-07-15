@@ -42,6 +42,7 @@ type KpiDetail = {
 
 const tooltipFormatter = (value: number) => formatHoursMinutes(value);
 const moneyFormatter = (value: number) => `$${value.toLocaleString("es-AR")}`;
+const kmFormatter = (value: number) => `${value.toLocaleString("es-AR")} km`;
 const chartColor = (index: number) => `hsl(var(--chart-${(index % 5) + 1}))`;
 
 function shortDate(fecha: string) {
