@@ -232,8 +232,8 @@ export default function MovilesHub({ services, fuelEntries, amLightTheme, setAmL
                 <Switch checked={amLightTheme} onCheckedChange={setAmLightTheme} aria-label="Cambiar tema" />
                 <Sun className="w-4 h-4 text-primary" />
               </div>
-              <Button variant="outline" size="sm" className="gap-1.5 text-xs" onClick={logout}>
-                <LogOut className="w-3.5 h-3.5" /> Salir
+              <Button variant="outline" size="sm" className="gap-1.5 text-xs bg-destructive/10 border-destructive/40 text-destructive hover:bg-destructive hover:text-destructive-foreground" onClick={logout}>
+                <LogOut className="w-3.5 h-3.5" /> Cerrar sesión
               </Button>
             </div>
           </div>
@@ -491,29 +491,31 @@ export default function MovilesHub({ services, fuelEntries, amLightTheme, setAmL
   // ============ VISTA LISTA ============
   return (
     <div className="space-y-5">
-      {/* Header con controles */}
-      <div className="flex items-center justify-between flex-wrap gap-3">
-        <div>
-          <h1 className="text-2xl font-extrabold tracking-tight flex items-center gap-2">
-            <Car className="w-6 h-6 text-primary" /> Gestión de Flota
-          </h1>
-          <p className="text-xs text-muted-foreground">
-            {allPatentes.length} móviles · Seleccioná uno para ver su historial completo
-          </p>
-        </div>
-        <div className="flex items-center gap-2">
-          <div className="hidden sm:flex items-center gap-2 rounded-lg border border-border bg-card px-3 py-1.5 text-xs">
-            <span className="text-muted-foreground">Usuario:</span>
-            <span className="font-mono font-bold">{user?.username}</span>
+      {/* Header con controles (sticky para que Salir siempre esté visible) */}
+      <div className="sticky top-0 z-30 -mx-4 px-4 py-2 backdrop-blur-md bg-background/80 border-b border-border/60">
+        <div className="flex items-center justify-between flex-wrap gap-3">
+          <div>
+            <h1 className="text-2xl font-extrabold tracking-tight flex items-center gap-2">
+              <Car className="w-6 h-6 text-primary" /> Gestión de Flota
+            </h1>
+            <p className="text-xs text-muted-foreground">
+              {allPatentes.length} móviles · Seleccioná uno para ver su historial completo
+            </p>
           </div>
-          <div className="flex items-center gap-2 rounded-lg border border-border bg-card px-3 py-2">
-            <Moon className="w-4 h-4 text-muted-foreground" />
-            <Switch checked={amLightTheme} onCheckedChange={setAmLightTheme} aria-label="Cambiar tema" />
-            <Sun className="w-4 h-4 text-primary" />
+          <div className="flex items-center gap-2">
+            <div className="hidden sm:flex items-center gap-2 rounded-lg border border-border bg-card px-3 py-1.5 text-xs">
+              <span className="text-muted-foreground">Usuario:</span>
+              <span className="font-mono font-bold">{user?.username}</span>
+            </div>
+            <div className="flex items-center gap-2 rounded-lg border border-border bg-card px-3 py-2">
+              <Moon className="w-4 h-4 text-muted-foreground" />
+              <Switch checked={amLightTheme} onCheckedChange={setAmLightTheme} aria-label="Cambiar tema" />
+              <Sun className="w-4 h-4 text-primary" />
+            </div>
+            <Button variant="outline" size="sm" className="gap-1.5 text-xs bg-destructive/10 border-destructive/40 text-destructive hover:bg-destructive hover:text-destructive-foreground" onClick={logout}>
+              <LogOut className="w-3.5 h-3.5" /> Cerrar sesión
+            </Button>
           </div>
-          <Button variant="outline" size="sm" className="gap-1.5 text-xs" onClick={logout}>
-            <LogOut className="w-3.5 h-3.5" /> Salir
-          </Button>
         </div>
       </div>
 
