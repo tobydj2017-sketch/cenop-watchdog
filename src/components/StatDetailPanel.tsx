@@ -40,6 +40,8 @@ export default function StatDetailPanel({ statKey, services, fuelEntries, select
         return <CombustibleDetail fuelEntries={dayFuel} />;
       case "eficiencia":
         return <EficienciaDetail services={dayServices} />;
+      case "km":
+        return <KmDetail services={dayServices} />;
       default:
         return null;
     }
