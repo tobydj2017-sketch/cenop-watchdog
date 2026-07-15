@@ -170,6 +170,7 @@ export default function DashboardResumen({ services, fuelEntries, byPerson, byMo
         <StatCard label="Móviles Utilizados" value={byMovil.length} active={selectedKpi === "moviles"} onClick={() => setSelectedKpi(selectedKpi === "moviles" ? null : "moviles")} />
         <StatCard label="Clientes Atendidos" value={byCliente.length} active={selectedKpi === "clientes"} onClick={() => setSelectedKpi(selectedKpi === "clientes" ? null : "clientes")} />
         <StatCard label="Combustible Total" value={`$${totalFuel.toLocaleString("es-AR")}`} active={selectedKpi === "combustible"} onClick={() => setSelectedKpi(selectedKpi === "combustible" ? null : "combustible")} />
+        <StatCard label="Km Recorridos" value={`${Math.round(services.reduce((acc, s) => acc + (parseFloat((s.kmRecorridos || "0").replace(/,/g, ".")) || 0), 0)).toLocaleString("es-AR")} km`} active={selectedKpi === "km-recorridos"} onClick={() => setSelectedKpi(selectedKpi === "km-recorridos" ? null : "km-recorridos")} />
       </div>
 
       {selectedDetail && (
