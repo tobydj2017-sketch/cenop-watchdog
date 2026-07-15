@@ -343,18 +343,15 @@ export async function exportMovilesPDF(
   const doc = new jsPDF();
   const logoDataUrl = await loadImageAsDataUrl(AM_LOGO_PATH);
   addHeader(doc, "Reporte de Móviles", `${byMovil.length} móviles | Generado con filtros activos`, logoDataUrl);
-  const chartEndY = drawBarChart(doc, "Gráfico — Top móviles por horas totales", byMovil.map((m) => ({ name: m.patente, value: m.total, label: formatHoursMinutes(m.total) })), 58);
+  const chartEndY = drawBarChart(doc, "Gráfico — Top móviles por horas productivas", byMovil.map((m) => ({ name: m.patente, value: m.prod, label: formatHoursMinutes(m.prod) })), 58);
 
   autoTable(doc, {
     startY: chartEndY,
-    head: [["Patente", "Servicios", "Hs Prod.", "Hs Improd.", "Hs Total", "Eficiencia"]],
+    head: [["Patente", "Servicios", "Hs Prod."]],
     body: byMovil.map((m) => [
       m.patente,
       m.servicios,
       formatHoursMinutes(m.prod),
-      formatHoursMinutes(m.improd),
-      formatHoursMinutes(m.total),
-      m.total > 0 ? `${Math.round((m.prod / m.total) * 100)}%` : "—",
     ]),
     ...tableStyle(),
   });
