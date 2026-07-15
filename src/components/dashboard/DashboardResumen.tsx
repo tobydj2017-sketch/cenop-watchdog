@@ -21,7 +21,7 @@ interface Props {
   fuelEntries: FuelEntry[];
 }
 
-type KpiId = "servicios" | "dias" | "prod" | "improd" | "cenop" | "eficiencia" | "total-horas" | "personal" | "moviles" | "clientes" | "combustible";
+type KpiId = "servicios" | "dias" | "prod" | "improd" | "cenop" | "eficiencia" | "total-horas" | "personal" | "moviles" | "clientes" | "combustible" | "km-recorridos";
 type ChartRow = Record<string, string | number>;
 type DetailMetric = { label: string; value: string; tone?: string };
 type KpiDetail = {
