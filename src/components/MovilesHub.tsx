@@ -11,6 +11,7 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { DataTable } from "@/components/dashboard/DataTable";
 import { FuelEntry, ServiceEntry } from "@/lib/types";
 import { getMoviles, MovilEntry } from "@/lib/movilesStore";
@@ -48,6 +49,8 @@ export default function MovilesHub({ services, fuelEntries, amLightTheme, setAmL
   const { user, logout } = useAuth();
   const [selected, setSelected] = useState<string>("");
   const [search, setSearch] = useState("");
+  const [drill, setDrill] = useState<null | "km" | "kmrec" | "gasto" | "litros" | "rend" | "srv" | "peajes">(null);
+
 
   const moviles = useMemo<MovilEntry[]>(() => getMoviles(), []);
   const infoByPatente = useMemo(() => new Map(moviles.map((m) => [m.patente, m])), [moviles]);
@@ -196,16 +199,16 @@ export default function MovilesHub({ services, fuelEntries, amLightTheme, setAmL
   // ============ VISTA DETALLE ============
   if (selected && detail) {
     const { info } = detail;
-    const kpis = [
-      { label: "Kilometraje actual", value: `${num(detail.ultKm)} km`, icon: Gauge, tint: "from-sky-500/25 to-sky-500/5" },
-      { label: "KM recorridos (total)", value: `${num(detail.totalKmFuel + detail.totalKmServ)} km`, icon: Route, tint: "from-indigo-500/25 to-indigo-500/5" },
-      { label: "Gasto en combustible", value: money(detail.totalMonto), icon: DollarSign, tint: "from-emerald-500/25 to-emerald-500/5" },
-      { label: "Litros cargados", value: `${num(detail.totalLitros, 1)} L`, icon: Fuel, tint: "from-amber-500/25 to-amber-500/5" },
-      { label: "Rendimiento", value: `${num(detail.kmL, 2)} km/L`, icon: TrendingUp, tint: "from-teal-500/25 to-teal-500/5" },
-      { label: "Servicios realizados", value: num(detail.srv.length), icon: Car, tint: "from-fuchsia-500/25 to-fuchsia-500/5" },
-      { label: "Peajes acumulados", value: money(detail.peajesTotal), icon: Receipt, tint: "from-rose-500/25 to-rose-500/5" },
-
+    const kpis: { key: NonNullable<typeof drill>; label: string; value: string; icon: typeof Gauge; tint: string }[] = [
+      { key: "km", label: "Kilometraje actual", value: `${num(detail.ultKm)} km`, icon: Gauge, tint: "from-sky-500/25 to-sky-500/5" },
+      { key: "kmrec", label: "KM recorridos (total)", value: `${num(detail.totalKmFuel + detail.totalKmServ)} km`, icon: Route, tint: "from-indigo-500/25 to-indigo-500/5" },
+      { key: "gasto", label: "Gasto en combustible", value: money(detail.totalMonto), icon: DollarSign, tint: "from-emerald-500/25 to-emerald-500/5" },
+      { key: "litros", label: "Litros cargados", value: `${num(detail.totalLitros, 1)} L`, icon: Fuel, tint: "from-amber-500/25 to-amber-500/5" },
+      { key: "rend", label: "Rendimiento", value: `${num(detail.kmL, 2)} km/L`, icon: TrendingUp, tint: "from-teal-500/25 to-teal-500/5" },
+      { key: "srv", label: "Servicios realizados", value: num(detail.srv.length), icon: Car, tint: "from-fuchsia-500/25 to-fuchsia-500/5" },
+      { key: "peajes", label: "Peajes acumulados", value: money(detail.peajesTotal), icon: Receipt, tint: "from-rose-500/25 to-rose-500/5" },
     ];
+
 
     return (
       <div className="space-y-5">
@@ -314,18 +317,27 @@ export default function MovilesHub({ services, fuelEntries, amLightTheme, setAmL
         </div>
 
 
-        {/* KPIs */}
-        <div className="grid grid-cols-2 md:grid-cols-4 xl:grid-cols-8 gap-3">
-          {kpis.map(({ label, value, icon: Icon, tint }) => (
-            <div key={label} className={`glass-card p-3 bg-gradient-to-br ${tint} border-border`}>
-              <Icon className="w-4 h-4 text-primary" />
+        {/* KPIs — clickeables: cada uno abre un detalle completo */}
+        <div className="grid grid-cols-2 md:grid-cols-4 xl:grid-cols-7 gap-3">
+          {kpis.map(({ key, label, value, icon: Icon, tint }) => (
+            <button
+              key={label}
+              onClick={() => setDrill(key)}
+              className={`text-left glass-card p-3 bg-gradient-to-br ${tint} border-border hover:border-primary hover:shadow-[0_0_0_1px_hsl(var(--primary)/0.5),0_10px_30px_-10px_hsl(var(--primary)/0.5)] hover:-translate-y-0.5 transition-all cursor-pointer group`}
+              title={`Ver detalle de ${label}`}
+            >
+              <div className="flex items-center justify-between">
+                <Icon className="w-4 h-4 text-primary" />
+                <span className="text-[9px] uppercase tracking-widest text-primary/70 group-hover:text-primary opacity-0 group-hover:opacity-100 transition">Ver detalle →</span>
+              </div>
               <div className="mt-2">
                 <div className="text-lg font-extrabold tracking-tight">{value}</div>
                 <div className="text-[10px] uppercase tracking-widest text-muted-foreground">{label}</div>
               </div>
-            </div>
+            </button>
           ))}
         </div>
+
 
         {/* Gráficos día a día */}
         <div className="grid lg:grid-cols-2 gap-4">
@@ -484,8 +496,156 @@ export default function MovilesHub({ services, fuelEntries, amLightTheme, setAmL
             ])}
           />
         </div>
+
+        {/* ============ Drill-down por KPI ============ */}
+        <Dialog open={!!drill} onOpenChange={(o) => !o && setDrill(null)}>
+          <DialogContent className="max-w-6xl max-h-[85vh] overflow-hidden flex flex-col">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2 text-base">
+                {drill === "km" && <><Gauge className="w-4 h-4 text-primary" /> Kilometraje actual — {selected}</>}
+                {drill === "kmrec" && <><Route className="w-4 h-4 text-primary" /> KM recorridos — {selected}</>}
+                {drill === "gasto" && <><DollarSign className="w-4 h-4 text-primary" /> Gasto en combustible — {selected}</>}
+                {drill === "litros" && <><Fuel className="w-4 h-4 text-primary" /> Litros cargados — {selected}</>}
+                {drill === "rend" && <><TrendingUp className="w-4 h-4 text-primary" /> Rendimiento — {selected}</>}
+                {drill === "srv" && <><Car className="w-4 h-4 text-primary" /> Servicios realizados — {selected}</>}
+                {drill === "peajes" && <><Receipt className="w-4 h-4 text-primary" /> Peajes acumulados — {selected}</>}
+              </DialogTitle>
+            </DialogHeader>
+            <div className="overflow-y-auto flex-1 space-y-3 pr-1">
+              {drill === "km" && (() => {
+                const rows = [...detail.fuel]
+                  .filter((f) => toNum(f.kilometraje) > 0)
+                  .sort((a, b) => (b.fecha + (b.hora || "")).localeCompare(a.fecha + (a.hora || "")))
+                  .map((f, i, arr) => {
+                    const prev = arr[i + 1];
+                    const delta = prev ? toNum(f.kilometraje) - toNum(prev.kilometraje) : 0;
+                    return [fmtDate(f.fecha), f.hora || "—", num(toNum(f.kilometraje)) + " km", prev ? `+${num(delta)} km` : "—", f.chofer || "—", f.estacion || "—", f.numeroRemito || "—"];
+                  });
+                return (
+                  <>
+                    <div className="grid grid-cols-3 gap-3 text-xs">
+                      <div className="glass-card p-3"><div className="text-muted-foreground">Kilometraje actual</div><div className="text-lg font-bold">{num(detail.ultKm)} km</div></div>
+                      <div className="glass-card p-3"><div className="text-muted-foreground">Lecturas</div><div className="text-lg font-bold">{rows.length}</div></div>
+                      <div className="glass-card p-3"><div className="text-muted-foreground">Última lectura</div><div className="text-lg font-bold">{rows[0]?.[0] || "—"}</div></div>
+                    </div>
+                    <DataTable columns={["Fecha", "Hora", "Odómetro", "Δ vs anterior", "Chofer", "Estación", "Remito"]} rows={rows} />
+                  </>
+                );
+              })()}
+
+              {drill === "kmrec" && (
+                <>
+                  <div className="grid grid-cols-3 gap-3 text-xs">
+                    <div className="glass-card p-3"><div className="text-muted-foreground">KM cargas</div><div className="text-lg font-bold">{num(detail.totalKmFuel)} km</div></div>
+                    <div className="glass-card p-3"><div className="text-muted-foreground">KM servicios</div><div className="text-lg font-bold">{num(detail.totalKmServ)} km</div></div>
+                    <div className="glass-card p-3"><div className="text-muted-foreground">Total</div><div className="text-lg font-bold text-primary">{num(detail.totalKmFuel + detail.totalKmServ)} km</div></div>
+                  </div>
+                  <h4 className="text-xs uppercase tracking-wider text-muted-foreground mt-2">Recorrido por día</h4>
+                  <DataTable
+                    columns={["Fecha", "KM combustible", "KM servicios", "Total día"]}
+                    rows={detail.porDia.map((d) => [d.dia, num(d.kmComb), num(d.kmServ), num(d.kmComb + d.kmServ)])}
+                  />
+                </>
+              )}
+
+              {drill === "gasto" && (
+                <>
+                  <div className="grid grid-cols-3 gap-3 text-xs">
+                    <div className="glass-card p-3"><div className="text-muted-foreground">Total gastado</div><div className="text-lg font-bold text-emerald-500">{money(detail.totalMonto)}</div></div>
+                    <div className="glass-card p-3"><div className="text-muted-foreground">Cargas</div><div className="text-lg font-bold">{detail.fuel.length}</div></div>
+                    <div className="glass-card p-3"><div className="text-muted-foreground">Precio prom. litro</div><div className="text-lg font-bold">{money(detail.precioL)}</div></div>
+                  </div>
+                  <DataTable
+                    columns={["Fecha", "Hora", "Estación", "Litros", "$/L", "Monto", "Chofer", "Remito"]}
+                    rows={[...detail.fuel].reverse().map((f) => [
+                      fmtDate(f.fecha), f.hora || "—", f.estacion || f.lugarCarga || "—",
+                      num(toNum(f.litros), 2), money(toNum(f.precioPorLitro)), money(toNum(f.monto)),
+                      f.chofer || "—", f.numeroRemito || "—",
+                    ])}
+                  />
+                </>
+              )}
+
+              {drill === "litros" && (
+                <>
+                  <div className="grid grid-cols-3 gap-3 text-xs">
+                    <div className="glass-card p-3"><div className="text-muted-foreground">Litros totales</div><div className="text-lg font-bold text-amber-500">{num(detail.totalLitros, 2)} L</div></div>
+                    <div className="glass-card p-3"><div className="text-muted-foreground">Cargas</div><div className="text-lg font-bold">{detail.fuel.length}</div></div>
+                    <div className="glass-card p-3"><div className="text-muted-foreground">Litros por carga</div><div className="text-lg font-bold">{detail.fuel.length ? num(detail.totalLitros / detail.fuel.length, 2) : "—"} L</div></div>
+                  </div>
+                  <DataTable
+                    columns={["Fecha", "Hora", "Estación", "Combustible", "Litros", "Monto"]}
+                    rows={[...detail.fuel].reverse().map((f) => [
+                      fmtDate(f.fecha), f.hora || "—", f.estacion || f.lugarCarga || "—",
+                      f.tipoCombustible || info?.tipoCombustible || "—",
+                      num(toNum(f.litros), 2), money(toNum(f.monto)),
+                    ])}
+                  />
+                </>
+              )}
+
+              {drill === "rend" && (
+                <>
+                  <div className="grid grid-cols-3 gap-3 text-xs">
+                    <div className="glass-card p-3"><div className="text-muted-foreground">Rendimiento real</div><div className="text-lg font-bold text-teal-500">{num(detail.kmL, 2)} km/L</div></div>
+                    <div className="glass-card p-3"><div className="text-muted-foreground">Consumo ideal</div><div className="text-lg font-bold">{info?.consumoIdeal ? `${info.consumoIdeal} L/100km` : "—"}</div></div>
+                    <div className="glass-card p-3"><div className="text-muted-foreground">Rend. ideal</div><div className="text-lg font-bold">{info?.consumoIdeal ? `${num(100 / info.consumoIdeal, 2)} km/L` : "—"}</div></div>
+                  </div>
+                  <DataTable
+                    columns={["Fecha", "KM recorridos", "Litros", "Km/L carga", "$/L", "Monto"]}
+                    rows={[...detail.fuel].reverse().map((f) => [
+                      fmtDate(f.fecha),
+                      num(toNum(f.kmRecorridos)),
+                      num(toNum(f.litros), 2),
+                      toNum(f.litros) > 0 ? num(toNum(f.kmRecorridos) / toNum(f.litros), 2) : "—",
+                      money(toNum(f.precioPorLitro)),
+                      money(toNum(f.monto)),
+                    ])}
+                  />
+                </>
+              )}
+
+              {drill === "srv" && (
+                <>
+                  <div className="grid grid-cols-3 gap-3 text-xs">
+                    <div className="glass-card p-3"><div className="text-muted-foreground">Servicios</div><div className="text-lg font-bold text-fuchsia-500">{detail.srv.length}</div></div>
+                    <div className="glass-card p-3"><div className="text-muted-foreground">KM en servicios</div><div className="text-lg font-bold">{num(detail.totalKmServ)} km</div></div>
+                    <div className="glass-card p-3"><div className="text-muted-foreground">Clientes distintos</div><div className="text-lg font-bold">{new Set(detail.srv.map((s) => s.cliente).filter(Boolean)).size}</div></div>
+                  </div>
+                  <DataTable
+                    columns={["Fecha", "Sol.", "Cliente", "Origen", "Destino", "Chofer", "Custodio", "Hs totales", "KM rec.", "Peajes"]}
+                    rows={detail.srv.map((s) => [
+                      fmtDate(s.fecha), String(s.solicitud || "—"), s.cliente || "—",
+                      s.lugarSalida || "—", s.destino || "—", s.chofer || "—", s.custodio || "—",
+                      s.horasTotales || "—", num(toNum(s.kmRecorridos)),
+                      money((s.peajes || []).reduce((t, p) => t + toNum(p.monto), 0)),
+                    ])}
+                  />
+                </>
+              )}
+
+              {drill === "peajes" && (
+                <>
+                  <div className="grid grid-cols-3 gap-3 text-xs">
+                    <div className="glass-card p-3"><div className="text-muted-foreground">Total peajes</div><div className="text-lg font-bold text-rose-500">{money(detail.peajesTotal)}</div></div>
+                    <div className="glass-card p-3"><div className="text-muted-foreground">Cantidad</div><div className="text-lg font-bold">{detail.peajes.length}</div></div>
+                    <div className="glass-card p-3"><div className="text-muted-foreground">Promedio</div><div className="text-lg font-bold">{detail.peajes.length ? money(detail.peajesTotal / detail.peajes.length) : "—"}</div></div>
+                  </div>
+                  <DataTable
+                    columns={["Fecha", "Solicitud", "Ubicación", "Con camión", "Monto"]}
+                    rows={detail.peajes.map((p) => [
+                      fmtDate(p.fecha), String(p.solicitud || "—"), p.ubicacion || "—",
+                      p.conCamion ? "Sí" : "No", money(p.monto),
+                    ])}
+                  />
+                </>
+              )}
+            </div>
+          </DialogContent>
+        </Dialog>
       </div>
     );
+
   }
 
   // ============ VISTA LISTA ============
