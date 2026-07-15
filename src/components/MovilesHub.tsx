@@ -607,7 +607,17 @@ export default function MovilesHub({ services, fuelEntries, amLightTheme, setAmL
                 </div>
                 <div className="rounded-md bg-muted/40 p-2">
                   <div className="text-[10px] uppercase text-muted-foreground">Últ. carga</div>
-                  <div className="font-bold">{m.ultimaFecha ? fmtDate(m.ultimaFecha) : "—"}</div>
+                  <div className="font-bold">
+                    {m.ultimaFecha ? fmtDate(m.ultimaFecha) : "—"}
+                    {m.ultimaHora && <span className="text-muted-foreground font-normal ml-1">{m.ultimaHora}</span>}
+                  </div>
+                </div>
+                <div className="rounded-md bg-muted/40 p-2 col-span-2">
+                  <div className="text-[10px] uppercase text-muted-foreground">Últ. servicio</div>
+                  <div className="font-bold">
+                    {m.ultimoServicio ? fmtDate(m.ultimoServicio) : "—"}
+                    {m.ultimoServicioHora && <span className="text-muted-foreground font-normal ml-1">{m.ultimoServicioHora}</span>}
+                  </div>
                 </div>
               </div>
             </button>
