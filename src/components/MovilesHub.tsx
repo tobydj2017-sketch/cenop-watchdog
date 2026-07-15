@@ -97,8 +97,6 @@ export default function MovilesHub({ services, fuelEntries, amLightTheme, setAmL
     }
     return map;
   }, [allPatentes, fuelEntries, services]);
-    return map;
-  }, [allPatentes, fuelEntries, services]);
 
   const filteredPatentes = useMemo(() => {
     const q = search.trim().toUpperCase();
