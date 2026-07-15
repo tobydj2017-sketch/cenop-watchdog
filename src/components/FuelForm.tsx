@@ -237,7 +237,7 @@ export default function FuelForm({ onAdd, selectedDate, existingEntries, allEntr
       return;
     }
     if (kmAnterior && Number(form.kilometraje) > 0 && Number(form.kilometraje) < Number(kmAnterior)) {
-      toast.error(`El KM actual (${form.kilometraje}) es menor que el KM de la carga previa del ${previasFechaLabel()} (${kmAnterior})`);
+      toast.error(`El KM actual (${form.kilometraje}) es menor que el KM de la carga previa (${kmAnterior})`);
       return;
     }
     if (kmPosterior && Number(form.kilometraje) > Number(kmPosterior)) {
