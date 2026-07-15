@@ -86,14 +86,27 @@ export default function FuelForm({ onAdd, selectedDate, existingEntries, allEntr
   };
 
 
-  // KM anterior del móvil (última carga histórica antes de esta fecha/hora)
+  // KM anterior del móvil: última carga con fecha/hora ANTERIOR a la del ticket actual
+  // (permite cargar tickets fuera de orden cronológico sin romper el cálculo)
+  const currentKey = `${form.fecha || ""} ${form.hora || ""}`;
   const kmAnterior = useMemo(() => {
-    if (!form.movil) return "";
+    if (!form.movil || !form.fecha) return "";
     const previas = historyEntries
       .filter((e) => e.movil === form.movil && e.kilometraje)
+      .filter((e) => `${e.fecha} ${e.hora || ""}` < currentKey)
       .sort((a, b) => `${b.fecha} ${b.hora || ""}`.localeCompare(`${a.fecha} ${a.hora || ""}`));
     return previas[0]?.kilometraje || "";
-  }, [form.movil, historyEntries]);
+  }, [form.movil, form.fecha, form.hora, historyEntries, currentKey]);
+
+  // KM posterior del móvil: primera carga con fecha/hora POSTERIOR (para validar coherencia)
+  const kmPosterior = useMemo(() => {
+    if (!form.movil || !form.fecha) return "";
+    const posteriores = historyEntries
+      .filter((e) => e.movil === form.movil && e.kilometraje)
+      .filter((e) => `${e.fecha} ${e.hora || ""}` > currentKey)
+      .sort((a, b) => `${a.fecha} ${a.hora || ""}`.localeCompare(`${b.fecha} ${b.hora || ""}`));
+    return posteriores[0]?.kilometraje || "";
+  }, [form.movil, form.fecha, form.hora, historyEntries, currentKey]);
 
   const kmRecorridos = useMemo(() => {
     const a = Number(kmAnterior);
