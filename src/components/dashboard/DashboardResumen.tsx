@@ -64,6 +64,8 @@ function buildKpiDetailData(
   const daysMap = new Map<string, { fecha: string; servicios: Set<string>; prod: number; improd: number }>();
   const cenopPersonMap = new Map<string, { prod: number; servicios: Set<string> }>();
   const fuelByMovil = new Map<string, { monto: number; litros: number; cargas: number }>();
+  const kmByMovil = new Map<string, { km: number; servicios: Set<string> }>();
+  let totalKmRecorridos = 0;
 
   services.forEach((service) => {
     const hours = getAdjustedHours(service);
