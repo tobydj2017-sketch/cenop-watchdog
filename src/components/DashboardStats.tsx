@@ -35,6 +35,7 @@ export default function DashboardStats({ services, fuelEntries, selectedDate }: 
     { key: "moviles", label: "Móviles", value: uniqueMoviles, icon: Truck, color: "text-primary" },
     { key: "combustible", label: "Combustible", value: `$${totalFuel.toLocaleString("es-AR")}`, icon: Fuel, color: "text-warning" },
     { key: "eficiencia", label: "Eficiencia", value: totalProd + totalImprod > 0 ? `${Math.round((totalProd / (totalProd + totalImprod)) * 100)}%` : "—", icon: Clock, color: "text-primary" },
+    { key: "km", label: "Km Recorridos", value: `${Math.round(totalKm).toLocaleString("es-AR")} km`, icon: Route, color: "text-primary" },
   ];
 
   return (
