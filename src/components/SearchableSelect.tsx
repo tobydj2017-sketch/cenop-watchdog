@@ -1,7 +1,7 @@
 import { useState, useRef, useEffect } from "react";
 import { Input } from "@/components/ui/input";
 import { cn } from "@/lib/utils";
-import { ChevronDown } from "lucide-react";
+import { ChevronDown, X } from "lucide-react";
 
 interface Props {
   options: string[];
@@ -45,8 +45,24 @@ export default function SearchableSelect({ options, value, onChange, placeholder
             setSearch("");
           }}
           placeholder={placeholder}
-          className={cn("h-9 text-sm pr-8", inputClassName)}
+          className={cn("h-9 text-sm pr-14", inputClassName)}
         />
+        {value && !open && (
+          <button
+            type="button"
+            aria-label="Borrar selección"
+            onMouseDown={(e) => {
+              e.preventDefault();
+              e.stopPropagation();
+              onChange("");
+              setSearch("");
+              setOpen(false);
+            }}
+            className="absolute right-7 top-1/2 -translate-y-1/2 p-0.5 rounded hover:bg-muted text-muted-foreground hover:text-foreground"
+          >
+            <X className="w-3.5 h-3.5" />
+          </button>
+        )}
         <ChevronDown className="absolute right-2 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground pointer-events-none" />
       </div>
       {open && (
