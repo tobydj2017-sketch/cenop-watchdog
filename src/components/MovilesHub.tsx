@@ -232,8 +232,8 @@ export default function MovilesHub({ services, fuelEntries, amLightTheme, setAmL
                 <Switch checked={amLightTheme} onCheckedChange={setAmLightTheme} aria-label="Cambiar tema" />
                 <Sun className="w-4 h-4 text-primary" />
               </div>
-              <Button variant="outline" size="sm" className="gap-1.5 text-xs" onClick={logout}>
-                <LogOut className="w-3.5 h-3.5" /> Salir
+              <Button variant="outline" size="sm" className="gap-1.5 text-xs bg-destructive/10 border-destructive/40 text-destructive hover:bg-destructive hover:text-destructive-foreground" onClick={logout}>
+                <LogOut className="w-3.5 h-3.5" /> Cerrar sesión
               </Button>
             </div>
           </div>
