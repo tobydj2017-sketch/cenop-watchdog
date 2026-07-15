@@ -35,7 +35,7 @@ export default function StatDetailPanel({ statKey, services, fuelEntries, select
       case "cenop_ops":
         return <CenopOpsDetail services={dayServices} />;
       case "moviles":
-        return <MovilesDetail services={dayServices} />;
+        return <MovilesDetail services={dayServices} fuelEntries={dayFuel} />;
       case "combustible":
         return <CombustibleDetail fuelEntries={dayFuel} />;
       case "eficiencia":
