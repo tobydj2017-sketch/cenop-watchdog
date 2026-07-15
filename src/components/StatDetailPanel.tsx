@@ -390,3 +390,63 @@ function EficienciaDetail({ services }: { services: ServiceEntry[] }) {
     </div>
   );
 }
+
+function KmDetail({ services }: { services: ServiceEntry[] }) {
+  const data = useMemo(() => {
+    const map = new Map<string, { km: number; servicios: Set<string> }>();
+    services.forEach((s) => {
+      if (!s.movil) return;
+      const km = parseFloat((s.kmRecorridos || "0").replace(/,/g, ".")) || 0;
+      if (km <= 0) return;
+      const current = map.get(s.movil) || { km: 0, servicios: new Set<string>() };
+      current.km += km;
+      current.servicios.add(getServiceKey(s));
+      map.set(s.movil, current);
+    });
+    return Array.from(map.entries())
+      .map(([name, d]) => ({ name, km: Math.round(d.km), servicios: d.servicios.size }))
+      .sort((a, b) => b.km - a.km);
+  }, [services]);
+
+  const total = data.reduce((acc, d) => acc + d.km, 0);
+
+  return (
+    <div>
+      <h3 className="text-sm font-bold uppercase tracking-wider text-muted-foreground mb-4">Kilometraje Recorrido por Móvil</h3>
+      {data.length === 0 ? (
+        <p className="text-sm text-muted-foreground text-center py-8">Sin datos de kilometraje para esta fecha</p>
+      ) : (
+        <div className="grid lg:grid-cols-2 gap-4">
+          <div className="h-64">
+            <ResponsiveContainer width="100%" height="100%">
+              <BarChart data={data} layout="vertical">
+                <XAxis type="number" tick={{ fontSize: 11, fill: "hsl(var(--muted-foreground))" }} tickFormatter={(v) => `${v} km`} />
+                <YAxis type="category" dataKey="name" width={100} tick={{ fontSize: 11, fill: "hsl(var(--muted-foreground))" }} />
+                <Tooltip
+                  contentStyle={{ background: "hsl(var(--card))", border: "1px solid hsl(var(--border))", borderRadius: 8, fontSize: 12 }}
+                  formatter={(v: number) => [`${v.toLocaleString("es-AR")} km`, "Km Recorridos"]}
+                />
+                <Bar dataKey="km" name="Km Recorridos" fill="hsl(var(--primary))" radius={[0, 4, 4, 0]} />
+              </BarChart>
+            </ResponsiveContainer>
+          </div>
+          <div className="space-y-1.5 max-h-64 overflow-y-auto">
+            <div className="flex items-center justify-between px-3 py-2 rounded-lg bg-primary/10 text-sm font-bold">
+              <span>Total</span>
+              <span className="text-primary">{total.toLocaleString("es-AR")} km</span>
+            </div>
+            {data.map((d) => (
+              <div key={d.name} className="flex items-center justify-between px-3 py-2 rounded-lg bg-secondary/30 text-sm">
+                <span className="font-medium">{d.name}</span>
+                <div className="text-right">
+                  <span className="font-bold">{d.km.toLocaleString("es-AR")} km</span>
+                  <span className="text-xs text-muted-foreground ml-2">({d.servicios} serv.)</span>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
