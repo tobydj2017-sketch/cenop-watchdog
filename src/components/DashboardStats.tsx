@@ -25,6 +25,7 @@ export default function DashboardStats({ services, fuelEntries, selectedDate }: 
   const totalFuel = dayFuel.reduce((acc, f) => acc + f.monto, 0);
   const uniqueMoviles = new Set(dayServices.map((s) => s.movil).filter(Boolean)).size;
   const cenopEnOps = getCenopEnOperacionesMinutes(dayServices);
+  const totalKm = dayServices.reduce((acc, s) => acc + (parseFloat((s.kmRecorridos || "0").replace(/,/g, ".")) || 0), 0);
 
   const stats: { key: StatKey; label: string; value: string | number; icon: typeof Shield; color: string }[] = [
     { key: "servicios", label: "Servicios", value: totalServicios, icon: Shield, color: "text-primary" },
