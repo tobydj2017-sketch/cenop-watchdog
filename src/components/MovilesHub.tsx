@@ -199,16 +199,16 @@ export default function MovilesHub({ services, fuelEntries, amLightTheme, setAmL
   // ============ VISTA DETALLE ============
   if (selected && detail) {
     const { info } = detail;
-    const kpis = [
-      { label: "Kilometraje actual", value: `${num(detail.ultKm)} km`, icon: Gauge, tint: "from-sky-500/25 to-sky-500/5" },
-      { label: "KM recorridos (total)", value: `${num(detail.totalKmFuel + detail.totalKmServ)} km`, icon: Route, tint: "from-indigo-500/25 to-indigo-500/5" },
-      { label: "Gasto en combustible", value: money(detail.totalMonto), icon: DollarSign, tint: "from-emerald-500/25 to-emerald-500/5" },
-      { label: "Litros cargados", value: `${num(detail.totalLitros, 1)} L`, icon: Fuel, tint: "from-amber-500/25 to-amber-500/5" },
-      { label: "Rendimiento", value: `${num(detail.kmL, 2)} km/L`, icon: TrendingUp, tint: "from-teal-500/25 to-teal-500/5" },
-      { label: "Servicios realizados", value: num(detail.srv.length), icon: Car, tint: "from-fuchsia-500/25 to-fuchsia-500/5" },
-      { label: "Peajes acumulados", value: money(detail.peajesTotal), icon: Receipt, tint: "from-rose-500/25 to-rose-500/5" },
-
+    const kpis: { key: NonNullable<typeof drill>; label: string; value: string; icon: typeof Gauge; tint: string }[] = [
+      { key: "km", label: "Kilometraje actual", value: `${num(detail.ultKm)} km`, icon: Gauge, tint: "from-sky-500/25 to-sky-500/5" },
+      { key: "kmrec", label: "KM recorridos (total)", value: `${num(detail.totalKmFuel + detail.totalKmServ)} km`, icon: Route, tint: "from-indigo-500/25 to-indigo-500/5" },
+      { key: "gasto", label: "Gasto en combustible", value: money(detail.totalMonto), icon: DollarSign, tint: "from-emerald-500/25 to-emerald-500/5" },
+      { key: "litros", label: "Litros cargados", value: `${num(detail.totalLitros, 1)} L`, icon: Fuel, tint: "from-amber-500/25 to-amber-500/5" },
+      { key: "rend", label: "Rendimiento", value: `${num(detail.kmL, 2)} km/L`, icon: TrendingUp, tint: "from-teal-500/25 to-teal-500/5" },
+      { key: "srv", label: "Servicios realizados", value: num(detail.srv.length), icon: Car, tint: "from-fuchsia-500/25 to-fuchsia-500/5" },
+      { key: "peajes", label: "Peajes acumulados", value: money(detail.peajesTotal), icon: Receipt, tint: "from-rose-500/25 to-rose-500/5" },
     ];
+
 
     return (
       <div className="space-y-5">
