@@ -10,7 +10,7 @@ interface Props {
   selectedDate: string;
 }
 
-const STAT_KEYS = ["servicios", "productivas", "improductivas", "cenop_ops", "moviles", "combustible", "eficiencia"] as const;
+const STAT_KEYS = ["servicios", "productivas", "improductivas", "cenop_ops", "moviles", "combustible", "eficiencia", "km"] as const;
 type StatKey = typeof STAT_KEYS[number];
 
 export default function DashboardStats({ services, fuelEntries, selectedDate }: Props) {
