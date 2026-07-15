@@ -49,6 +49,8 @@ export default function MovilesHub({ services, fuelEntries, amLightTheme, setAmL
   const { user, logout } = useAuth();
   const [selected, setSelected] = useState<string>("");
   const [search, setSearch] = useState("");
+  const [drill, setDrill] = useState<null | "km" | "kmrec" | "gasto" | "litros" | "rend" | "srv" | "peajes">(null);
+
 
   const moviles = useMemo<MovilEntry[]>(() => getMoviles(), []);
   const infoByPatente = useMemo(() => new Map(moviles.map((m) => [m.patente, m])), [moviles]);
