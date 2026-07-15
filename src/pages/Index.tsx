@@ -292,6 +292,20 @@ export default function Index() {
   const dayServices = selectedDate ? visibleServices.filter((s) => s.fecha === selectedDate) : visibleServices;
   const dayFuel = selectedDate ? visibleFuel.filter((f) => f.fecha === selectedDate) : visibleFuel;
 
+  // El rol "flota" (solo lectura) accede únicamente al hub de móviles.
+  if (user?.role === "flota") {
+    return (
+      <main className="min-h-screen w-full px-4 py-6 mx-auto max-w-[1600px]">
+        <MovilesHub
+          services={services}
+          fuelEntries={fuelEntries}
+          amLightTheme={amLightTheme}
+          setAmLightTheme={setAmLightTheme}
+        />
+      </main>
+    );
+  }
+
   return (
     <SidebarProvider>
       <AppSidebar activeTab={activeTab} setActiveTab={setActiveTab} navItems={navItems} />
