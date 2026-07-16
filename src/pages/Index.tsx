@@ -4,6 +4,11 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
 import {
+  Dialog,
+  DialogContent,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import {
   Sidebar,
   SidebarContent,
   SidebarFooter,
@@ -74,6 +79,7 @@ function AppSidebar({
 }) {
   const { state } = useSidebar();
   const collapsed = state === "collapsed";
+  const [logoOpen, setLogoOpen] = useState(false);
 
   return (
     <Sidebar collapsible="icon" className="border-sidebar-border [&>[data-sidebar=sidebar]]:relative [&>[data-sidebar=sidebar]]:overflow-hidden">
@@ -103,13 +109,18 @@ function AppSidebar({
 
       <SidebarHeader className="relative z-10 p-3">
         <div className="flex items-center gap-3 rounded-lg px-2 py-2 bg-black/40 backdrop-blur-md border border-white/5">
-          <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-sidebar-primary/25 ring-1 ring-sidebar-primary/40 glow-amber overflow-hidden">
+          <button
+            type="button"
+            onClick={() => setLogoOpen(true)}
+            className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-sidebar-primary/25 ring-1 ring-sidebar-primary/40 glow-amber overflow-hidden transition-transform hover:scale-105 focus:outline-none focus:ring-2 focus:ring-sidebar-primary"
+            aria-label="Ver logo AM Seguridad"
+          >
             <img
               src={amLogoAsset.url}
               alt="AM Seguridad"
               className="h-full w-full object-contain"
             />
-          </div>
+          </button>
           {!collapsed && (
             <div className="min-w-0">
               <h1 className="text-lg font-extrabold tracking-tight text-white [text-shadow:_0_2px_6px_rgb(0_0_0_/_80%)]">
@@ -160,6 +171,20 @@ function AppSidebar({
 
 
       <SidebarRail />
+
+      <Dialog open={logoOpen} onOpenChange={setLogoOpen}>
+        <DialogContent className="fixed inset-0 z-[100] flex h-screen w-screen max-w-none translate-x-0 translate-y-0 flex-col items-center justify-center gap-6 border-0 bg-black/95 p-6 shadow-none data-[state=open]:zoom-in-0 data-[state=open]:slide-in-from-bottom-0 sm:rounded-none">
+          <DialogTitle className="sr-only">Logo AM Seguridad</DialogTitle>
+          <img
+            src={amLogoAsset.url}
+            alt="AM Seguridad"
+            className="max-h-[80vh] max-w-[90vw] object-contain drop-shadow-[0_0_40px_rgba(255,255,255,0.25)]"
+          />
+          <p className="text-sm font-medium tracking-widest text-white/80">
+            Tobias Brito AM
+          </p>
+        </DialogContent>
+      </Dialog>
     </Sidebar>
   );
 }
