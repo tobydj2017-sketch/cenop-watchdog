@@ -1,5 +1,5 @@
 import { useState, useCallback, useMemo, useEffect } from "react";
-import { Shield, CalendarDays, BarChart3, ClipboardList, Users, Building2, Download, Moon, Sun, FileText, LogOut, ShieldCheck, Car, Fuel } from "lucide-react";
+import { CalendarDays, BarChart3, ClipboardList, Users, Building2, Download, Moon, Sun, FileText, LogOut, ShieldCheck, Car, Fuel } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
@@ -34,6 +34,7 @@ import UserManager from "@/components/UserManager";
 import MovilesUnified from "@/components/MovilesUnified";
 import MovilesHub from "@/components/MovilesHub";
 
+import amLogoAsset from "@/assets/am-logo.gif.asset.json";
 import amCustodiasDoorAsset from "@/assets/am-custodias-door-400.png.asset.json";
 import amGuardPhoneAsset from "@/assets/am-guard-phone.png.asset.json";
 import amControlRoomAsset from "@/assets/am-control-room.png.asset.json";
