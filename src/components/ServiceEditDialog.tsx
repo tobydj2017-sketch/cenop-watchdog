@@ -201,11 +201,13 @@ export default function ServiceEditDialog({ service, open, onClose, onSave, exis
                 <SearchableSelect options={allPersonal} value={form.chofer} onChange={(v) => set("chofer", v)} badgeMap={roleBadgeMap} inputClassName="h-10" />
               </div>
               {renderField({ label: "Cita Chofer", field: "citaChofer", type: "time" })}
+              {renderField({ label: "Llegada tarde Chofer (min)", field: "llegadaTardeChoferMin", type: "number" })}
               <div className="space-y-1.5">
                 <Label className="text-xs font-bold uppercase tracking-wider text-muted-foreground">Custodio</Label>
                 <SearchableSelect options={allPersonal} value={form.custodio} onChange={(v) => set("custodio", v)} badgeMap={roleBadgeMap} inputClassName="h-10" />
               </div>
               {renderField({ label: "Cita Custodio", field: "citaCustodio", type: "time" })}
+              {renderField({ label: "Llegada tarde Custodio (min)", field: "llegadaTardeCustodioMin", type: "number" })}
             </div>
           </section>
 

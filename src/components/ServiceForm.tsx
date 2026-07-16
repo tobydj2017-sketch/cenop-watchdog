@@ -51,6 +51,8 @@ const defaultEntry = {
   llegadaCenopChofer: "",
   salidaCenopCustodio: "",
   llegadaCenopCustodio: "",
+  llegadaTardeChoferMin: "",
+  llegadaTardeCustodioMin: "",
 };
 
 export default function ServiceForm({ onAdd, selectedDate, existingServices }: Props) {
@@ -423,6 +425,7 @@ export default function ServiceForm({ onAdd, selectedDate, existingServices }: P
             <SearchableSelect options={allPersonal} value={form.chofer} onChange={(v) => set("chofer", v)} placeholder="Seleccionar..." badgeMap={roleBadgeMap} inputClassName="h-9 text-sm bg-background text-foreground border-input" />
           </div>
           {renderField({ label: "Cita Chofer", field: "citaChofer", type: "time" })}
+          {renderField({ label: "Llegada tarde Chofer (min)", field: "llegadaTardeChoferMin", type: "number", placeholder: "0" })}
           <div className="space-y-1.5">
             <Label className="text-sm font-bold text-background flex items-center gap-2">
               Custodio
@@ -433,6 +436,7 @@ export default function ServiceForm({ onAdd, selectedDate, existingServices }: P
             <SearchableSelect options={allPersonal} value={form.custodio} onChange={(v) => set("custodio", v)} placeholder="Seleccionar..." badgeMap={roleBadgeMap} inputClassName="h-9 text-sm bg-background text-foreground border-input" />
           </div>
           {renderField({ label: "Cita Custodio", field: "citaCustodio", type: "time" })}
+          {renderField({ label: "Llegada tarde Custodio (min)", field: "llegadaTardeCustodioMin", type: "number", placeholder: "0" })}
         </div>
       )}
 
