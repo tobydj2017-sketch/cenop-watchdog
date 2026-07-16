@@ -103,8 +103,12 @@ function AppSidebar({
 
       <SidebarHeader className="relative z-10 p-3">
         <div className="flex items-center gap-3 rounded-lg px-2 py-2 bg-black/40 backdrop-blur-md border border-white/5">
-          <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-sidebar-primary/25 ring-1 ring-sidebar-primary/40 glow-amber">
-            <Shield className="h-5 w-5 text-sidebar-primary" />
+          <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-sidebar-primary/25 ring-1 ring-sidebar-primary/40 glow-amber overflow-hidden">
+            <img
+              src={amLogoAsset.url}
+              alt="AM Seguridad"
+              className="h-full w-full object-contain"
+            />
           </div>
           {!collapsed && (
             <div className="min-w-0">
