@@ -51,6 +51,8 @@ const defaultEntry = {
   llegadaCenopChofer: "",
   salidaCenopCustodio: "",
   llegadaCenopCustodio: "",
+  llegadaTardeChoferMin: "",
+  llegadaTardeCustodioMin: "",
 };
 
 export default function ServiceForm({ onAdd, selectedDate, existingServices }: Props) {
