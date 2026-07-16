@@ -29,21 +29,29 @@ export function exportCargaDiaExcel(services: ServiceEntry[], fecha: string) {
     "Cita del Chofer",
     "Hora de Franco Chofer",
     "Total Horas Chofer",
+    "Llegada Tarde",
     "Nombre del Custodio",
     "Cita del Custodio",
     "Hora de Franco Custodio",
     "Total Horas Custodio",
+    "Llegada Tarde",
   ];
+  const fmtTarde = (v?: string) => {
+    const n = parseInt(String(v ?? "").trim(), 10);
+    return Number.isFinite(n) && n > 0 ? `${n.toString().padStart(2, "0")} minutos` : "";
+  };
   const rows = services.map((s) => [
     s.solicitud,
     s.chofer || "—",
     cleanTime(s.citaChofer) || "—",
     cleanTime(s.horaFrancoChofer) || "—",
     diffHoras(s.citaChofer, s.horaFrancoChofer),
+    fmtTarde(s.llegadaTardeChoferMin),
     s.custodio || "—",
     cleanTime(s.citaCustodio) || "—",
     cleanTime(s.horaFrancoCustodio) || "—",
     diffHoras(s.citaCustodio, s.horaFrancoCustodio),
+    fmtTarde(s.llegadaTardeCustodioMin),
   ]);
   const aoa: (string | number)[][] = [
     [`Carga del día: ${fechaLabel}`],
