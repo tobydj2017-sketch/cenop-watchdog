@@ -415,6 +415,12 @@ export default function Index() {
             fuelEntries={fuelEntries}
             onBack={() => setActiveTab("carga")}
           />
+        ) : activeTab === "planilla" ? (
+          <PlanillaDia
+            services={services}
+            onChanged={() => setServices(getServices())}
+            initialDate={selectedDate}
+          />
         ) : activeTab === "personal" ? (
           <PersonalManager />
         ) : activeTab === "clientes" ? (
