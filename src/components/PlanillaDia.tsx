@@ -309,7 +309,7 @@ export default function PlanillaDia({ services, onChanged, initialDate }: Props)
               <Th w={100}>Remito</Th>
               <Th w={100}>Continúa</Th>
               <Th w={180}>Observaciones</Th>
-              <Th w={70}></Th>
+              <Th w={70}>{" "}</Th>
             </tr>
           </thead>
           <tbody>
