@@ -1,5 +1,5 @@
 import { useState, useCallback, useMemo, useEffect } from "react";
-import { CalendarDays, BarChart3, ClipboardList, Users, Building2, Download, Moon, Sun, FileText, LogOut, ShieldCheck, Car, Fuel } from "lucide-react";
+import { CalendarDays, BarChart3, ClipboardList, Users, Building2, Download, Moon, Sun, FileText, LogOut, ShieldCheck, Car, Fuel, Grid3x3 } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
@@ -38,6 +38,7 @@ import MovilesManager from "@/components/MovilesManager";
 import UserManager from "@/components/UserManager";
 import MovilesUnified from "@/components/MovilesUnified";
 import MovilesHub from "@/components/MovilesHub";
+import PlanillaDia from "@/components/PlanillaDia";
 
 import amLogoAsset from "@/assets/am-logo.gif.asset.json";
 import amCustodiasDoorAsset from "@/assets/am-custodias-door-400.png.asset.json";
@@ -55,10 +56,11 @@ import { exportCargaDiaExcel } from "@/lib/excelExport";
 import { useAuth } from "@/lib/authContext";
 import { isOwnService } from "@/lib/authStore";
 
-type AppTab = "carga" | "dashboard" | "personal" | "clientes" | "moviles" | "flota" | "reportes" | "usuarios";
+type AppTab = "carga" | "planilla" | "dashboard" | "personal" | "clientes" | "moviles" | "flota" | "reportes" | "usuarios";
 
 const ALL_NAV_ITEMS = [
   { key: "carga", label: "Carga de Datos", icon: ClipboardList, perm: null },
+  { key: "planilla", label: "Planilla del Día", icon: Grid3x3, perm: "createServices" as const },
   { key: "dashboard", label: "Panel de Análisis", icon: BarChart3, perm: "viewDashboard" as const },
   { key: "personal", label: "Personal", icon: Users, perm: "managePersonal" as const },
   { key: "clientes", label: "Clientes", icon: Building2, perm: "manageClients" as const },
@@ -412,6 +414,12 @@ export default function Index() {
             services={cleanServices}
             fuelEntries={fuelEntries}
             onBack={() => setActiveTab("carga")}
+          />
+        ) : activeTab === "planilla" ? (
+          <PlanillaDia
+            services={services}
+            onChanged={() => setServices(getServices())}
+            initialDate={selectedDate}
           />
         ) : activeTab === "personal" ? (
           <PersonalManager />
