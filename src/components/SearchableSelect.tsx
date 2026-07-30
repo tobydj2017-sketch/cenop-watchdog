@@ -1,4 +1,5 @@
 import { useState, useRef, useEffect } from "react";
+import { createPortal } from "react-dom";
 import { Input } from "@/components/ui/input";
 import { cn } from "@/lib/utils";
 import { ChevronDown, X } from "lucide-react";
@@ -12,11 +13,14 @@ interface Props {
   inputClassName?: string;
   dropdownClassName?: string;
   badgeMap?: Record<string, string>;
+  /** Render the dropdown in a portal (needed inside scrollable/overflow containers) */
+  portal?: boolean;
 }
 
-export default function SearchableSelect({ options, value, onChange, placeholder, className, inputClassName, dropdownClassName, badgeMap }: Props) {
+export default function SearchableSelect({ options, value, onChange, placeholder, className, inputClassName, dropdownClassName, badgeMap, portal }: Props) {
   const [open, setOpen] = useState(false);
   const [search, setSearch] = useState("");
+  const [rect, setRect] = useState<{ top: number; left: number; width: number } | null>(null);
   const ref = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -27,12 +31,67 @@ export default function SearchableSelect({ options, value, onChange, placeholder
     return () => document.removeEventListener("mousedown", handler);
   }, []);
 
+  useEffect(() => {
+    if (!portal || !open) return;
+    const update = () => {
+      const el = ref.current;
+      if (!el) return;
+      const r = el.getBoundingClientRect();
+      setRect({ top: r.bottom + 4, left: r.left, width: Math.max(r.width, 180) });
+    };
+    update();
+    window.addEventListener("scroll", update, true);
+    window.addEventListener("resize", update);
+    return () => {
+      window.removeEventListener("scroll", update, true);
+      window.removeEventListener("resize", update);
+    };
+  }, [portal, open]);
+
   const filtered = options.filter((o) =>
     o.toLowerCase().includes((open ? search : "").toLowerCase())
   );
 
+  const list = (
+    <div
+      className={cn(
+        "max-h-48 overflow-auto rounded-md border border-border bg-popover text-popover-foreground shadow-md",
+        portal ? "fixed z-[100]" : "absolute z-50 mt-1 w-full",
+        dropdownClassName
+      )}
+      style={portal && rect ? { top: rect.top, left: rect.left, width: rect.width } : undefined}
+    >
+      {filtered.length === 0 ? (
+        <div className="px-3 py-2 text-xs text-muted-foreground">Sin resultados</div>
+      ) : (
+        filtered.map((opt) => (
+          <div
+            key={opt}
+            className={cn(
+              "px-3 py-1.5 text-sm cursor-pointer hover:bg-accent hover:text-accent-foreground flex items-center justify-between",
+              opt === value && "bg-accent/50"
+            )}
+            onMouseDown={(e) => {
+              e.preventDefault();
+              onChange(opt);
+              setOpen(false);
+            }}
+          >
+            <span className="truncate">{opt}</span>
+            {badgeMap?.[opt] && (
+              <span className="ml-2 px-1.5 py-0.5 rounded text-[10px] font-bold bg-purple-500/20 text-purple-400 border border-purple-500/30">
+                {badgeMap[opt]}
+              </span>
+            )}
+          </div>
+        ))
+      )}
+    </div>
+  );
+
   return (
     <div ref={ref} className={cn("relative", className)}>
+
       <div className="relative">
         <Input
           value={open ? search : value}
