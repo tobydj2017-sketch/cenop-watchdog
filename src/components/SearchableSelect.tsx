@@ -106,6 +106,17 @@ export default function SearchableSelect({ options, value, onChange, placeholder
             setOpen(true);
             setSearch("");
           }}
+          onKeyDown={(e) => {
+            if (e.key === "Enter") {
+              e.preventDefault();
+              const pick = open && search ? filtered[0] : undefined;
+              if (pick) onChange(pick);
+              setOpen(false);
+              onSelect?.();
+            } else if (e.key === "Escape") {
+              setOpen(false);
+            }
+          }}
           placeholder={placeholder}
           className={cn("h-9 text-sm pr-14", inputClassName)}
         />
