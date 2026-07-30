@@ -24,6 +24,7 @@ export default function SearchableSelect({ options, value, onChange, placeholder
   const [search, setSearch] = useState("");
   const [rect, setRect] = useState<{ top: number; left: number; width: number } | null>(null);
   const ref = useRef<HTMLDivElement>(null);
+  const inputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
     const handler = (e: MouseEvent) => {
@@ -76,7 +77,9 @@ export default function SearchableSelect({ options, value, onChange, placeholder
             onMouseDown={(e) => {
               e.preventDefault();
               onChange(opt);
+              setSearch("");
               setOpen(false);
+              inputRef.current?.blur();
               onSelect?.();
             }}
           >
@@ -97,6 +100,7 @@ export default function SearchableSelect({ options, value, onChange, placeholder
 
       <div className="relative">
         <Input
+          ref={inputRef}
           value={open ? search : value}
           onChange={(e) => {
             setSearch(e.target.value);
