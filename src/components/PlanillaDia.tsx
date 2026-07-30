@@ -461,7 +461,7 @@ export default function PlanillaDia({ services, onChanged, initialDate }: Props)
                   <TdSelect value={r.custodio} options={custodios} onChange={(v) => updateRow(r.id, { custodio: v })} highlight={overlapCu} onAdvance={focusNext} />
                   <TdTime value={r.citaCustodio} onChange={(v) => updateRow(r.id, { citaCustodio: v })} onAdvance={focusNext} />
                   <TdSelect value={r.movil} options={moviles} onChange={(v) => updateRow(r.id, { movil: v })} highlight={overlapMv} onAdvance={focusNext} />
-                  <TdText value={r.celular} onChange={(v) => updateRow(r.id, { celular: v })} onAdvance={focusNext} />
+                  <TdSelect value={r.celular} options={celulares} onChange={(v) => updateRow(r.id, { celular: v })} onAdvance={focusNext} />
                   <TdTime value={r.salidaCenop} onChange={(v) => updateRow(r.id, { salidaCenop: v })} onAdvance={focusNext} />
                   <TdTime value={r.llegadaServicio} onChange={(v) => updateRow(r.id, { llegadaServicio: v })} onAdvance={focusNext} />
                   <TdTime value={r.iniciaServicio} onChange={(v) => updateRow(r.id, { iniciaServicio: v })} onAdvance={focusNext} />
