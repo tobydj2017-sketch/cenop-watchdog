@@ -137,10 +137,14 @@ export default function PlanillaDia({ services, onChanged, initialDate }: Props)
       });
       const existingIds = new Set(asDrafts.map((s) => s.id));
       const kept = prev.filter((r) => !existingIds.has(r.id) && r.fecha === fecha);
+      // Mantener el orden que ya está en pantalla: las filas no deben saltar mientras se carga
+      const prevOrder = new Map(prev.map((r, i) => [r.id, i]));
+      asDrafts.sort((a, b) => (prevOrder.get(a.id) ?? 9999) - (prevOrder.get(b.id) ?? 9999));
       const merged = [...asDrafts, ...kept];
       if (merged.length === 0) return [emptyDraft(fecha, 1)];
       return merged;
     });
+
   }, [fecha, services]);
 
   // Al desmontar, limpio timers de UI (los datos ya están guardados en el instante)
@@ -420,18 +424,50 @@ function Th({ children, w }: { children: React.ReactNode; w: number }) {
   );
 }
 
+/**
+ * Input de texto con estado local: mientras se escribe nada externo puede pisar
+ * el texto. Se confirma (y guarda) al salir del casillero, al presionar Enter
+ * y también automáticamente 700 ms después de dejar de tipear.
+ */
 function TdText({ value, onChange, numeric }: { value: string; onChange: (v: string) => void; numeric?: boolean }) {
+  const [local, setLocal] = useState(value);
+  const [focused, setFocused] = useState(false);
+  const timer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const localRef = useRef(value);
+  localRef.current = local;
+
+  // Solo aceptar valores externos cuando el usuario no está escribiendo acá
+  useEffect(() => {
+    if (!focused) setLocal(value);
+  }, [value, focused]);
+
+  useEffect(() => () => { if (timer.current) clearTimeout(timer.current); }, []);
+
+  const commit = (v: string) => {
+    if (timer.current) { clearTimeout(timer.current); timer.current = null; }
+    if (v !== value) onChange(v);
+  };
+
   return (
     <td className="px-1 py-1">
       <input
-        value={value}
-        onChange={(e) => onChange(numeric ? e.target.value.replace(/[^\d.]/g, "") : e.target.value)}
+        value={local}
+        onFocus={() => setFocused(true)}
+        onChange={(e) => {
+          const v = numeric ? e.target.value.replace(/[^\d.]/g, "") : e.target.value;
+          setLocal(v);
+          if (timer.current) clearTimeout(timer.current);
+          timer.current = setTimeout(() => commit(localRef.current), 700);
+        }}
+        onBlur={() => { setFocused(false); commit(localRef.current); }}
+        onKeyDown={(e) => { if (e.key === "Enter") commit(localRef.current); }}
         className="w-full h-8 rounded border border-input bg-background px-2 text-xs focus:outline-none focus:ring-1 focus:ring-ring"
         inputMode={numeric ? "numeric" : undefined}
       />
     </td>
   );
 }
+
 
 function TdTime({ value, onChange }: { value: string; onChange: (v: string) => void }) {
   return (
