@@ -329,7 +329,7 @@ export default function PlanillaDia({ services, onChanged, initialDate }: Props)
       )}
 
       {/* Grilla */}
-      <div className="glass-card overflow-auto min-h-[400px] max-h-[calc(100vh-260px)]">
+      <div ref={gridRef} className="glass-card overflow-auto min-h-[400px] max-h-[calc(100vh-260px)]">
         <table className="text-xs border-collapse" style={{ minWidth: "3000px" }}>
           <thead className="sticky top-0 z-20 bg-card">
             <tr className="border-b border-border">
