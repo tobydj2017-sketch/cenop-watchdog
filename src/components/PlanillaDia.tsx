@@ -290,6 +290,54 @@ export default function PlanillaDia({ services, onChanged, initialDate }: Props)
     onChanged();
   }, [persistNow, onChanged]);
 
+  // ---- Selección / copiar / pegar filas ----
+  const [selected, setSelected] = useState<Set<string>>(new Set());
+  const [clipboard, setClipboard] = useState<Draft[]>([]);
+
+  const toggleSelect = useCallback((id: string) => {
+    setSelected((prev) => {
+      const n = new Set(prev);
+      n.has(id) ? n.delete(id) : n.add(id);
+      return n;
+    });
+  }, []);
+
+  const allSelected = rows.length > 0 && rows.every((r) => selected.has(r.id));
+  const toggleSelectAll = () => {
+    setSelected(allSelected ? new Set() : new Set(rows.map((r) => r.id)));
+  };
+
+  const copiarSeleccion = () => {
+    const sel = rowsRef.current.filter((r) => selected.has(r.id));
+    if (sel.length === 0) return;
+    setClipboard(sel.map((r) => ({ ...r })));
+  };
+
+  const pegarFilas = () => {
+    if (clipboard.length === 0) return;
+    const nuevas: Draft[] = clipboard.map((src, idx) => ({
+      ...src,
+      id: generateId(),
+      fecha,
+      solicitud: rowsRef.current.length + idx + 1,
+      remito: "",
+      ordenCarga: "",
+      kmSalida: "",
+      kmLlegada: "",
+      kmRecorridos: "",
+      _persisted: false,
+      _saveStatus: "idle",
+    }));
+    rowsRef.current = [...rowsRef.current, ...nuevas];
+    setRows(rowsRef.current);
+    nuevas.forEach((n) => {
+      lastEdit.current[n.id] = Date.now();
+      persistNow(n);
+    });
+    onChanged();
+  };
+
+
   return (
     <div className="space-y-3">
       {/* Encabezado con controles y stats */}
