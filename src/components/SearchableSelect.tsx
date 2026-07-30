@@ -15,9 +15,11 @@ interface Props {
   badgeMap?: Record<string, string>;
   /** Render the dropdown in a portal (needed inside scrollable/overflow containers) */
   portal?: boolean;
+  /** Se dispara al confirmar una opción (clic o Enter) — útil para saltar al siguiente casillero */
+  onSelect?: () => void;
 }
 
-export default function SearchableSelect({ options, value, onChange, placeholder, className, inputClassName, dropdownClassName, badgeMap, portal }: Props) {
+export default function SearchableSelect({ options, value, onChange, placeholder, className, inputClassName, dropdownClassName, badgeMap, portal, onSelect }: Props) {
   const [open, setOpen] = useState(false);
   const [search, setSearch] = useState("");
   const [rect, setRect] = useState<{ top: number; left: number; width: number } | null>(null);
@@ -75,6 +77,7 @@ export default function SearchableSelect({ options, value, onChange, placeholder
               e.preventDefault();
               onChange(opt);
               setOpen(false);
+              onSelect?.();
             }}
           >
             <span className="truncate">{opt}</span>
@@ -102,6 +105,17 @@ export default function SearchableSelect({ options, value, onChange, placeholder
           onFocus={() => {
             setOpen(true);
             setSearch("");
+          }}
+          onKeyDown={(e) => {
+            if (e.key === "Enter") {
+              e.preventDefault();
+              const pick = open && search ? filtered[0] : undefined;
+              if (pick) onChange(pick);
+              setOpen(false);
+              onSelect?.();
+            } else if (e.key === "Escape") {
+              setOpen(false);
+            }
           }}
           placeholder={placeholder}
           className={cn("h-9 text-sm pr-14", inputClassName)}

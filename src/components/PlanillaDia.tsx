@@ -262,6 +262,34 @@ export default function PlanillaDia({ services, onChanged, initialDate }: Props)
   const anySaving = rows.some((r) => r._saveStatus === "saving");
   const anyError = rows.some((r) => r._saveStatus === "error");
 
+  // ---- Navegación automática entre casilleros ----
+  const gridRef = useRef<HTMLDivElement>(null);
+  const saveRef = useRef<HTMLButtonElement>(null);
+
+  const focusNext = useCallback((from: HTMLElement | null) => {
+    const root = gridRef.current;
+    if (!root || !from) return;
+    const cells = Array.from(root.querySelectorAll<HTMLElement>("td[data-cell]"));
+    const td = (from.closest?.("td[data-cell]") as HTMLElement | null) ?? from;
+    const idx = cells.indexOf(td);
+    for (let i = idx + 1; i < cells.length; i++) {
+      const inp = cells[i].querySelector<HTMLInputElement>("input:not([disabled])");
+      if (inp) {
+        inp.focus();
+        inp.select?.();
+        inp.scrollIntoView({ block: "nearest", inline: "nearest" });
+        return;
+      }
+    }
+    saveRef.current?.focus();
+    saveRef.current?.scrollIntoView({ block: "nearest" });
+  }, []);
+
+  const guardarTodo = useCallback(() => {
+    rowsRef.current.forEach((r) => persistNow(r));
+    onChanged();
+  }, [persistNow, onChanged]);
+
   return (
     <div className="space-y-3">
       {/* Encabezado con controles y stats */}
@@ -301,7 +329,7 @@ export default function PlanillaDia({ services, onChanged, initialDate }: Props)
       )}
 
       {/* Grilla */}
-      <div className="glass-card overflow-auto min-h-[400px] max-h-[calc(100vh-260px)]">
+      <div ref={gridRef} className="glass-card overflow-auto min-h-[400px] max-h-[calc(100vh-260px)]">
         <table className="text-xs border-collapse" style={{ minWidth: "3000px" }}>
           <thead className="sticky top-0 z-20 bg-card">
             <tr className="border-b border-border">
@@ -357,31 +385,31 @@ export default function PlanillaDia({ services, onChanged, initialDate }: Props)
                       <div className="text-[9px] text-destructive" title={r._error}>!</div>
                     )}
                   </td>
-                  <TdTime value={r.horaSolicitud} onChange={(v) => updateRow(r.id, { horaSolicitud: v })} />
-                  <TdSelect value={r.cliente} options={clientes} onChange={(v) => updateRow(r.id, { cliente: v })} />
-                  <TdText value={r.lugarSalida} onChange={(v) => updateRow(r.id, { lugarSalida: v })} />
-                  <TdText value={r.destino} onChange={(v) => updateRow(r.id, { destino: v })} />
-                  <TdSelect value={r.chofer} options={choferes} onChange={(v) => updateRow(r.id, { chofer: v })} highlight={overlapCh} />
-                  <TdTime value={r.citaChofer} onChange={(v) => updateRow(r.id, { citaChofer: v })} />
-                  <TdSelect value={r.custodio} options={custodios} onChange={(v) => updateRow(r.id, { custodio: v })} highlight={overlapCu} />
-                  <TdTime value={r.citaCustodio} onChange={(v) => updateRow(r.id, { citaCustodio: v })} />
-                  <TdSelect value={r.movil} options={moviles} onChange={(v) => updateRow(r.id, { movil: v })} highlight={overlapMv} />
-                  <TdText value={r.celular} onChange={(v) => updateRow(r.id, { celular: v })} />
-                  <TdTime value={r.salidaCenop} onChange={(v) => updateRow(r.id, { salidaCenop: v })} />
-                  <TdTime value={r.llegadaServicio} onChange={(v) => updateRow(r.id, { llegadaServicio: v })} />
-                  <TdTime value={r.iniciaServicio} onChange={(v) => updateRow(r.id, { iniciaServicio: v })} />
-                  <TdTime value={r.llegadaDestino} onChange={(v) => updateRow(r.id, { llegadaDestino: v })} />
-                  <TdTime value={r.finalizaServicio} onChange={(v) => updateRow(r.id, { finalizaServicio: v })} />
-                  <TdTime value={r.llegadaCenop} onChange={(v) => updateRow(r.id, { llegadaCenop: v })} />
-                  <TdTime value={r.horaFrancoChofer} onChange={(v) => updateRow(r.id, { horaFrancoChofer: v })} />
-                  <TdTime value={r.horaFrancoCustodio} onChange={(v) => updateRow(r.id, { horaFrancoCustodio: v })} />
-                  <TdText value={r.kmSalida || ""} onChange={(v) => updateRow(r.id, { kmSalida: v })} numeric />
-                  <TdText value={r.kmLlegada || ""} onChange={(v) => updateRow(r.id, { kmLlegada: v })} numeric />
+                  <TdTime value={r.horaSolicitud} onChange={(v) => updateRow(r.id, { horaSolicitud: v })} onAdvance={focusNext} />
+                  <TdSelect value={r.cliente} options={clientes} onChange={(v) => updateRow(r.id, { cliente: v })} onAdvance={focusNext} />
+                  <TdText value={r.lugarSalida} onChange={(v) => updateRow(r.id, { lugarSalida: v })} onAdvance={focusNext} />
+                  <TdText value={r.destino} onChange={(v) => updateRow(r.id, { destino: v })} onAdvance={focusNext} />
+                  <TdSelect value={r.chofer} options={choferes} onChange={(v) => updateRow(r.id, { chofer: v })} highlight={overlapCh} onAdvance={focusNext} />
+                  <TdTime value={r.citaChofer} onChange={(v) => updateRow(r.id, { citaChofer: v })} onAdvance={focusNext} />
+                  <TdSelect value={r.custodio} options={custodios} onChange={(v) => updateRow(r.id, { custodio: v })} highlight={overlapCu} onAdvance={focusNext} />
+                  <TdTime value={r.citaCustodio} onChange={(v) => updateRow(r.id, { citaCustodio: v })} onAdvance={focusNext} />
+                  <TdSelect value={r.movil} options={moviles} onChange={(v) => updateRow(r.id, { movil: v })} highlight={overlapMv} onAdvance={focusNext} />
+                  <TdText value={r.celular} onChange={(v) => updateRow(r.id, { celular: v })} onAdvance={focusNext} />
+                  <TdTime value={r.salidaCenop} onChange={(v) => updateRow(r.id, { salidaCenop: v })} onAdvance={focusNext} />
+                  <TdTime value={r.llegadaServicio} onChange={(v) => updateRow(r.id, { llegadaServicio: v })} onAdvance={focusNext} />
+                  <TdTime value={r.iniciaServicio} onChange={(v) => updateRow(r.id, { iniciaServicio: v })} onAdvance={focusNext} />
+                  <TdTime value={r.llegadaDestino} onChange={(v) => updateRow(r.id, { llegadaDestino: v })} onAdvance={focusNext} />
+                  <TdTime value={r.finalizaServicio} onChange={(v) => updateRow(r.id, { finalizaServicio: v })} onAdvance={focusNext} />
+                  <TdTime value={r.llegadaCenop} onChange={(v) => updateRow(r.id, { llegadaCenop: v })} onAdvance={focusNext} />
+                  <TdTime value={r.horaFrancoChofer} onChange={(v) => updateRow(r.id, { horaFrancoChofer: v })} onAdvance={focusNext} />
+                  <TdTime value={r.horaFrancoCustodio} onChange={(v) => updateRow(r.id, { horaFrancoCustodio: v })} onAdvance={focusNext} />
+                  <TdText value={r.kmSalida || ""} onChange={(v) => updateRow(r.id, { kmSalida: v })} numeric onAdvance={focusNext} />
+                  <TdText value={r.kmLlegada || ""} onChange={(v) => updateRow(r.id, { kmLlegada: v })} numeric onAdvance={focusNext} />
                   <td className="px-2 py-1 font-mono text-muted-foreground text-center">{kmRec || "—"}</td>
-                  <TdText value={r.ordenCarga} onChange={(v) => updateRow(r.id, { ordenCarga: v })} />
-                  <TdText value={r.remito} onChange={(v) => updateRow(r.id, { remito: v })} />
-                  <TdText value={r.continuaOrden} onChange={(v) => updateRow(r.id, { continuaOrden: v })} />
-                  <TdText value={r.observaciones} onChange={(v) => updateRow(r.id, { observaciones: v })} />
+                  <TdText value={r.ordenCarga} onChange={(v) => updateRow(r.id, { ordenCarga: v })} onAdvance={focusNext} />
+                  <TdText value={r.remito} onChange={(v) => updateRow(r.id, { remito: v })} onAdvance={focusNext} />
+                  <TdText value={r.continuaOrden} onChange={(v) => updateRow(r.id, { continuaOrden: v })} onAdvance={focusNext} />
+                  <TdText value={r.observaciones} onChange={(v) => updateRow(r.id, { observaciones: v })} onAdvance={focusNext} />
                   <td className="px-1 py-1">
                     <div className="flex gap-1">
                       <button
@@ -409,9 +437,15 @@ export default function PlanillaDia({ services, onChanged, initialDate }: Props)
         </table>
       </div>
 
-      <div className="text-[11px] text-muted-foreground italic px-1">
-        Cada dato (hora, cliente, chofer…) se guarda <b>al instante</b> al escribirlo y se sincroniza con Azure automáticamente. El N° final se reasigna por orden de <b>Hora de Solicitud</b>.
+      <div className="flex items-center gap-3 px-1">
+        <Button ref={saveRef} onClick={guardarTodo} className="gap-2">
+          <Save className="w-4 h-4" /> Guardar planilla
+        </Button>
+        <span className="text-[11px] text-muted-foreground italic">
+          Cada dato (hora, cliente, chofer…) se guarda <b>al instante</b> al escribirlo y se sincroniza con Azure automáticamente. Al completar una hora o presionar <b>Enter</b> el cursor salta solo al siguiente casillero.
+        </span>
       </div>
+
     </div>
   );
 }
@@ -429,7 +463,9 @@ function Th({ children, w }: { children: React.ReactNode; w: number }) {
  * el texto. Se confirma (y guarda) al salir del casillero, al presionar Enter
  * y también automáticamente 700 ms después de dejar de tipear.
  */
-function TdText({ value, onChange, numeric }: { value: string; onChange: (v: string) => void; numeric?: boolean }) {
+type Advance = (from: HTMLElement) => void;
+
+function TdText({ value, onChange, numeric, onAdvance }: { value: string; onChange: (v: string) => void; numeric?: boolean; onAdvance?: Advance }) {
   const [local, setLocal] = useState(value);
   const [focused, setFocused] = useState(false);
   const timer = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -449,7 +485,7 @@ function TdText({ value, onChange, numeric }: { value: string; onChange: (v: str
   };
 
   return (
-    <td className="px-1 py-1">
+    <td className="px-1 py-1" data-cell>
       <input
         value={local}
         onFocus={() => setFocused(true)}
@@ -460,7 +496,13 @@ function TdText({ value, onChange, numeric }: { value: string; onChange: (v: str
           timer.current = setTimeout(() => commit(localRef.current), 700);
         }}
         onBlur={() => { setFocused(false); commit(localRef.current); }}
-        onKeyDown={(e) => { if (e.key === "Enter") commit(localRef.current); }}
+        onKeyDown={(e) => {
+          if (e.key === "Enter") {
+            e.preventDefault();
+            commit(localRef.current);
+            onAdvance?.(e.currentTarget);
+          }
+        }}
         className="w-full h-8 rounded border border-input bg-background px-2 text-xs focus:outline-none focus:ring-1 focus:ring-ring"
         inputMode={numeric ? "numeric" : undefined}
       />
@@ -469,21 +511,35 @@ function TdText({ value, onChange, numeric }: { value: string; onChange: (v: str
 }
 
 
-function TdTime({ value, onChange }: { value: string; onChange: (v: string) => void }) {
+function TdTime({ value, onChange, onAdvance }: { value: string; onChange: (v: string) => void; onAdvance?: Advance }) {
+  const tdRef = useRef<HTMLTableCellElement>(null);
+  const advance = () => { if (tdRef.current) onAdvance?.(tdRef.current); };
   return (
-    <td className="px-1 py-1">
-      <TimeInput value={value} onChange={onChange} className="h-8 text-xs px-1 tracking-normal" />
+    <td
+      className="px-1 py-1"
+      data-cell
+      ref={tdRef}
+      onKeyDown={(e) => {
+        if (e.key === "Enter") {
+          e.preventDefault();
+          advance();
+        }
+      }}
+    >
+      <TimeInput value={value} onChange={onChange} onComplete={advance} className="h-8 text-xs px-1 tracking-normal" />
     </td>
   );
 }
 
-function TdSelect({ value, options, onChange, highlight }: { value: string; options: string[]; onChange: (v: string) => void; highlight?: boolean }) {
+function TdSelect({ value, options, onChange, highlight, onAdvance }: { value: string; options: string[]; onChange: (v: string) => void; highlight?: boolean; onAdvance?: Advance }) {
+  const tdRef = useRef<HTMLTableCellElement>(null);
   return (
-    <td className={`px-1 py-1 ${highlight ? "bg-amber-500/25" : ""}`}>
+    <td className={`px-1 py-1 ${highlight ? "bg-amber-500/25" : ""}`} data-cell ref={tdRef}>
       <SearchableSelect
         value={value}
         options={options}
         onChange={onChange}
+        onSelect={() => { if (tdRef.current) onAdvance?.(tdRef.current); }}
         portal
         inputClassName="h-8 text-xs"
       />
