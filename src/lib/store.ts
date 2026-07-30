@@ -128,7 +128,8 @@ export function saveFuelEntries(entries: FuelEntry[]) {
       BLOB_KEYS.fuel,
       () => JSON.parse(localStorage.getItem(FUEL_KEY) || "[]"),
       (merged) => {
-        const finalList = merged.filter((f) => !isLegacy(f.fecha));
+        const finalList = mergeKeepingLocal(merged, readLocal<FuelEntry>(FUEL_KEY)).filter((f) => !isLegacy(f.fecha));
+
         localStorage.setItem(FUEL_KEY, JSON.stringify(finalList));
         window.dispatchEvent(new Event("cenop:fuel-synced"));
       },
