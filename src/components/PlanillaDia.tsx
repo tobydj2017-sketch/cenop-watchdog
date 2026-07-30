@@ -437,9 +437,15 @@ export default function PlanillaDia({ services, onChanged, initialDate }: Props)
         </table>
       </div>
 
-      <div className="text-[11px] text-muted-foreground italic px-1">
-        Cada dato (hora, cliente, chofer…) se guarda <b>al instante</b> al escribirlo y se sincroniza con Azure automáticamente. El N° final se reasigna por orden de <b>Hora de Solicitud</b>.
+      <div className="flex items-center gap-3 px-1">
+        <Button ref={saveRef} onClick={guardarTodo} className="gap-2">
+          <Save className="w-4 h-4" /> Guardar planilla
+        </Button>
+        <span className="text-[11px] text-muted-foreground italic">
+          Cada dato (hora, cliente, chofer…) se guarda <b>al instante</b> al escribirlo y se sincroniza con Azure automáticamente. Al completar una hora o presionar <b>Enter</b> el cursor salta solo al siguiente casillero.
+        </span>
       </div>
+
     </div>
   );
 }
