@@ -59,9 +59,11 @@ export default function SearchableSelect({ options, value, onChange, placeholder
     <div
       className={cn(
         "max-h-48 overflow-auto rounded-md border border-border bg-popover text-popover-foreground shadow-md",
-        "fixed z-[200]",
+        "fixed z-[200] pointer-events-auto",
         dropdownClassName
       )}
+      onPointerDownCapture={(e) => e.stopPropagation()}
+      onMouseDownCapture={(e) => e.stopPropagation()}
       style={rect ? { top: rect.top, left: rect.left, width: rect.width } : { visibility: "hidden" }}
     >
       {filtered.length === 0 ? (
