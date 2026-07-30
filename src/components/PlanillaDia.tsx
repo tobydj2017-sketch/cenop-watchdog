@@ -463,7 +463,9 @@ function Th({ children, w }: { children: React.ReactNode; w: number }) {
  * el texto. Se confirma (y guarda) al salir del casillero, al presionar Enter
  * y también automáticamente 700 ms después de dejar de tipear.
  */
-function TdText({ value, onChange, numeric }: { value: string; onChange: (v: string) => void; numeric?: boolean }) {
+type Advance = (from: HTMLElement) => void;
+
+function TdText({ value, onChange, numeric, onAdvance }: { value: string; onChange: (v: string) => void; numeric?: boolean; onAdvance?: Advance }) {
   const [local, setLocal] = useState(value);
   const [focused, setFocused] = useState(false);
   const timer = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -483,7 +485,7 @@ function TdText({ value, onChange, numeric }: { value: string; onChange: (v: str
   };
 
   return (
-    <td className="px-1 py-1">
+    <td className="px-1 py-1" data-cell>
       <input
         value={local}
         onFocus={() => setFocused(true)}
@@ -494,7 +496,13 @@ function TdText({ value, onChange, numeric }: { value: string; onChange: (v: str
           timer.current = setTimeout(() => commit(localRef.current), 700);
         }}
         onBlur={() => { setFocused(false); commit(localRef.current); }}
-        onKeyDown={(e) => { if (e.key === "Enter") commit(localRef.current); }}
+        onKeyDown={(e) => {
+          if (e.key === "Enter") {
+            e.preventDefault();
+            commit(localRef.current);
+            onAdvance?.(e.currentTarget);
+          }
+        }}
         className="w-full h-8 rounded border border-input bg-background px-2 text-xs focus:outline-none focus:ring-1 focus:ring-ring"
         inputMode={numeric ? "numeric" : undefined}
       />
@@ -503,21 +511,35 @@ function TdText({ value, onChange, numeric }: { value: string; onChange: (v: str
 }
 
 
-function TdTime({ value, onChange }: { value: string; onChange: (v: string) => void }) {
+function TdTime({ value, onChange, onAdvance }: { value: string; onChange: (v: string) => void; onAdvance?: Advance }) {
+  const tdRef = useRef<HTMLTableCellElement>(null);
+  const advance = () => { if (tdRef.current) onAdvance?.(tdRef.current); };
   return (
-    <td className="px-1 py-1">
-      <TimeInput value={value} onChange={onChange} className="h-8 text-xs px-1 tracking-normal" />
+    <td
+      className="px-1 py-1"
+      data-cell
+      ref={tdRef}
+      onKeyDown={(e) => {
+        if (e.key === "Enter") {
+          e.preventDefault();
+          advance();
+        }
+      }}
+    >
+      <TimeInput value={value} onChange={onChange} onComplete={advance} className="h-8 text-xs px-1 tracking-normal" />
     </td>
   );
 }
 
-function TdSelect({ value, options, onChange, highlight }: { value: string; options: string[]; onChange: (v: string) => void; highlight?: boolean }) {
+function TdSelect({ value, options, onChange, highlight, onAdvance }: { value: string; options: string[]; onChange: (v: string) => void; highlight?: boolean; onAdvance?: Advance }) {
+  const tdRef = useRef<HTMLTableCellElement>(null);
   return (
-    <td className={`px-1 py-1 ${highlight ? "bg-amber-500/25" : ""}`}>
+    <td className={`px-1 py-1 ${highlight ? "bg-amber-500/25" : ""}`} data-cell ref={tdRef}>
       <SearchableSelect
         value={value}
         options={options}
         onChange={onChange}
+        onSelect={() => { if (tdRef.current) onAdvance?.(tdRef.current); }}
         portal
         inputClassName="h-8 text-xs"
       />
