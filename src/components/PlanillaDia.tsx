@@ -476,14 +476,7 @@ export default function PlanillaDia({ services, onChanged, initialDate }: Props)
                         title="Seleccionar fila"
                         className="w-4 h-4 accent-primary cursor-pointer"
                       />
-                      <button
-                        onClick={() => duplicateRow(r.id)}
-                        className="p-1 rounded hover:bg-secondary text-muted-foreground hover:text-foreground"
-                        title="Duplicar fila"
-                        type="button"
-                      >
-                        <Copy className="w-3.5 h-3.5" />
-                      </button>
+                      
                       <button
                         onClick={() => removeRow(r.id)}
                         className="p-1 rounded hover:bg-destructive/20 text-muted-foreground hover:text-destructive"
