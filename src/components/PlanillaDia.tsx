@@ -363,9 +363,16 @@ export default function PlanillaDia({ services, onChanged, initialDate }: Props)
           {anySaving && <span className="text-xs text-amber-400 flex items-center gap-1"><Save className="w-3.5 h-3.5 animate-pulse" /> Guardando…</span>}
           {!anySaving && !anyError && <span className="text-xs text-emerald-400 flex items-center gap-1"><Check className="w-3.5 h-3.5" /> Sincronizado</span>}
           {anyError && <span className="text-xs text-destructive flex items-center gap-1"><AlertTriangle className="w-3.5 h-3.5" /> Error al guardar</span>}
+          <Button size="sm" variant="outline" onClick={copiarSeleccion} disabled={selected.size === 0} className="gap-1.5 text-xs">
+            <Copy className="w-3.5 h-3.5" /> Copiar ({selected.size})
+          </Button>
+          <Button size="sm" variant="outline" onClick={pegarFilas} disabled={clipboard.length === 0} className="gap-1.5 text-xs">
+            <ClipboardPaste className="w-3.5 h-3.5" /> Pegar ({clipboard.length})
+          </Button>
           <Button size="sm" variant="outline" onClick={addRow} className="gap-1.5 text-xs">
             <Plus className="w-3.5 h-3.5" /> Agregar fila
           </Button>
+
         </div>
       </div>
 
