@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useRef, useState, useCallback } from "react";
-import { CalendarDays, Plus, Copy, Trash2, Save, Check, AlertTriangle } from "lucide-react";
+import { CalendarDays, Plus, Copy, Trash2, Save, Check, AlertTriangle, ClipboardPaste } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import SearchableSelect from "@/components/SearchableSelect";
