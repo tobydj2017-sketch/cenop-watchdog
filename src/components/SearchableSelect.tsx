@@ -26,6 +26,14 @@ export default function SearchableSelect({ options, value, onChange, placeholder
   const ref = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
 
+  const selectOption = (option: string) => {
+    onChange(option);
+    setSearch("");
+    setOpen(false);
+    inputRef.current?.blur();
+    onSelect?.();
+  };
+
   useEffect(() => {
     const handler = (e: MouseEvent) => {
       if (ref.current && !ref.current.contains(e.target as Node)) setOpen(false);
@@ -76,13 +84,10 @@ export default function SearchableSelect({ options, value, onChange, placeholder
               "px-3 py-1.5 text-sm cursor-pointer hover:bg-accent hover:text-accent-foreground flex items-center justify-between",
               opt === value && "bg-accent/50"
             )}
-            onMouseDown={(e) => {
+            onPointerDown={(e) => {
               e.preventDefault();
-              onChange(opt);
-              setSearch("");
-              setOpen(false);
-              inputRef.current?.blur();
-              onSelect?.();
+              e.stopPropagation();
+              selectOption(opt);
             }}
           >
             <span className="truncate">{opt}</span>
