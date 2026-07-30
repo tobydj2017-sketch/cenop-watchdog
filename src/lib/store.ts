@@ -41,6 +41,27 @@ function recomputeHours(list: ServiceEntry[]): ServiceEntry[] {
   return list.map((s) => ({ ...s, ...computeServiceHours(s) }));
 }
 
+/**
+ * Combina el resultado del merge remoto con lo que hay AHORA en localStorage.
+ * Lo local siempre gana: durante la subida (que tarda cientos de ms) el usuario
+ * pudo seguir escribiendo y esos cambios no deben perderse nunca.
+ */
+function mergeKeepingLocal<T extends { id?: string }>(remoteMerged: T[], currentLocal: T[]): T[] {
+  const byId = new Map<string, T>();
+  for (const item of remoteMerged) if (item?.id) byId.set(item.id, item);
+  for (const item of currentLocal) if (item?.id) byId.set(item.id, item);
+  return Array.from(byId.values());
+}
+
+function readLocal<T>(key: string): T[] {
+  try {
+    const arr = JSON.parse(localStorage.getItem(key) || "[]");
+    return Array.isArray(arr) ? arr : [];
+  } catch {
+    return [];
+  }
+}
+
 export function getServices(): ServiceEntry[] {
   const data = localStorage.getItem(SERVICES_KEY);
   const parsed: ServiceEntry[] = data ? JSON.parse(data) : [];
@@ -58,14 +79,16 @@ export function saveServices(entries: ServiceEntry[]) {
     BLOB_KEYS.services,
     () => JSON.parse(localStorage.getItem(SERVICES_KEY) || "[]"),
     (merged) => {
+      const withLocal = mergeKeepingLocal(merged, readLocal<ServiceEntry>(SERVICES_KEY));
       const finalList = renumberDeterministic(
-        recomputeHours(merged.filter(isCountableServiceEntry).filter((s) => !isLegacy(s.fecha)))
+        recomputeHours(withLocal.filter(isCountableServiceEntry).filter((s) => !isLegacy(s.fecha)))
       );
       localStorage.setItem(SERVICES_KEY, JSON.stringify(finalList));
       window.dispatchEvent(new Event("cenop:services-synced"));
     },
   );
 }
+
 
 export function addService(entry: ServiceEntry) {
   const entries = getServices();
