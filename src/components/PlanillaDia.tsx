@@ -216,13 +216,15 @@ export default function PlanillaDia({ services, onChanged, initialDate }: Props)
     setRows((prev) => [...prev, emptyDraft(fecha, prev.length + 1)]);
   };
   const duplicateRow = (id: string) => {
-    setRows((prev) => {
-      const src = prev.find((r) => r.id === id);
-      if (!src) return prev;
-      const copy: Draft = { ...src, id: generateId(), solicitud: prev.length + 1, _persisted: false, _saveStatus: "idle", remito: "", ordenCarga: "" };
-      return [...prev, copy];
-    });
+    const src = rowsRef.current.find((r) => r.id === id);
+    if (!src) return;
+    const copy: Draft = { ...src, id: generateId(), solicitud: rowsRef.current.length + 1, _persisted: false, _saveStatus: "idle", remito: "", ordenCarga: "" };
+    rowsRef.current = [...rowsRef.current, copy];
+    setRows(rowsRef.current);
+    lastEdit.current[copy.id] = Date.now();
+    persistNow(copy);
   };
+
   const removeRow = (id: string) => {
     const r = rows.find((x) => x.id === id);
     if (!r) return;
