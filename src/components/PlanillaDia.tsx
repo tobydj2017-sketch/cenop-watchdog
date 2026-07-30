@@ -401,7 +401,7 @@ export default function PlanillaDia({ services, onChanged, initialDate }: Props)
       </div>
 
       <div className="text-[11px] text-muted-foreground italic px-1">
-        Cada fila se guarda automáticamente al modificarla (auto-sync con Azure). El N° final se reasigna por orden de <b>Hora de Solicitud</b> tras guardar.
+        Cada dato (hora, cliente, chofer…) se guarda <b>al instante</b> al escribirlo y se sincroniza con Azure automáticamente. El N° final se reasigna por orden de <b>Hora de Solicitud</b>.
       </div>
     </div>
   );
