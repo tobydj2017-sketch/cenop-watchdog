@@ -65,6 +65,7 @@ export default function SearchableSelect({ options, value, onChange, placeholder
 
   const list = (
     <div
+      data-searchable-select-dropdown="true"
       className={cn(
         "max-h-48 overflow-auto rounded-md border border-border bg-popover text-popover-foreground shadow-md",
         "fixed z-[200] pointer-events-auto",
@@ -88,6 +89,11 @@ export default function SearchableSelect({ options, value, onChange, placeholder
               e.preventDefault();
               e.stopPropagation();
               selectOption(opt);
+            }}
+            onClick={(e) => {
+              e.preventDefault();
+              e.stopPropagation();
+              if (value !== opt) selectOption(opt);
             }}
           >
             <span className="truncate">{opt}</span>
