@@ -148,7 +148,7 @@ export default function FuelEditDialog({ entry, open, onClose, onSave, existingE
             </div>
             <div className="space-y-1.5">
               <Label className="text-xs font-bold uppercase tracking-wider text-muted-foreground">Móvil</Label>
-              <SearchableSelect options={patentes} value={form.movil} onChange={(v) => set("movil", v)} inputClassName="h-10" />
+              <SearchableSelect portal options={patentes} value={form.movil} onChange={(v) => set("movil", v)} inputClassName="h-10" />
             </div>
             <div className="space-y-1.5">
               <Label className="text-xs font-bold uppercase tracking-wider text-muted-foreground">Chofer</Label>
@@ -160,7 +160,7 @@ export default function FuelEditDialog({ entry, open, onClose, onSave, existingE
             </div>
             <div className="space-y-1.5">
               <Label className="text-xs font-bold uppercase tracking-wider text-muted-foreground">Tipo de combustible</Label>
-              <SearchableSelect options={TIPOS_COMBUSTIBLE} value={form.tipoCombustible} onChange={(v) => set("tipoCombustible", v)} inputClassName="h-10" />
+              <SearchableSelect portal options={TIPOS_COMBUSTIBLE} value={form.tipoCombustible} onChange={(v) => set("tipoCombustible", v)} inputClassName="h-10" />
             </div>
             <div className="space-y-1.5">
               <Label className="text-xs font-bold uppercase tracking-wider text-muted-foreground">Litros</Label>
@@ -176,7 +176,7 @@ export default function FuelEditDialog({ entry, open, onClose, onSave, existingE
             </div>
             <div className="space-y-1.5">
               <Label className="text-xs font-bold uppercase tracking-wider text-muted-foreground">Lugar de carga</Label>
-              <SearchableSelect options={LUGARES_CARGA} value={form.lugarCarga} onChange={(v) => set("lugarCarga", v)} inputClassName="h-10" />
+              <SearchableSelect portal options={LUGARES_CARGA} value={form.lugarCarga} onChange={(v) => set("lugarCarga", v)} inputClassName="h-10" />
             </div>
             <div className="space-y-1.5">
               <Label className="text-xs font-bold uppercase tracking-wider text-muted-foreground">Estación / detalle</Label>

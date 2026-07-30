@@ -335,7 +335,7 @@ export default function FuelForm({ onAdd, selectedDate, existingEntries, allEntr
                 {renderInput("Hora", "hora", "time")}
                 <div className="space-y-1.5">
                   <Label className="text-sm font-bold">Patente / Móvil</Label>
-                  <SearchableSelect options={patentes} value={form.movil} onChange={handleMovil} placeholder="Seleccionar móvil..." />
+                  <SearchableSelect portal options={patentes} value={form.movil} onChange={handleMovil} placeholder="Seleccionar móvil..." />
                 </div>
                 {renderInput("Asignación (Chofer)", "chofer", "text", "Auto desde móvil")}
                 {renderReadonly("Marca", form.marca)}
@@ -350,7 +350,7 @@ export default function FuelForm({ onAdd, selectedDate, existingEntries, allEntr
                 {renderInput("N° Remito *", "numeroRemito")}
                 <div className="space-y-1.5">
                   <Label className="text-sm font-bold">Tipo de combustible</Label>
-                  <SearchableSelect options={TIPOS_COMBUSTIBLE} value={form.tipoCombustible} onChange={(v) => set("tipoCombustible", v)} placeholder="Seleccionar..." />
+                  <SearchableSelect portal options={TIPOS_COMBUSTIBLE} value={form.tipoCombustible} onChange={(v) => set("tipoCombustible", v)} placeholder="Seleccionar..." />
                 </div>
                 {renderInput("Litros cargados", "litros", "number")}
                 {renderInput("Monto de carga ($)", "monto", "number")}
@@ -374,7 +374,7 @@ export default function FuelForm({ onAdd, selectedDate, existingEntries, allEntr
                 <div className="grid md:grid-cols-2 gap-3">
                   <div className="space-y-1.5">
                     <Label className="text-sm font-bold">Lugar de carga</Label>
-                    <SearchableSelect options={LUGARES_CARGA} value={form.lugarCarga} onChange={(v) => set("lugarCarga", v)} placeholder="Seleccionar..." />
+                    <SearchableSelect portal options={LUGARES_CARGA} value={form.lugarCarga} onChange={(v) => set("lugarCarga", v)} placeholder="Seleccionar..." />
                   </div>
                   {renderInput("Estación / detalle", "estacion", "text", "Opcional")}
                   <div className="md:col-span-2">
