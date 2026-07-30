@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useRef, useState, useCallback } from "react";
-import { CalendarDays, Plus, Copy, Trash2, Save, Check, AlertTriangle } from "lucide-react";
+import { CalendarDays, Plus, Copy, Trash2, Save, Check, AlertTriangle, ClipboardPaste } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import SearchableSelect from "@/components/SearchableSelect";
@@ -290,6 +290,54 @@ export default function PlanillaDia({ services, onChanged, initialDate }: Props)
     onChanged();
   }, [persistNow, onChanged]);
 
+  // ---- Selección / copiar / pegar filas ----
+  const [selected, setSelected] = useState<Set<string>>(new Set());
+  const [clipboard, setClipboard] = useState<Draft[]>([]);
+
+  const toggleSelect = useCallback((id: string) => {
+    setSelected((prev) => {
+      const n = new Set(prev);
+      n.has(id) ? n.delete(id) : n.add(id);
+      return n;
+    });
+  }, []);
+
+  const allSelected = rows.length > 0 && rows.every((r) => selected.has(r.id));
+  const toggleSelectAll = () => {
+    setSelected(allSelected ? new Set() : new Set(rows.map((r) => r.id)));
+  };
+
+  const copiarSeleccion = () => {
+    const sel = rowsRef.current.filter((r) => selected.has(r.id));
+    if (sel.length === 0) return;
+    setClipboard(sel.map((r) => ({ ...r })));
+  };
+
+  const pegarFilas = () => {
+    if (clipboard.length === 0) return;
+    const nuevas: Draft[] = clipboard.map((src, idx) => ({
+      ...src,
+      id: generateId(),
+      fecha,
+      solicitud: rowsRef.current.length + idx + 1,
+      remito: "",
+      ordenCarga: "",
+      kmSalida: "",
+      kmLlegada: "",
+      kmRecorridos: "",
+      _persisted: false,
+      _saveStatus: "idle",
+    }));
+    rowsRef.current = [...rowsRef.current, ...nuevas];
+    setRows(rowsRef.current);
+    nuevas.forEach((n) => {
+      lastEdit.current[n.id] = Date.now();
+      persistNow(n);
+    });
+    onChanged();
+  };
+
+
   return (
     <div className="space-y-3">
       {/* Encabezado con controles y stats */}
@@ -315,9 +363,16 @@ export default function PlanillaDia({ services, onChanged, initialDate }: Props)
           {anySaving && <span className="text-xs text-amber-400 flex items-center gap-1"><Save className="w-3.5 h-3.5 animate-pulse" /> Guardando…</span>}
           {!anySaving && !anyError && <span className="text-xs text-emerald-400 flex items-center gap-1"><Check className="w-3.5 h-3.5" /> Sincronizado</span>}
           {anyError && <span className="text-xs text-destructive flex items-center gap-1"><AlertTriangle className="w-3.5 h-3.5" /> Error al guardar</span>}
+          <Button size="sm" variant="outline" onClick={copiarSeleccion} disabled={selected.size === 0} className="gap-1.5 text-xs">
+            <Copy className="w-3.5 h-3.5" /> Copiar ({selected.size})
+          </Button>
+          <Button size="sm" variant="outline" onClick={pegarFilas} disabled={clipboard.length === 0} className="gap-1.5 text-xs">
+            <ClipboardPaste className="w-3.5 h-3.5" /> Pegar ({clipboard.length})
+          </Button>
           <Button size="sm" variant="outline" onClick={addRow} className="gap-1.5 text-xs">
             <Plus className="w-3.5 h-3.5" /> Agregar fila
           </Button>
+
         </div>
       </div>
 
@@ -357,7 +412,13 @@ export default function PlanillaDia({ services, onChanged, initialDate }: Props)
               <Th w={80}>KM Rec.</Th>
               <Th w={110}>Orden Carga</Th>
               <Th w={110}>Remito</Th>
-              <Th w={70}>{" "}</Th>
+              <th className="px-2 py-2 text-left text-[10px] uppercase tracking-wider font-bold text-muted-foreground whitespace-nowrap" style={{ minWidth: 100 }}>
+                <div className="flex items-center gap-1">
+                  <input type="checkbox" checked={allSelected} onChange={toggleSelectAll} className="w-4 h-4 accent-primary cursor-pointer" title="Seleccionar todas" />
+                  Funciones
+                </div>
+              </th>
+
             </tr>
           </thead>
 
@@ -407,7 +468,14 @@ export default function PlanillaDia({ services, onChanged, initialDate }: Props)
                   <TdText value={r.ordenCarga} onChange={(v) => updateRow(r.id, { ordenCarga: v })} onAdvance={focusNext} />
                   <TdText value={r.remito} onChange={(v) => updateRow(r.id, { remito: v })} onAdvance={focusNext} />
                   <td className="px-1 py-1">
-                    <div className="flex gap-1">
+                    <div className="flex items-center gap-1">
+                      <input
+                        type="checkbox"
+                        checked={selected.has(r.id)}
+                        onChange={() => toggleSelect(r.id)}
+                        title="Seleccionar fila"
+                        className="w-4 h-4 accent-primary cursor-pointer"
+                      />
                       <button
                         onClick={() => duplicateRow(r.id)}
                         className="p-1 rounded hover:bg-secondary text-muted-foreground hover:text-foreground"
@@ -426,6 +494,7 @@ export default function PlanillaDia({ services, onChanged, initialDate }: Props)
                       </button>
                     </div>
                   </td>
+
                 </tr>
               );
             })}
