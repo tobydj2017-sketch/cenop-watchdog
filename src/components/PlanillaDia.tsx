@@ -279,39 +279,40 @@ export default function PlanillaDia({ services, onChanged, initialDate }: Props)
       )}
 
       {/* Grilla */}
-      <div className="glass-card overflow-auto max-h-[calc(100vh-260px)]">
-        <table className="text-xs border-collapse" style={{ minWidth: "2400px" }}>
+      <div className="glass-card overflow-auto min-h-[400px] max-h-[calc(100vh-260px)]">
+        <table className="text-xs border-collapse" style={{ minWidth: "3000px" }}>
           <thead className="sticky top-0 z-20 bg-card">
             <tr className="border-b border-border">
               <th className="sticky left-0 z-30 bg-card px-2 py-2 text-left text-[10px] uppercase tracking-wider font-bold w-10">#</th>
-              <Th w={70}>H. Solic.</Th>
-              <Th w={160}>Cliente</Th>
-              <Th w={140}>Lugar Salida</Th>
-              <Th w={140}>Destino</Th>
-              <Th w={160}>Chofer</Th>
-              <Th w={70}>Cita Ch.</Th>
-              <Th w={160}>Custodio</Th>
-              <Th w={70}>Cita Cu.</Th>
-              <Th w={100}>Móvil</Th>
-              <Th w={110}>Celular</Th>
-              <Th w={70}>Sal. CENOP</Th>
-              <Th w={70}>Lleg. Serv.</Th>
-              <Th w={70}>Inicia</Th>
-              <Th w={70}>Lleg. Dest.</Th>
-              <Th w={70}>Finaliza</Th>
-              <Th w={70}>Lleg. CENOP</Th>
-              <Th w={70}>Franco Ch.</Th>
-              <Th w={70}>Franco Cu.</Th>
+              <Th w={92}>H. Solic.</Th>
+              <Th w={180}>Cliente</Th>
+              <Th w={150}>Lugar Salida</Th>
+              <Th w={150}>Destino</Th>
+              <Th w={190}>Chofer</Th>
+              <Th w={92}>Cita Ch.</Th>
+              <Th w={190}>Custodio</Th>
+              <Th w={92}>Cita Cu.</Th>
+              <Th w={130}>Móvil</Th>
+              <Th w={120}>Celular</Th>
+              <Th w={92}>Sal. CENOP</Th>
+              <Th w={92}>Lleg. Serv.</Th>
+              <Th w={92}>Inicia</Th>
+              <Th w={92}>Lleg. Dest.</Th>
+              <Th w={92}>Finaliza</Th>
+              <Th w={92}>Lleg. CENOP</Th>
+              <Th w={92}>Franco Ch.</Th>
+              <Th w={92}>Franco Cu.</Th>
               <Th w={90}>KM Sal.</Th>
               <Th w={90}>KM Lleg.</Th>
               <Th w={80}>KM Rec.</Th>
-              <Th w={100}>Orden Carga</Th>
-              <Th w={100}>Remito</Th>
-              <Th w={100}>Continúa</Th>
-              <Th w={180}>Observaciones</Th>
+              <Th w={110}>Orden Carga</Th>
+              <Th w={110}>Remito</Th>
+              <Th w={110}>Continúa</Th>
+              <Th w={200}>Observaciones</Th>
               <Th w={70}>{" "}</Th>
             </tr>
           </thead>
+
           <tbody>
             {rows.map((r, i) => {
               const kmRec = (() => {
