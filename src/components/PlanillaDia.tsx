@@ -357,8 +357,6 @@ export default function PlanillaDia({ services, onChanged, initialDate }: Props)
               <Th w={80}>KM Rec.</Th>
               <Th w={110}>Orden Carga</Th>
               <Th w={110}>Remito</Th>
-              <Th w={110}>Continúa</Th>
-              <Th w={200}>Observaciones</Th>
               <Th w={70}>{" "}</Th>
             </tr>
           </thead>
@@ -408,8 +406,6 @@ export default function PlanillaDia({ services, onChanged, initialDate }: Props)
                   <td className="px-2 py-1 font-mono text-muted-foreground text-center">{kmRec || "—"}</td>
                   <TdText value={r.ordenCarga} onChange={(v) => updateRow(r.id, { ordenCarga: v })} onAdvance={focusNext} />
                   <TdText value={r.remito} onChange={(v) => updateRow(r.id, { remito: v })} onAdvance={focusNext} />
-                  <TdText value={r.continuaOrden} onChange={(v) => updateRow(r.id, { continuaOrden: v })} onAdvance={focusNext} />
-                  <TdText value={r.observaciones} onChange={(v) => updateRow(r.id, { observaciones: v })} onAdvance={focusNext} />
                   <td className="px-1 py-1">
                     <div className="flex gap-1">
                       <button
