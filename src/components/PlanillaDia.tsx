@@ -385,31 +385,31 @@ export default function PlanillaDia({ services, onChanged, initialDate }: Props)
                       <div className="text-[9px] text-destructive" title={r._error}>!</div>
                     )}
                   </td>
-                  <TdTime value={r.horaSolicitud} onChange={(v) => updateRow(r.id, { horaSolicitud: v })} />
-                  <TdSelect value={r.cliente} options={clientes} onChange={(v) => updateRow(r.id, { cliente: v })} />
-                  <TdText value={r.lugarSalida} onChange={(v) => updateRow(r.id, { lugarSalida: v })} />
-                  <TdText value={r.destino} onChange={(v) => updateRow(r.id, { destino: v })} />
-                  <TdSelect value={r.chofer} options={choferes} onChange={(v) => updateRow(r.id, { chofer: v })} highlight={overlapCh} />
-                  <TdTime value={r.citaChofer} onChange={(v) => updateRow(r.id, { citaChofer: v })} />
-                  <TdSelect value={r.custodio} options={custodios} onChange={(v) => updateRow(r.id, { custodio: v })} highlight={overlapCu} />
-                  <TdTime value={r.citaCustodio} onChange={(v) => updateRow(r.id, { citaCustodio: v })} />
-                  <TdSelect value={r.movil} options={moviles} onChange={(v) => updateRow(r.id, { movil: v })} highlight={overlapMv} />
-                  <TdText value={r.celular} onChange={(v) => updateRow(r.id, { celular: v })} />
-                  <TdTime value={r.salidaCenop} onChange={(v) => updateRow(r.id, { salidaCenop: v })} />
-                  <TdTime value={r.llegadaServicio} onChange={(v) => updateRow(r.id, { llegadaServicio: v })} />
-                  <TdTime value={r.iniciaServicio} onChange={(v) => updateRow(r.id, { iniciaServicio: v })} />
-                  <TdTime value={r.llegadaDestino} onChange={(v) => updateRow(r.id, { llegadaDestino: v })} />
-                  <TdTime value={r.finalizaServicio} onChange={(v) => updateRow(r.id, { finalizaServicio: v })} />
-                  <TdTime value={r.llegadaCenop} onChange={(v) => updateRow(r.id, { llegadaCenop: v })} />
-                  <TdTime value={r.horaFrancoChofer} onChange={(v) => updateRow(r.id, { horaFrancoChofer: v })} />
-                  <TdTime value={r.horaFrancoCustodio} onChange={(v) => updateRow(r.id, { horaFrancoCustodio: v })} />
-                  <TdText value={r.kmSalida || ""} onChange={(v) => updateRow(r.id, { kmSalida: v })} numeric />
-                  <TdText value={r.kmLlegada || ""} onChange={(v) => updateRow(r.id, { kmLlegada: v })} numeric />
+                  <TdTime value={r.horaSolicitud} onChange={(v) => updateRow(r.id, { horaSolicitud: v })} onAdvance={focusNext} />
+                  <TdSelect value={r.cliente} options={clientes} onChange={(v) => updateRow(r.id, { cliente: v })} onAdvance={focusNext} />
+                  <TdText value={r.lugarSalida} onChange={(v) => updateRow(r.id, { lugarSalida: v })} onAdvance={focusNext} />
+                  <TdText value={r.destino} onChange={(v) => updateRow(r.id, { destino: v })} onAdvance={focusNext} />
+                  <TdSelect value={r.chofer} options={choferes} onChange={(v) => updateRow(r.id, { chofer: v })} highlight={overlapCh} onAdvance={focusNext} />
+                  <TdTime value={r.citaChofer} onChange={(v) => updateRow(r.id, { citaChofer: v })} onAdvance={focusNext} />
+                  <TdSelect value={r.custodio} options={custodios} onChange={(v) => updateRow(r.id, { custodio: v })} highlight={overlapCu} onAdvance={focusNext} />
+                  <TdTime value={r.citaCustodio} onChange={(v) => updateRow(r.id, { citaCustodio: v })} onAdvance={focusNext} />
+                  <TdSelect value={r.movil} options={moviles} onChange={(v) => updateRow(r.id, { movil: v })} highlight={overlapMv} onAdvance={focusNext} />
+                  <TdText value={r.celular} onChange={(v) => updateRow(r.id, { celular: v })} onAdvance={focusNext} />
+                  <TdTime value={r.salidaCenop} onChange={(v) => updateRow(r.id, { salidaCenop: v })} onAdvance={focusNext} />
+                  <TdTime value={r.llegadaServicio} onChange={(v) => updateRow(r.id, { llegadaServicio: v })} onAdvance={focusNext} />
+                  <TdTime value={r.iniciaServicio} onChange={(v) => updateRow(r.id, { iniciaServicio: v })} onAdvance={focusNext} />
+                  <TdTime value={r.llegadaDestino} onChange={(v) => updateRow(r.id, { llegadaDestino: v })} onAdvance={focusNext} />
+                  <TdTime value={r.finalizaServicio} onChange={(v) => updateRow(r.id, { finalizaServicio: v })} onAdvance={focusNext} />
+                  <TdTime value={r.llegadaCenop} onChange={(v) => updateRow(r.id, { llegadaCenop: v })} onAdvance={focusNext} />
+                  <TdTime value={r.horaFrancoChofer} onChange={(v) => updateRow(r.id, { horaFrancoChofer: v })} onAdvance={focusNext} />
+                  <TdTime value={r.horaFrancoCustodio} onChange={(v) => updateRow(r.id, { horaFrancoCustodio: v })} onAdvance={focusNext} />
+                  <TdText value={r.kmSalida || ""} onChange={(v) => updateRow(r.id, { kmSalida: v })} numeric onAdvance={focusNext} />
+                  <TdText value={r.kmLlegada || ""} onChange={(v) => updateRow(r.id, { kmLlegada: v })} numeric onAdvance={focusNext} />
                   <td className="px-2 py-1 font-mono text-muted-foreground text-center">{kmRec || "—"}</td>
-                  <TdText value={r.ordenCarga} onChange={(v) => updateRow(r.id, { ordenCarga: v })} />
-                  <TdText value={r.remito} onChange={(v) => updateRow(r.id, { remito: v })} />
-                  <TdText value={r.continuaOrden} onChange={(v) => updateRow(r.id, { continuaOrden: v })} />
-                  <TdText value={r.observaciones} onChange={(v) => updateRow(r.id, { observaciones: v })} />
+                  <TdText value={r.ordenCarga} onChange={(v) => updateRow(r.id, { ordenCarga: v })} onAdvance={focusNext} />
+                  <TdText value={r.remito} onChange={(v) => updateRow(r.id, { remito: v })} onAdvance={focusNext} />
+                  <TdText value={r.continuaOrden} onChange={(v) => updateRow(r.id, { continuaOrden: v })} onAdvance={focusNext} />
+                  <TdText value={r.observaciones} onChange={(v) => updateRow(r.id, { observaciones: v })} onAdvance={focusNext} />
                   <td className="px-1 py-1">
                     <div className="flex gap-1">
                       <button
