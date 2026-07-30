@@ -226,12 +226,15 @@ export default function PlanillaDia({ services, onChanged, initialDate }: Props)
   const removeRow = (id: string) => {
     const r = rows.find((x) => x.id === id);
     if (!r) return;
-    if (r._persisted) {
+    if (r._persisted || persistedIds.current.has(id)) {
       if (!confirm("¿Eliminar este servicio del sistema?")) return;
       deleteService(id);
+      persistedIds.current.delete(id);
       onChanged();
     }
+    delete lastEdit.current[id];
     setRows((prev) => prev.filter((x) => x.id !== id));
+
   };
 
   // Stats
