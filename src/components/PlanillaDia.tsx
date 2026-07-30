@@ -262,6 +262,34 @@ export default function PlanillaDia({ services, onChanged, initialDate }: Props)
   const anySaving = rows.some((r) => r._saveStatus === "saving");
   const anyError = rows.some((r) => r._saveStatus === "error");
 
+  // ---- Navegación automática entre casilleros ----
+  const gridRef = useRef<HTMLDivElement>(null);
+  const saveRef = useRef<HTMLButtonElement>(null);
+
+  const focusNext = useCallback((from: HTMLElement | null) => {
+    const root = gridRef.current;
+    if (!root || !from) return;
+    const cells = Array.from(root.querySelectorAll<HTMLElement>("td[data-cell]"));
+    const td = (from.closest?.("td[data-cell]") as HTMLElement | null) ?? from;
+    const idx = cells.indexOf(td);
+    for (let i = idx + 1; i < cells.length; i++) {
+      const inp = cells[i].querySelector<HTMLInputElement>("input:not([disabled])");
+      if (inp) {
+        inp.focus();
+        inp.select?.();
+        inp.scrollIntoView({ block: "nearest", inline: "nearest" });
+        return;
+      }
+    }
+    saveRef.current?.focus();
+    saveRef.current?.scrollIntoView({ block: "nearest" });
+  }, []);
+
+  const guardarTodo = useCallback(() => {
+    rowsRef.current.forEach((r) => persistNow(r));
+    onChanged();
+  }, [persistNow, onChanged]);
+
   return (
     <div className="space-y-3">
       {/* Encabezado con controles y stats */}
