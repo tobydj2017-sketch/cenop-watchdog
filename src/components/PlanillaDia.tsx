@@ -418,7 +418,7 @@ function TdText({ value, onChange, numeric }: { value: string; onChange: (v: str
 function TdTime({ value, onChange }: { value: string; onChange: (v: string) => void }) {
   return (
     <td className="px-1 py-1">
-      <TimeInput value={value} onChange={onChange} className="h-8 text-xs" />
+      <TimeInput value={value} onChange={onChange} className="h-8 text-xs px-1 tracking-normal" />
     </td>
   );
 }
@@ -430,8 +430,10 @@ function TdSelect({ value, options, onChange, highlight }: { value: string; opti
         value={value}
         options={options}
         onChange={onChange}
+        portal
         inputClassName="h-8 text-xs"
       />
     </td>
   );
 }
+
