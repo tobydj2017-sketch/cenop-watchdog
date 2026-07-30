@@ -406,7 +406,7 @@ export default function PlanillaDia({ services, onChanged, initialDate }: Props)
               <Th w={190}>Custodio</Th>
               <Th w={92}>Cita Cu.</Th>
               <Th w={130}>Móvil</Th>
-              <Th w={120}>Celular</Th>
+              <Th w={150}>Celular</Th>
               <Th w={92}>Sal. CENOP</Th>
               <Th w={92}>Lleg. Serv.</Th>
               <Th w={92}>Inicia</Th>
