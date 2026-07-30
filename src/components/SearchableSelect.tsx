@@ -104,7 +104,6 @@ export default function SearchableSelect({ options, value, onChange, placeholder
           value={open ? (search || value) : value}
           onChange={(e) => {
             setSearch(e.target.value);
-            setRect(null);
             if (!open) setOpen(true);
           }}
           onFocus={() => {
