@@ -405,7 +405,13 @@ export default function PlanillaDia({ services, onChanged, initialDate }: Props)
               <Th w={80}>KM Rec.</Th>
               <Th w={110}>Orden Carga</Th>
               <Th w={110}>Remito</Th>
-              <Th w={70}>{" "}</Th>
+              <th className="px-2 py-2 text-left text-[10px] uppercase tracking-wider font-bold text-muted-foreground whitespace-nowrap" style={{ minWidth: 100 }}>
+                <div className="flex items-center gap-1">
+                  <input type="checkbox" checked={allSelected} onChange={toggleSelectAll} className="w-4 h-4 accent-primary cursor-pointer" title="Seleccionar todas" />
+                  Funciones
+                </div>
+              </th>
+
             </tr>
           </thead>
 
