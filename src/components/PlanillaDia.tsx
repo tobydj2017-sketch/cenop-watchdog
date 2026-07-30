@@ -162,6 +162,14 @@ export default function PlanillaDia({ services, onChanged, initialDate }: Props)
     getMoviles().forEach((mv) => m.set(mv.patente, mv.telefono || ""));
     return m;
   }, [services]);
+  const celulares = useMemo(() => {
+    const split = (t?: string) => (t || "").split(/[,;/]| o /i).map((s) => s.trim()).filter(Boolean);
+    const all = [
+      ...getMoviles().flatMap((mv) => split(mv.telefono)),
+      ...getPersonal().flatMap((p) => split(p.telefono)),
+    ];
+    return Array.from(new Set(all)).sort();
+  }, [services]);
 
 
   const overlaps = useMemo(() => detectOverlaps(rows), [rows]);
