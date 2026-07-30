@@ -110,28 +110,44 @@ interface Props {
 export default function PlanillaDia({ services, onChanged, initialDate }: Props) {
   const [fecha, setFecha] = useState(initialDate || todayISO());
   const [rows, setRows] = useState<Draft[]>([]);
-  const debouncers = useRef<Record<string, ReturnType<typeof setTimeout>>>({});
+  const rowsRef = useRef<Draft[]>([]);
+  const persistedIds = useRef<Set<string>>(new Set());
+  /** id -> timestamp de la última edición local (protege de que un sync remoto pise lo recién tipeado) */
+  const lastEdit = useRef<Record<string, number>>({});
+  const statusTimers = useRef<Record<string, ReturnType<typeof setTimeout>>>({});
+
+  rowsRef.current = rows;
 
   // Cargar/actualizar filas cuando cambia la fecha o llegan servicios sincronizados
   useEffect(() => {
     const existing = services
       .filter((s) => s.fecha === fecha)
       .sort((a, b) => (a.horaSolicitud || "99:99").localeCompare(b.horaSolicitud || "99:99") || (a.id || "").localeCompare(b.id || ""));
-    const asDrafts: Draft[] = existing.map((s) => ({ ...s, _persisted: true, _saveStatus: "idle" }));
-    // preservar filas nuevas no persistidas (por id que no esté en existing)
+    existing.forEach((s) => persistedIds.current.add(s.id));
+    const now = Date.now();
     setRows((prev) => {
+      const prevById = new Map(prev.map((r) => [r.id, r]));
+      const asDrafts: Draft[] = existing.map((s) => {
+        const local = prevById.get(s.id);
+        // Si el usuario editó esta fila hace menos de 15s, gana lo local (nunca se pierde lo tipeado)
+        if (local && now - (lastEdit.current[s.id] || 0) < 15000) {
+          return { ...local, _persisted: true };
+        }
+        return { ...s, _persisted: true, _saveStatus: local?._saveStatus ?? "idle" };
+      });
       const existingIds = new Set(asDrafts.map((s) => s.id));
-      const kept = prev.filter((r) => !r._persisted && !existingIds.has(r.id) && (r as any).fecha === fecha);
+      const kept = prev.filter((r) => !existingIds.has(r.id) && r.fecha === fecha);
       const merged = [...asDrafts, ...kept];
       if (merged.length === 0) return [emptyDraft(fecha, 1)];
       return merged;
     });
-    // limpio debouncers
-    return () => {
-      Object.values(debouncers.current).forEach(clearTimeout);
-      debouncers.current = {};
-    };
   }, [fecha, services]);
+
+  // Al desmontar, limpio timers de UI (los datos ya están guardados en el instante)
+  useEffect(() => () => {
+    Object.values(statusTimers.current).forEach(clearTimeout);
+    statusTimers.current = {};
+  }, []);
 
   const clientes = useMemo(() => getActiveClientNames(), [services]);
   const choferes = useMemo(() => getPersonalByRole("chofer").map((p) => p.nombre), [services]);
@@ -146,80 +162,81 @@ export default function PlanillaDia({ services, onChanged, initialDate }: Props)
 
   const overlaps = useMemo(() => detectOverlaps(rows), [rows]);
 
-  const persist = useCallback((r: Draft) => {
-    // fila con al menos algún dato relevante
+  /** Guarda la fila AL INSTANTE (localStorage sincrónico + cola de subida a Azure). */
+  const persistNow = useCallback((r: Draft) => {
     const clone: ServiceEntry = { ...r };
     delete (clone as any)._persisted;
     delete (clone as any)._saveStatus;
     delete (clone as any)._error;
-    // recompute hours
     Object.assign(clone, computeServiceHours(clone));
-    // km recorridos
     const ks = parseFloat(clone.kmSalida || ""); const kl = parseFloat(clone.kmLlegada || "");
     if (!isNaN(ks) && !isNaN(kl) && kl >= ks) clone.kmRecorridos = String(kl - ks);
 
     if (!isCountableServiceEntry(clone)) return;
 
-    setRows((prev) => prev.map((p) => p.id === r.id ? { ...p, _saveStatus: "saving" } : p));
+    const setStatus = (status: Draft["_saveStatus"], error?: string) =>
+      setRows((prev) => prev.map((p) => (p.id === r.id ? { ...p, _persisted: status !== "error" ? true : p._persisted, _saveStatus: status, _error: error } : p)));
+
     try {
-      if (r._persisted) {
+      if (persistedIds.current.has(r.id)) {
         updateService(clone);
       } else {
         addService(clone);
+        persistedIds.current.add(r.id);
       }
-      setRows((prev) => prev.map((p) => p.id === r.id ? { ...p, _persisted: true, _saveStatus: "saved" } : p));
+      setStatus("saved");
       onChanged();
-      setTimeout(() => {
-        setRows((prev) => prev.map((p) => p.id === r.id && p._saveStatus === "saved" ? { ...p, _saveStatus: "idle" } : p));
-      }, 1200);
+      if (statusTimers.current[r.id]) clearTimeout(statusTimers.current[r.id]);
+      statusTimers.current[r.id] = setTimeout(() => {
+        setRows((prev) => prev.map((p) => (p.id === r.id && p._saveStatus === "saved" ? { ...p, _saveStatus: "idle" } : p)));
+      }, 1000);
     } catch (e: any) {
-      setRows((prev) => prev.map((p) => p.id === r.id ? { ...p, _saveStatus: "error", _error: e?.message || "Error" } : p));
+      setStatus("error", e?.message || "Error");
     }
   }, [onChanged]);
 
-  const scheduleSave = useCallback((r: Draft) => {
-    if (debouncers.current[r.id]) clearTimeout(debouncers.current[r.id]);
-    debouncers.current[r.id] = setTimeout(() => persist(r), 400);
-  }, [persist]);
-
   const updateRow = useCallback((id: string, patch: Partial<Draft>) => {
-    setRows((prev) => {
-      const next = prev.map((r) => r.id === id ? { ...r, ...patch } : r);
-      const changed = next.find((r) => r.id === id);
-      if (changed) {
-        // autocompletar celular si eligió móvil
-        if (patch.movil !== undefined) {
-          const tel = movilesMap.get(patch.movil || "");
-          if (tel && !changed.celular) {
-            changed.celular = tel;
-          }
-        }
-        scheduleSave(changed);
-      }
-      return next;
-    });
-  }, [movilesMap, scheduleSave]);
+    const current = rowsRef.current.find((r) => r.id === id);
+    if (!current) return;
+    const next: Draft = { ...current, ...patch };
+    // autocompletar celular si eligió móvil
+    if (patch.movil !== undefined) {
+      const tel = movilesMap.get(patch.movil || "");
+      if (tel && !next.celular) next.celular = tel;
+    }
+    lastEdit.current[id] = Date.now();
+    rowsRef.current = rowsRef.current.map((r) => (r.id === id ? next : r));
+    setRows(rowsRef.current);
+    // guardado inmediato, sin espera
+    persistNow(next);
+  }, [movilesMap, persistNow]);
+
 
   const addRow = () => {
     setRows((prev) => [...prev, emptyDraft(fecha, prev.length + 1)]);
   };
   const duplicateRow = (id: string) => {
-    setRows((prev) => {
-      const src = prev.find((r) => r.id === id);
-      if (!src) return prev;
-      const copy: Draft = { ...src, id: generateId(), solicitud: prev.length + 1, _persisted: false, _saveStatus: "idle", remito: "", ordenCarga: "" };
-      return [...prev, copy];
-    });
+    const src = rowsRef.current.find((r) => r.id === id);
+    if (!src) return;
+    const copy: Draft = { ...src, id: generateId(), solicitud: rowsRef.current.length + 1, _persisted: false, _saveStatus: "idle", remito: "", ordenCarga: "" };
+    rowsRef.current = [...rowsRef.current, copy];
+    setRows(rowsRef.current);
+    lastEdit.current[copy.id] = Date.now();
+    persistNow(copy);
   };
+
   const removeRow = (id: string) => {
     const r = rows.find((x) => x.id === id);
     if (!r) return;
-    if (r._persisted) {
+    if (r._persisted || persistedIds.current.has(id)) {
       if (!confirm("¿Eliminar este servicio del sistema?")) return;
       deleteService(id);
+      persistedIds.current.delete(id);
       onChanged();
     }
+    delete lastEdit.current[id];
     setRows((prev) => prev.filter((x) => x.id !== id));
+
   };
 
   // Stats
@@ -389,7 +406,7 @@ export default function PlanillaDia({ services, onChanged, initialDate }: Props)
       </div>
 
       <div className="text-[11px] text-muted-foreground italic px-1">
-        Cada fila se guarda automáticamente al modificarla (auto-sync con Azure). El N° final se reasigna por orden de <b>Hora de Solicitud</b> tras guardar.
+        Cada dato (hora, cliente, chofer…) se guarda <b>al instante</b> al escribirlo y se sincroniza con Azure automáticamente. El N° final se reasigna por orden de <b>Hora de Solicitud</b>.
       </div>
     </div>
   );
