@@ -62,8 +62,8 @@ export default function SearchableSelect({ options, value, onChange, placeholder
         "fixed z-[200] pointer-events-auto",
         dropdownClassName
       )}
-      onPointerDownCapture={(e) => e.stopPropagation()}
-      onMouseDownCapture={(e) => e.stopPropagation()}
+      onPointerDown={(e) => e.stopPropagation()}
+      onMouseDown={(e) => e.stopPropagation()}
       style={rect ? { top: rect.top, left: rect.left, width: rect.width } : { visibility: "hidden" }}
     >
       {filtered.length === 0 ? (
