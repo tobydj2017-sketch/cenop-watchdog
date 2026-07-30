@@ -77,9 +77,9 @@ export default function SearchableSelect({ options, value, onChange, placeholder
               e.preventDefault();
               onChange(opt);
               setOpen(false);
+              onSelect?.();
             }}
           >
-            <span className="truncate">{opt}</span>
             {badgeMap?.[opt] && (
               <span className="ml-2 px-1.5 py-0.5 rounded text-[10px] font-bold bg-purple-500/20 text-purple-400 border border-purple-500/30">
                 {badgeMap[opt]}
