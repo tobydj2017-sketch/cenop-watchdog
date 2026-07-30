@@ -162,6 +162,14 @@ export default function PlanillaDia({ services, onChanged, initialDate }: Props)
     getMoviles().forEach((mv) => m.set(mv.patente, mv.telefono || ""));
     return m;
   }, [services]);
+  const celulares = useMemo(() => {
+    const split = (t?: string) => (t || "").split(/[,;/]| o /i).map((s) => s.trim()).filter(Boolean);
+    const all = [
+      ...getMoviles().flatMap((mv) => split(mv.telefono)),
+      ...getPersonal().flatMap((p) => split(p.telefono)),
+    ];
+    return Array.from(new Set(all)).sort();
+  }, [services]);
 
 
   const overlaps = useMemo(() => detectOverlaps(rows), [rows]);
@@ -398,7 +406,7 @@ export default function PlanillaDia({ services, onChanged, initialDate }: Props)
               <Th w={190}>Custodio</Th>
               <Th w={92}>Cita Cu.</Th>
               <Th w={130}>Móvil</Th>
-              <Th w={120}>Celular</Th>
+              <Th w={150}>Celular</Th>
               <Th w={92}>Sal. CENOP</Th>
               <Th w={92}>Lleg. Serv.</Th>
               <Th w={92}>Inicia</Th>
@@ -453,7 +461,7 @@ export default function PlanillaDia({ services, onChanged, initialDate }: Props)
                   <TdSelect value={r.custodio} options={custodios} onChange={(v) => updateRow(r.id, { custodio: v })} highlight={overlapCu} onAdvance={focusNext} />
                   <TdTime value={r.citaCustodio} onChange={(v) => updateRow(r.id, { citaCustodio: v })} onAdvance={focusNext} />
                   <TdSelect value={r.movil} options={moviles} onChange={(v) => updateRow(r.id, { movil: v })} highlight={overlapMv} onAdvance={focusNext} />
-                  <TdText value={r.celular} onChange={(v) => updateRow(r.id, { celular: v })} onAdvance={focusNext} />
+                  <TdSelect value={r.celular} options={celulares} onChange={(v) => updateRow(r.id, { celular: v })} onAdvance={focusNext} />
                   <TdTime value={r.salidaCenop} onChange={(v) => updateRow(r.id, { salidaCenop: v })} onAdvance={focusNext} />
                   <TdTime value={r.llegadaServicio} onChange={(v) => updateRow(r.id, { llegadaServicio: v })} onAdvance={focusNext} />
                   <TdTime value={r.iniciaServicio} onChange={(v) => updateRow(r.id, { iniciaServicio: v })} onAdvance={focusNext} />
