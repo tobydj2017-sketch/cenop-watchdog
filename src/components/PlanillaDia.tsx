@@ -407,7 +407,14 @@ export default function PlanillaDia({ services, onChanged, initialDate }: Props)
                   <TdText value={r.ordenCarga} onChange={(v) => updateRow(r.id, { ordenCarga: v })} onAdvance={focusNext} />
                   <TdText value={r.remito} onChange={(v) => updateRow(r.id, { remito: v })} onAdvance={focusNext} />
                   <td className="px-1 py-1">
-                    <div className="flex gap-1">
+                    <div className="flex items-center gap-1">
+                      <input
+                        type="checkbox"
+                        checked={selected.has(r.id)}
+                        onChange={() => toggleSelect(r.id)}
+                        title="Seleccionar fila"
+                        className="w-4 h-4 accent-primary cursor-pointer"
+                      />
                       <button
                         onClick={() => duplicateRow(r.id)}
                         className="p-1 rounded hover:bg-secondary text-muted-foreground hover:text-foreground"
@@ -426,6 +433,7 @@ export default function PlanillaDia({ services, onChanged, initialDate }: Props)
                       </button>
                     </div>
                   </td>
+
                 </tr>
               );
             })}
