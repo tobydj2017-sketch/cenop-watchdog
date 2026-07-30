@@ -133,15 +133,16 @@ export default function PlanillaDia({ services, onChanged, initialDate }: Props)
     };
   }, [fecha, services]);
 
-  const clientes = useMemo(() => getActiveClientNames(), []);
-  const choferes = useMemo(() => getPersonalByRole("chofer").map((p) => p.nombre), []);
-  const custodios = useMemo(() => getPersonalByRole("custodio").map((p) => p.nombre), []);
-  const moviles = useMemo(() => getActivePatentes(), []);
+  const clientes = useMemo(() => getActiveClientNames(), [services]);
+  const choferes = useMemo(() => getPersonalByRole("chofer").map((p) => p.nombre), [services]);
+  const custodios = useMemo(() => getPersonalByRole("custodio").map((p) => p.nombre), [services]);
+  const moviles = useMemo(() => getActivePatentes(), [services]);
   const movilesMap = useMemo(() => {
     const m = new Map<string, string>();
     getMoviles().forEach((mv) => m.set(mv.patente, mv.telefono || ""));
     return m;
-  }, []);
+  }, [services]);
+
 
   const overlaps = useMemo(() => detectOverlaps(rows), [rows]);
 
