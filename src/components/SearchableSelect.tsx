@@ -35,7 +35,7 @@ export default function SearchableSelect({ options, value, onChange, placeholder
   }, []);
 
   useEffect(() => {
-    if (!portal || !open) return;
+    if (!open) return;
     const update = () => {
       const el = ref.current;
       if (!el) return;
@@ -49,7 +49,7 @@ export default function SearchableSelect({ options, value, onChange, placeholder
       window.removeEventListener("scroll", update, true);
       window.removeEventListener("resize", update);
     };
-  }, [portal, open]);
+  }, [open]);
 
   const filtered = options.filter((o) =>
     o.toLowerCase().includes((open ? search : "").toLowerCase())
@@ -59,10 +59,10 @@ export default function SearchableSelect({ options, value, onChange, placeholder
     <div
       className={cn(
         "max-h-48 overflow-auto rounded-md border border-border bg-popover text-popover-foreground shadow-md",
-        portal ? "fixed z-[100]" : "absolute z-50 mt-1 w-full",
+        "fixed z-[200]",
         dropdownClassName
       )}
-      style={portal && rect ? { top: rect.top, left: rect.left, width: rect.width } : undefined}
+      style={rect ? { top: rect.top, left: rect.left, width: rect.width } : { visibility: "hidden" }}
     >
       {filtered.length === 0 ? (
         <div className="px-3 py-2 text-xs text-muted-foreground">Sin resultados</div>
@@ -101,7 +101,7 @@ export default function SearchableSelect({ options, value, onChange, placeholder
       <div className="relative">
         <Input
           ref={inputRef}
-          value={open ? search : value}
+          value={open ? (search || value) : value}
           onChange={(e) => {
             setSearch(e.target.value);
             if (!open) setOpen(true);
@@ -109,6 +109,10 @@ export default function SearchableSelect({ options, value, onChange, placeholder
           onFocus={() => {
             setOpen(true);
             setSearch("");
+          }}
+          onBlur={() => {
+            setSearch("");
+            setOpen(false);
           }}
           onKeyDown={(e) => {
             if (e.key === "Enter") {
@@ -142,7 +146,7 @@ export default function SearchableSelect({ options, value, onChange, placeholder
         )}
         <ChevronDown className="absolute right-2 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground pointer-events-none" />
       </div>
-      {open && (portal ? createPortal(list, document.body) : list)}
+      {open && createPortal(list, document.body)}
 
     </div>
   );
