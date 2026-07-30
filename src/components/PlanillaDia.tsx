@@ -137,10 +137,14 @@ export default function PlanillaDia({ services, onChanged, initialDate }: Props)
       });
       const existingIds = new Set(asDrafts.map((s) => s.id));
       const kept = prev.filter((r) => !existingIds.has(r.id) && r.fecha === fecha);
+      // Mantener el orden que ya está en pantalla: las filas no deben saltar mientras se carga
+      const prevOrder = new Map(prev.map((r, i) => [r.id, i]));
+      asDrafts.sort((a, b) => (prevOrder.get(a.id) ?? 9999) - (prevOrder.get(b.id) ?? 9999));
       const merged = [...asDrafts, ...kept];
       if (merged.length === 0) return [emptyDraft(fecha, 1)];
       return merged;
     });
+
   }, [fecha, services]);
 
   // Al desmontar, limpio timers de UI (los datos ya están guardados en el instante)
