@@ -9,7 +9,7 @@ import NotFound from "./pages/NotFound.tsx";
 import LoginPage from "./components/LoginPage.tsx";
 import { AuthProvider, useAuth } from "./lib/authContext";
 import WorldMapBackground from "./components/WorldMapBackground";
-import { bootstrapFromAzure, isAzureConfigured } from "./lib/azureBlob";
+import { bootstrapFromAzure, isAzureConfigured, startAutoRefresh } from "./lib/azureBlob";
 import { getServices, getFuelEntries } from "./lib/store";
 import { getClients } from "./lib/clientStore";
 import { getPersonal } from "./lib/personalStore";
@@ -29,11 +29,15 @@ function AppGate() {
     getClients();
     getPersonal();
     getMoviles();
+    let stopRefresh: (() => void) | undefined;
     bootstrapFromAzure().finally(() => {
       import("./lib/store").then(({ wipeFuelIfNeeded }) => wipeFuelIfNeeded());
       setDataReady(true);
+      // Trae automáticamente lo que carguen otros operadores, sin recargar la página
+      stopRefresh = startAutoRefresh(20000);
     });
 
+    return () => { stopRefresh?.(); };
   }, []);
 
   if (!ready || !dataReady) {
