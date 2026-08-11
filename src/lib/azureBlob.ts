@@ -244,7 +244,8 @@ export function queueUploadMerged<T extends { id?: string }>(
 export const BLOB_KEYS = {
   services: "services.json",
   fuel: "fuel.json",
-  clientes: "clientes.json",
+  // clientes.json quedó en nivel Archive en Azure (409 BlobArchived): usamos un blob nuevo en Hot.
+  clientes: "clientes-v2.json",
   personal: "personal.json",
   moviles: "moviles.json",
 } as const;
