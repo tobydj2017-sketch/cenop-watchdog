@@ -22,7 +22,55 @@ export function getBlobAccessUrl(value: string): string {
   return buildBlobUrl(value.slice("azure:".length));
 }
 
-export async function downloadJson<T>(blobName: string): Promise<T | null> {
+// ----- Rehidratación automática de blobs archivados -----
+// Si el blob quedó en nivel Archive, Azure devuelve 409 BlobArchived y ni se
+// puede leer ni escribir. Intentamos pasarlo a Hot (Set Blob Tier) y reintentar.
+const rehydrating = new Set<string>();
+
+async function setBlobTierHot(blobName: string): Promise<boolean> {
+  try {
+    const url = buildBlobUrl(blobName);
+    const sep = url.includes("?") ? "&" : "?";
+    const res = await fetch(`${url}${sep}comp=tier`, {
+      method: "PUT",
+      headers: {
+        "x-ms-version": "2025-05-05",
+        "x-ms-access-tier": "Hot",
+        "x-ms-rehydrate-priority": "High",
+      },
+    });
+    if (res.ok || res.status === 202) {
+      console.warn(`[Azure] ${blobName}: rehidratación a Hot solicitada`);
+      return true;
+    }
+    console.warn(`[Azure] no se pudo rehidratar ${blobName} -> ${res.status}`);
+    return false;
+  } catch (err) {
+    console.warn(`[Azure] error rehidratando ${blobName}:`, err);
+    return false;
+  }
+}
+
+async function isArchived(res: Response): Promise<boolean> {
+  if (res.status !== 409) return false;
+  try {
+    const text = await res.clone().text();
+    return text.includes("BlobArchived") || text.includes("archived blob");
+  } catch {
+    return false;
+  }
+}
+
+async function handleArchived(blobName: string, res: Response): Promise<boolean> {
+  if (!(await isArchived(res))) return false;
+  if (rehydrating.has(blobName)) return false;
+  rehydrating.add(blobName);
+  const ok = await setBlobTierHot(blobName);
+  if (!ok) rehydrating.delete(blobName);
+  return ok;
+}
+
+export async function downloadJson<T>(blobName: string, retry = true): Promise<T | null> {
   if (!isAzureConfigured()) return null;
   try {
     const res = await fetch(buildBlobUrl(blobName), {
@@ -31,9 +79,14 @@ export async function downloadJson<T>(blobName: string): Promise<T | null> {
     });
     if (res.status === 404) return null;
     if (!res.ok) {
+      if (retry && (await handleArchived(blobName, res))) {
+        await new Promise((r) => setTimeout(r, 2000));
+        return downloadJson<T>(blobName, false);
+      }
       console.warn(`[Azure] download ${blobName} -> ${res.status}`);
       return null;
     }
+    rehydrating.delete(blobName);
     const text = await res.text();
     if (!text) return null;
     return JSON.parse(text) as T;
@@ -43,7 +96,7 @@ export async function downloadJson<T>(blobName: string): Promise<T | null> {
   }
 }
 
-export async function uploadJson(blobName: string, data: unknown): Promise<boolean> {
+export async function uploadJson(blobName: string, data: unknown, retry = true): Promise<boolean> {
   if (!isAzureConfigured()) return false;
   try {
     const body = JSON.stringify(data);
@@ -57,9 +110,14 @@ export async function uploadJson(blobName: string, data: unknown): Promise<boole
       body,
     });
     if (!res.ok) {
+      if (retry && (await handleArchived(blobName, res))) {
+        await new Promise((r) => setTimeout(r, 2000));
+        return uploadJson(blobName, data, false);
+      }
       console.warn(`[Azure] upload ${blobName} -> ${res.status}`, await res.text());
       return false;
     }
+    rehydrating.delete(blobName);
     return true;
   } catch (err) {
     console.warn(`[Azure] error subiendo ${blobName}:`, err);
