@@ -313,7 +313,6 @@ export async function bootstrapFromAzure(): Promise<void> {
       } else if (remote === null && local.length > 0) {
         void uploadJson(blob, local);
       }
-      }
     }),
   ]);
 }
