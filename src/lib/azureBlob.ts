@@ -253,3 +253,77 @@ export async function bootstrapFromAzure(): Promise<void> {
     }),
   ]);
 }
+
+// ----- Refresco periódico: trae lo que cargaron otros operadores sin recargar la página -----
+let refreshing = false;
+
+/**
+ * Descarga los blobs y los fusiona con lo que hay en localStorage.
+ * - services/fuel: fusión por id. Lo remoto pisa a lo local en ids compartidos,
+ *   pero se conservan los ids que sólo existen localmente (todavía sin subir).
+ * - catálogos (clientes/personal/móviles): fusión por id, conservando altas locales.
+ * Nunca sube nada: sólo lee. Así un operador con la página abierta no puede
+ * borrar lo que cargó otro.
+ */
+export async function refreshFromAzure(): Promise<boolean> {
+  if (!isAzureConfigured() || refreshing) return false;
+  refreshing = true;
+  let changed = false;
+  try {
+    const targets = [
+      [BLOB_KEYS.services, LOCAL_KEYS.services],
+      [BLOB_KEYS.fuel, LOCAL_KEYS.fuel],
+      [BLOB_KEYS.clientes, LOCAL_KEYS.clientes],
+      [BLOB_KEYS.personal, LOCAL_KEYS.personal],
+      [BLOB_KEYS.moviles, LOCAL_KEYS.moviles],
+    ] as const;
+
+    await Promise.all(
+      targets.map(async ([blob, localKey]) => {
+        const remote = await downloadJson<any[]>(blob);
+        if (!Array.isArray(remote)) return;
+        const tombstones = new Set(getLocalTombstones(blob));
+        let local: any[] = [];
+        try {
+          const raw = localStorage.getItem(localKey);
+          const parsed = raw ? JSON.parse(raw) : [];
+          if (Array.isArray(parsed)) local = parsed;
+        } catch { local = []; }
+
+        const byId = new Map<string, any>();
+        for (const item of local) if (item?.id && !tombstones.has(item.id)) byId.set(item.id, item);
+        for (const item of remote) if (item?.id && !tombstones.has(item.id)) byId.set(item.id, item);
+        const merged = Array.from(byId.values());
+        const next = JSON.stringify(merged);
+        if (next !== JSON.stringify(local)) {
+          localStorage.setItem(localKey, next);
+          changed = true;
+        }
+      }),
+    );
+  } catch (err) {
+    console.warn("[Azure] refresh falló:", err);
+  } finally {
+    refreshing = false;
+  }
+  if (changed) {
+    window.dispatchEvent(new Event("cenop:services-synced"));
+    window.dispatchEvent(new Event("cenop:fuel-synced"));
+  }
+  return changed;
+}
+
+/** Arranca el refresco automático (intervalo + al volver a la pestaña). */
+export function startAutoRefresh(intervalMs = 20000): () => void {
+  if (!isAzureConfigured()) return () => {};
+  const tick = () => { void refreshFromAzure(); };
+  const onVisible = () => { if (document.visibilityState === "visible") tick(); };
+  const timer = setInterval(tick, intervalMs);
+  window.addEventListener("focus", tick);
+  document.addEventListener("visibilitychange", onVisible);
+  return () => {
+    clearInterval(timer);
+    window.removeEventListener("focus", tick);
+    document.removeEventListener("visibilitychange", onVisible);
+  };
+}
