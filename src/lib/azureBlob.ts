@@ -294,19 +294,25 @@ export async function bootstrapFromAzure(): Promise<void> {
       }
     }),
     ...overwrite.map(async ([blob, localKey]) => {
-      const remote = await downloadJson<unknown>(blob);
-      if (remote !== null && Array.isArray(remote)) {
-        localStorage.setItem(localKey, JSON.stringify(remote));
-      } else if (remote === null) {
-        const local = localStorage.getItem(localKey);
-        if (local) {
-          try {
-            const parsed = JSON.parse(local);
-            if (Array.isArray(parsed) && parsed.length > 0) {
-              void uploadJson(blob, parsed);
-            }
-          } catch {/* ignore */}
-        }
+      const remote = await downloadJson<any[]>(blob);
+      let local: any[] = [];
+      try {
+        const parsed = JSON.parse(localStorage.getItem(localKey) || "[]");
+        if (Array.isArray(parsed)) local = parsed;
+      } catch { local = []; }
+
+      if (Array.isArray(remote)) {
+        // Catálogos: fusión por id. Lo remoto manda en ids compartidos y se
+        // conservan las altas locales todavía no subidas.
+        const byId = new Map<string, any>();
+        for (const item of local) if (item?.id) byId.set(item.id, item);
+        for (const item of remote) if (item?.id) byId.set(item.id, item);
+        const merged = Array.from(byId.values());
+        localStorage.setItem(localKey, JSON.stringify(merged));
+        if (merged.length !== remote.length) void uploadJson(blob, merged);
+      } else if (remote === null && local.length > 0) {
+        void uploadJson(blob, local);
+      }
       }
     }),
   ]);
