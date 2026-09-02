@@ -86,11 +86,19 @@ export function getPersonalByRole(role: PersonalRole): PersonalEntry[] {
 }
 
 export function getActivePersonalNames(): string[] {
-  return getPersonal()
-    .filter((p) => p.activo)
-    .map((p) => p.nombre)
-    .sort((a, b) => a.localeCompare(b, "es", { sensitivity: "base" }));
+  const names = getPersonal()
+    .filter((p) => p.activo !== false)
+    .map((p) => (p.nombre || "").trim())
+    .filter(Boolean);
+  // Deduplicar (case-insensitive) para evitar repetidos en las listas desplegables
+  const seen = new Map<string, string>();
+  for (const n of names) {
+    const key = n.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase();
+    if (!seen.has(key)) seen.set(key, n);
+  }
+  return [...seen.values()].sort((a, b) => a.localeCompare(b, "es", { sensitivity: "base" }));
 }
+
 
 export const ROLE_LABELS: Record<PersonalRole, string> = {
   chofer: "Chofer",
