@@ -294,25 +294,37 @@ export async function bootstrapUsers(): Promise<void> {
     if (migrated) writeLocal(patched);
   }
   const users = readLocal();
+  let seeded = false;
 
-  if (!users.some((u) => u.username === SEED_ADMIN_USERNAME.toLowerCase())) {
-    const passwordHash = await hashPassword(SEED_ADMIN_PASSWORD);
-    const admin: UserAccount = {
+  // Cuentas que deben existir siempre (se crean si faltan en users.json).
+  const SEEDS: Array<{ username: string; password: string; role: UserRole }> = [
+    { username: SEED_ADMIN_USERNAME, password: SEED_ADMIN_PASSWORD, role: "admin" },
+    { username: "operaciones@amseguridad.com.ar", password: "Operaciones2026!", role: "administracion" },
+  ];
+
+  for (const seed of SEEDS) {
+    const uname = seed.username.toLowerCase();
+    if (users.some((u) => u.username === uname)) continue;
+    users.push({
       id: generateId(),
-      username: SEED_ADMIN_USERNAME.toLowerCase(),
-      passwordHash,
-      role: "admin",
-      permissions: DEFAULT_PERMISSIONS.admin,
+      username: uname,
+      passwordHash: await hashPassword(seed.password),
+      role: seed.role,
+      permissions: DEFAULT_PERMISSIONS[seed.role],
       activo: true,
       createdAt: new Date().toISOString(),
-    };
-    users.push(admin);
+    });
+    seeded = true;
+  }
+
+  if (seeded) {
     writeLocal(users);
     if (isAzureConfigured()) {
       void uploadJson(USERS_BLOB, users);
     }
   }
 }
+
 
 // ---------------- session ----------------
 
