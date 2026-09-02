@@ -223,40 +223,22 @@ export default function Index() {
     const onFuel = () => setFuelEntries(getFuelEntries());
     window.addEventListener("cenop:services-synced", onServices);
     window.addEventListener("cenop:fuel-synced", onFuel);
-    // También refresco periódico ligero por si otro navegador guardó recientemente.
-    const iv = setInterval(() => {
-      import("./../lib/azureBlob").then(async ({ downloadJson, BLOB_KEYS, isAzureConfigured }) => {
-        if (!isAzureConfigured()) return;
-        const [remoteSrv, remoteFuel] = await Promise.all([
-          downloadJson<any[]>(BLOB_KEYS.services),
-          downloadJson<any[]>(BLOB_KEYS.fuel),
-        ]);
-        if (Array.isArray(remoteSrv)) {
-          const localRaw = localStorage.getItem("cenop_services");
-          const local = localRaw ? JSON.parse(localRaw) : [];
-          const byId = new Map<string, any>();
-          for (const it of remoteSrv) if (it?.id) byId.set(it.id, it);
-          for (const it of local) if (it?.id) byId.set(it.id, it);
-          const merged = Array.from(byId.values());
-          if (merged.length !== local.length) {
-            localStorage.setItem("cenop_services", JSON.stringify(merged));
-            setServices(getServices());
-          }
-        }
-        if (Array.isArray(remoteFuel)) {
-          const localRaw = localStorage.getItem("cenop_fuel");
-          const local = localRaw ? JSON.parse(localRaw) : [];
-          const byId = new Map<string, any>();
-          for (const it of remoteFuel) if (it?.id) byId.set(it.id, it);
-          for (const it of local) if (it?.id) byId.set(it.id, it);
-          const merged = Array.from(byId.values());
-          if (merged.length !== local.length) {
-            localStorage.setItem("cenop_fuel", JSON.stringify(merged));
-            setFuelEntries(getFuelEntries());
-          }
+    // Refresco periódico: trae SIEMPRE lo remoto (incluidas modificaciones de
+    // servicios ya existentes, no sólo altas nuevas) y actualiza la vista.
+    const pull = () => {
+      import("./../lib/azureBlob").then(async ({ refreshFromAzure }) => {
+        const changed = await refreshFromAzure();
+        if (changed) {
+          setServices(getServices());
+          setFuelEntries(getFuelEntries());
         }
       });
-    }, 30000);
+    };
+    pull();
+    const iv = setInterval(pull, 15000);
+    const onFocus = () => pull();
+    window.addEventListener("focus", onFocus);
+
     return () => {
       window.removeEventListener("cenop:services-synced", onServices);
       window.removeEventListener("cenop:fuel-synced", onFuel);
