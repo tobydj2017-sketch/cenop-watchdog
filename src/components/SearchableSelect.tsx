@@ -63,12 +63,24 @@ export default function SearchableSelect({ options, value, onChange, placeholder
     s.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase().trim();
 
   const query = open ? norm(search) : "";
-  const sorted = [...options].sort((a, b) => a.localeCompare(b, "es", { sensitivity: "base" }));
-  const filtered = query
+  // Limpiar, quitar vacíos y deduplicar (evita keys repetidas que rompen el render)
+  const unique = (() => {
+    const seen = new Map<string, string>();
+    for (const raw of options) {
+      const o = (raw ?? "").toString().trim();
+      if (!o) continue;
+      const k = norm(o);
+      if (!seen.has(k)) seen.set(k, o);
+    }
+    return [...seen.values()];
+  })();
+  const sorted = unique.sort((a, b) => a.localeCompare(b, "es", { sensitivity: "base" }));
+  const tokens = query ? query.split(/\s+/).filter(Boolean) : [];
+  const filtered = tokens.length
     ? sorted
         .filter((o) => {
           const n = norm(o);
-          return query.split(/\s+/).every((t) => n.includes(t));
+          return tokens.every((t) => n.includes(t));
         })
         .sort((a, b) => {
           const sa = norm(a).startsWith(query) ? 0 : 1;
@@ -92,7 +104,8 @@ export default function SearchableSelect({ options, value, onChange, placeholder
       {filtered.length === 0 ? (
         <div className="px-3 py-2 text-xs text-muted-foreground">Sin resultados</div>
       ) : (
-        filtered.map((opt) => (
+        filtered.map((opt, i) => (
+
           <div
             key={opt}
             className={cn(
