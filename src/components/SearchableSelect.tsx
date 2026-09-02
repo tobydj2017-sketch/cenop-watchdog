@@ -128,7 +128,7 @@ export default function SearchableSelect({ options, value, onChange, placeholder
       <div className="relative">
         <Input
           ref={inputRef}
-          value={open ? (search || value) : value}
+          value={open ? search : value}
           onChange={(e) => {
             setSearch(e.target.value);
             if (!open) setOpen(true);
