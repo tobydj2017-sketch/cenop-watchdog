@@ -59,9 +59,23 @@ export default function SearchableSelect({ options, value, onChange, placeholder
     };
   }, [open]);
 
-  const filtered = options.filter((o) =>
-    o.toLowerCase().includes((open ? search : "").toLowerCase())
-  );
+  const norm = (s: string) =>
+    s.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase().trim();
+
+  const query = open ? norm(search) : "";
+  const sorted = [...options].sort((a, b) => a.localeCompare(b, "es", { sensitivity: "base" }));
+  const filtered = query
+    ? sorted
+        .filter((o) => {
+          const n = norm(o);
+          return query.split(/\s+/).every((t) => n.includes(t));
+        })
+        .sort((a, b) => {
+          const sa = norm(a).startsWith(query) ? 0 : 1;
+          const sb = norm(b).startsWith(query) ? 0 : 1;
+          return sa - sb || a.localeCompare(b, "es", { sensitivity: "base" });
+        })
+    : sorted;
 
   const list = (
     <div
