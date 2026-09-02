@@ -242,6 +242,7 @@ export default function Index() {
     return () => {
       window.removeEventListener("cenop:services-synced", onServices);
       window.removeEventListener("cenop:fuel-synced", onFuel);
+      window.removeEventListener("focus", onFocus);
       clearInterval(iv);
     };
   }, []);
