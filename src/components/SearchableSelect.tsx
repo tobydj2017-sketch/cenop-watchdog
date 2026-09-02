@@ -152,7 +152,7 @@ export default function SearchableSelect({ options, value, onChange, placeholder
               setOpen(false);
             }
           }}
-          placeholder={placeholder}
+          placeholder={open && value ? value : placeholder}
           className={cn("h-9 bg-background text-foreground text-sm pr-14", inputClassName)}
         />
         {value && !open && (
