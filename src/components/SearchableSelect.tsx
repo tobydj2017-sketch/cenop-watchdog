@@ -107,7 +107,7 @@ export default function SearchableSelect({ options, value, onChange, placeholder
         filtered.map((opt, i) => (
 
           <div
-            key={opt}
+            key={`${opt}-${i}`}
             className={cn(
               "px-3 py-1.5 text-sm cursor-pointer hover:bg-accent hover:text-accent-foreground flex items-center justify-between",
               opt === value && "bg-accent/50"
