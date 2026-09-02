@@ -59,9 +59,23 @@ export default function SearchableSelect({ options, value, onChange, placeholder
     };
   }, [open]);
 
-  const filtered = options.filter((o) =>
-    o.toLowerCase().includes((open ? search : "").toLowerCase())
-  );
+  const norm = (s: string) =>
+    s.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase().trim();
+
+  const query = open ? norm(search) : "";
+  const sorted = [...options].sort((a, b) => a.localeCompare(b, "es", { sensitivity: "base" }));
+  const filtered = query
+    ? sorted
+        .filter((o) => {
+          const n = norm(o);
+          return query.split(/\s+/).every((t) => n.includes(t));
+        })
+        .sort((a, b) => {
+          const sa = norm(a).startsWith(query) ? 0 : 1;
+          const sb = norm(b).startsWith(query) ? 0 : 1;
+          return sa - sb || a.localeCompare(b, "es", { sensitivity: "base" });
+        })
+    : sorted;
 
   const list = (
     <div
@@ -114,7 +128,7 @@ export default function SearchableSelect({ options, value, onChange, placeholder
       <div className="relative">
         <Input
           ref={inputRef}
-          value={open ? (search || value) : value}
+          value={open ? search : value}
           onChange={(e) => {
             setSearch(e.target.value);
             if (!open) setOpen(true);
@@ -138,7 +152,7 @@ export default function SearchableSelect({ options, value, onChange, placeholder
               setOpen(false);
             }
           }}
-          placeholder={placeholder}
+          placeholder={open && value ? value : placeholder}
           className={cn("h-9 bg-background text-foreground text-sm pr-14", inputClassName)}
         />
         {value && !open && (

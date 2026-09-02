@@ -86,7 +86,10 @@ export function getPersonalByRole(role: PersonalRole): PersonalEntry[] {
 }
 
 export function getActivePersonalNames(): string[] {
-  return getPersonal().filter((p) => p.activo).map((p) => p.nombre);
+  return getPersonal()
+    .filter((p) => p.activo)
+    .map((p) => p.nombre)
+    .sort((a, b) => a.localeCompare(b, "es", { sensitivity: "base" }));
 }
 
 export const ROLE_LABELS: Record<PersonalRole, string> = {
