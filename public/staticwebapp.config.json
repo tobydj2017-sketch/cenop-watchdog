@@ -1,0 +1,12 @@
+{
+  "navigationFallback": {
+    "rewrite": "/index.html",
+    "exclude": ["/assets/*", "/*.{ico,png,jpg,jpeg,gif,svg,webp,pdf}"]
+  },
+  "routes": [
+    {
+      "route": "/index.html",
+      "headers": { "Cache-Control": "no-cache" }
+    }
+  ]
+}
