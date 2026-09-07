@@ -48,6 +48,8 @@ export interface UserAccount {
 const USERS_LOCAL_KEY = "cenop_users";
 const SESSION_KEY = "cenop_session";
 const USERS_BLOB = "users.json";
+export const USERS_SYNC_EVENT = "cenop:users-synced";
+let usersChangedLocallyAt = 0;
 
 // Extender BLOB_KEYS sin tocar el archivo original
 (BLOB_KEYS as Record<string, string>).users = USERS_BLOB;
@@ -208,8 +210,28 @@ function readLocal(): UserAccount[] {
 }
 
 function writeLocal(users: UserAccount[]) {
+  usersChangedLocallyAt = Date.now();
   localStorage.setItem(USERS_LOCAL_KEY, JSON.stringify(users));
   queueUpload(USERS_BLOB, () => users);
+  window.dispatchEvent(new Event(USERS_SYNC_EVENT));
+}
+
+/** Actualiza usuarios y permisos desde el almacenamiento compartido de Azure. */
+export async function syncUsersFromAzure(force = false): Promise<boolean> {
+  if (!isAzureConfigured()) return false;
+  // Deja que una edición local termine de subirse antes de volver a leer.
+  if (!force && Date.now() - usersChangedLocallyAt < 3000) return false;
+
+  const remote = await downloadJson<UserAccount[]>(USERS_BLOB);
+  if (!Array.isArray(remote)) return false;
+
+  const current = localStorage.getItem(USERS_LOCAL_KEY) || "[]";
+  const next = JSON.stringify(remote);
+  if (current === next) return false;
+
+  localStorage.setItem(USERS_LOCAL_KEY, next);
+  window.dispatchEvent(new Event(USERS_SYNC_EVENT));
+  return true;
 }
 
 export function getUsers(): UserAccount[] {
@@ -276,12 +298,7 @@ const SEED_ADMIN_PASSWORD = "Admin2026!";
 
 /** Descarga users.json desde Azure y siembra el admin si no existe. */
 export async function bootstrapUsers(): Promise<void> {
-  if (isAzureConfigured()) {
-    const remote = await downloadJson<UserAccount[]>(USERS_BLOB);
-    if (remote && Array.isArray(remote)) {
-      localStorage.setItem(USERS_LOCAL_KEY, JSON.stringify(remote));
-    }
-  }
+  await syncUsersFromAzure(true);
   // Migración: rellenar permisos nuevos con los defaults del rol
   {
     const users = readLocal();

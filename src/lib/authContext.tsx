@@ -6,6 +6,8 @@ import {
   login as doLogin,
   logout as doLogout,
   bootstrapUsers,
+  syncUsersFromAzure,
+  USERS_SYNC_EVENT,
   isOwnService,
 } from "./authStore";
 
@@ -27,11 +29,32 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [ready, setReady] = useState(false);
 
   useEffect(() => {
+    let active = true;
     (async () => {
       await bootstrapUsers();
+      if (!active) return;
       setUser(getCurrentUser());
       setReady(true);
     })();
+
+    const refreshUsers = () => {
+      void syncUsersFromAzure().then(() => {
+        if (active) setUser(getCurrentUser());
+      });
+    };
+    const onUsersSynced = () => {
+      if (active) setUser(getCurrentUser());
+    };
+    const timer = window.setInterval(refreshUsers, 20000);
+    window.addEventListener("focus", refreshUsers);
+    window.addEventListener(USERS_SYNC_EVENT, onUsersSynced);
+
+    return () => {
+      active = false;
+      window.clearInterval(timer);
+      window.removeEventListener("focus", refreshUsers);
+      window.removeEventListener(USERS_SYNC_EVENT, onUsersSynced);
+    };
   }, []);
 
   const refresh = useCallback(() => setUser(getCurrentUser()), []);

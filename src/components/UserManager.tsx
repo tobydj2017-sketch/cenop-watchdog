@@ -1,4 +1,4 @@
-import { useState, useMemo } from "react";
+import { useEffect, useState, useMemo } from "react";
 import {
   UserAccount,
   UserPermissions,
@@ -10,6 +10,7 @@ import {
   updateUser,
   updateUserPassword,
   deleteUser,
+  USERS_SYNC_EVENT,
 } from "@/lib/authStore";
 import { getPersonal } from "@/lib/personalStore";
 import { useAuth } from "@/lib/authContext";
@@ -37,6 +38,12 @@ export default function UserManager() {
   const [creating, setCreating] = useState(false);
   const [editingPermsId, setEditingPermsId] = useState<string | null>(null);
   const [changingPasswordId, setChangingPasswordId] = useState<string | null>(null);
+
+  useEffect(() => {
+    const reloadUsers = () => setUsers(getUsers());
+    window.addEventListener(USERS_SYNC_EVENT, reloadUsers);
+    return () => window.removeEventListener(USERS_SYNC_EVENT, reloadUsers);
+  }, []);
 
   if (!currentUser?.permissions.manageUsers) {
     return (
