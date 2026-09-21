@@ -29,15 +29,12 @@ function AppGate() {
     getClients();
     getPersonal();
     getMoviles();
-    let stopRefresh: (() => void) | undefined;
     bootstrapFromAzure().finally(() => {
       import("./lib/store").then(({ wipeFuelIfNeeded }) => wipeFuelIfNeeded());
       setDataReady(true);
-      // Trae automáticamente lo que carguen otros operadores, sin recargar la página
-      stopRefresh = startAutoRefresh(20000);
+      // El refresco periódico lo maneja la pantalla principal (un solo ciclo,
+      // para no duplicar descargas ni trabar la interfaz).
     });
-
-    return () => { stopRefresh?.(); };
   }, []);
 
   if (!ready || !dataReady) {
