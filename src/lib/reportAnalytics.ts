@@ -300,5 +300,27 @@ export function buildDownloadReports(services: ServiceEntry[], fuelEntries: Fuel
       rows: services.flatMap((service) => (service.peajes || []).map((peaje) => [formatDate(service.fecha), service.solicitud, normalizeClientName(service.cliente), getPeajeType(peaje), money(peaje.monto || 0)])),
       chartData: services.flatMap((service) => (service.peajes || []).map((peaje) => ({ name: getPeajeType(peaje) || `Solicitud ${service.solicitud}`, value: peaje.monto || 0, label: money(peaje.monto || 0) }))),
     },
+    {
+      id: "custodias-largas-cortas",
+      title: "Custodias Largas y Cortas",
+      description: "Clasificación decidida por el administrador al cargar cada custodia.",
+      metricLabel: "Horas totales",
+      totalLabel: "Servicios",
+      totalValue: serviciosUnicos.toString(),
+      columns: ["Fecha", "Solicitud", "Tipo Custodia", "Cliente", "Destino", "Chofer", "Custodio", "Móvil", "KM Recorridos", "Hs Total"],
+      rows: services.map((service) => {
+        const hours = getAdjustedHours(service);
+        return [
+          formatDate(service.fecha), service.solicitud, getTipoCustodiaLabel(service),
+          normalizeClientName(service.cliente), service.destino || "—", service.chofer || "—",
+          service.custodio || "—", service.movil || "—", service.kmRecorridos || "—",
+          formatHoursMinutes(hours.prod + hours.improd),
+        ];
+      }),
+      chartData: summarizeByName(services.map((service) => {
+        const hours = getAdjustedHours(service);
+        return { name: getTipoCustodiaLabel(service), minutes: hours.prod + hours.improd };
+      })),
+    },
   ];
 }
