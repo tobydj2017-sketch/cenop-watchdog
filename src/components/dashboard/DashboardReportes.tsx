@@ -104,7 +104,7 @@ export default function DashboardReportes({ services, fuelEntries }: Props) {
             </Button>
           )}
         </div>
-        <div className="grid grid-cols-2 md:grid-cols-4 xl:grid-cols-7 gap-3">
+        <div className="grid grid-cols-2 md:grid-cols-4 xl:grid-cols-8 gap-3">
           <div className="space-y-1">
             <Label className="text-xs text-muted-foreground">Desde</Label>
             <Input type="date" value={fechaDesde} onChange={(e) => setFechaDesde(e.target.value)} className="h-9 text-sm" />

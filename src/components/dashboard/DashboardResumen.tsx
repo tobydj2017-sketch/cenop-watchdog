@@ -177,6 +177,47 @@ export default function DashboardResumen({ services, fuelEntries, byPerson, byMo
         <KpiDetailPanel detail={selectedDetail} totalHoras={totalHoras} totalServicios={uniqueServices} />
       )}
 
+      {/* Custodias largas vs cortas */}
+      {(() => {
+        const counts = { larga: 0, corta: 0, sin: 0 };
+        const minutos = { larga: 0, corta: 0, sin: 0 };
+        services.forEach((s) => {
+          const key = s.tipoCustodia === "larga" ? "larga" : s.tipoCustodia === "corta" ? "corta" : "sin";
+          counts[key] += 1;
+          const h = getAdjustedHours(s);
+          minutos[key] += h.prod + h.improd;
+        });
+        const rows = [
+          { name: "Largas", value: counts.larga, min: minutos.larga, color: "hsl(var(--chart-1))" },
+          { name: "Cortas", value: counts.corta, min: minutos.corta, color: "hsl(var(--chart-3))" },
+          { name: "Sin clasificar", value: counts.sin, min: minutos.sin, color: "hsl(var(--chart-5))" },
+        ].filter((r) => r.value > 0);
+        if (rows.length === 0) return null;
+        return (
+          <div className="glass-card p-5">
+            <h3 className="text-sm font-semibold text-muted-foreground mb-4 uppercase tracking-wider">Custodias Largas vs Cortas</h3>
+            <div className="grid lg:grid-cols-[1fr_1fr] gap-4 items-center">
+              <ResponsiveContainer width="100%" height={220}>
+                <PieChart>
+                  <Pie data={rows} cx="50%" cy="50%" outerRadius={80} dataKey="value" label={({ name, value }) => `${name}: ${value}`}>
+                    {rows.map((r) => <Cell key={r.name} fill={r.color} />)}
+                  </Pie>
+                  <Tooltip formatter={(v: number) => `${v} servicios`} />
+                </PieChart>
+              </ResponsiveContainer>
+              <div className="grid grid-cols-1 gap-2">
+                {rows.map((r) => (
+                  <div key={r.name} className="rounded-md border border-border/70 bg-muted/20 p-3 flex items-center justify-between">
+                    <span className="text-xs uppercase tracking-wider text-muted-foreground">{r.name}</span>
+                    <span className="stat-value text-base">{r.value} · {formatHoursMinutes(r.min)}</span>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+        );
+      })()}
+
       {/* Charts row */}
       <div className="grid lg:grid-cols-2 gap-4">
         <div className="glass-card p-5">
