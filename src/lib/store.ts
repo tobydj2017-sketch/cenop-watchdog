@@ -115,10 +115,16 @@ export function updateService(entry: ServiceEntry) {
   saveServices(entries);
 }
 
+let fuelCacheRaw: string | null = null;
+let fuelCacheValue: FuelEntry[] = [];
+
 export function getFuelEntries(): FuelEntry[] {
   const data = localStorage.getItem(FUEL_KEY);
+  if (data === fuelCacheRaw) return fuelCacheValue;
   const parsed: FuelEntry[] = data ? JSON.parse(data) : [];
-  return parsed.filter((f) => !isLegacy(f.fecha));
+  fuelCacheRaw = data;
+  fuelCacheValue = parsed.filter((f) => !isLegacy(f.fecha));
+  return fuelCacheValue;
 }
 
 export function saveFuelEntries(entries: FuelEntry[]) {
