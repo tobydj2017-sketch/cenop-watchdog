@@ -309,6 +309,25 @@ export default function ServiceEditDialog({ service, open, onClose, onSave, exis
               {renderField({ label: "N° Remito", field: "remito" })}
               {renderField({ label: "Continúa Orden N°", field: "continuaOrden" })}
               <div className="space-y-1.5 md:col-span-3">
+                <Label className="text-xs font-bold uppercase tracking-wider text-muted-foreground">Tipo de Custodia</Label>
+                <div className="flex flex-wrap gap-4 rounded-md border border-input bg-background p-3">
+                  {([
+                    { value: "larga", label: "Custodia larga" },
+                    { value: "corta", label: "Custodia corta" },
+                  ] as const).map((opt) => (
+                    <label key={opt.value} className="flex items-center gap-2 text-sm font-semibold text-foreground cursor-pointer">
+                      <input
+                        type="checkbox"
+                        className="h-4 w-4 accent-primary"
+                        checked={form.tipoCustodia === opt.value}
+                        onChange={(e) => set("tipoCustodia", e.target.checked ? opt.value : undefined)}
+                      />
+                      {opt.label}
+                    </label>
+                  ))}
+                </div>
+              </div>
+              <div className="space-y-1.5 md:col-span-3">
                 <Label className="text-xs font-bold uppercase tracking-wider text-muted-foreground">Observaciones</Label>
                 <Textarea value={form.observaciones} onChange={(e) => set("observaciones", e.target.value)} rows={2} />
               </div>
