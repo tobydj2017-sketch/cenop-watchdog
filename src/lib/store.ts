@@ -62,11 +62,20 @@ function readLocal<T>(key: string): T[] {
   }
 }
 
+// Caché: getServices() se llama muy seguido y recalcular horas + renumerar
+// sobre miles de filas en cada llamada trababa la interfaz. Mientras el
+// contenido crudo no cambie, devolvemos el mismo resultado ya calculado.
+let servicesCacheRaw: string | null = null;
+let servicesCacheValue: ServiceEntry[] = [];
+
 export function getServices(): ServiceEntry[] {
   const data = localStorage.getItem(SERVICES_KEY);
+  if (data === servicesCacheRaw) return servicesCacheValue;
   const parsed: ServiceEntry[] = data ? JSON.parse(data) : [];
   const filtered = parsed.filter(isCountableServiceEntry).filter((s) => !isLegacy(s.fecha));
-  return renumberDeterministic(recomputeHours(filtered));
+  servicesCacheRaw = data;
+  servicesCacheValue = renumberDeterministic(recomputeHours(filtered));
+  return servicesCacheValue;
 }
 
 export function saveServices(entries: ServiceEntry[]) {
@@ -106,10 +115,16 @@ export function updateService(entry: ServiceEntry) {
   saveServices(entries);
 }
 
+let fuelCacheRaw: string | null = null;
+let fuelCacheValue: FuelEntry[] = [];
+
 export function getFuelEntries(): FuelEntry[] {
   const data = localStorage.getItem(FUEL_KEY);
+  if (data === fuelCacheRaw) return fuelCacheValue;
   const parsed: FuelEntry[] = data ? JSON.parse(data) : [];
-  return parsed.filter((f) => !isLegacy(f.fecha));
+  fuelCacheRaw = data;
+  fuelCacheValue = parsed.filter((f) => !isLegacy(f.fecha));
+  return fuelCacheValue;
 }
 
 export function saveFuelEntries(entries: FuelEntry[]) {
