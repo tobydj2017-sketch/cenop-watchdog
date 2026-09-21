@@ -63,6 +63,7 @@ export default function ServiceForm({ onAdd, selectedDate, existingServices }: P
   const [comisiones, setComisiones] = useState<ComisionEntry[]>([]);
   const [serviciosOp, setServiciosOp] = useState<ServicioOperacionesEntry[]>([]);
   const [tipoCenopOp, setTipoCenopOp] = useState<"ninguno" | "cenop_en_op" | "op_en_cenop">("ninguno");
+  const [tipoCustodia, setTipoCustodia] = useState<"larga" | "corta" | undefined>(undefined);
 
   const allPersonalEntries = getPersonal();
   const allPersonal = getActivePersonalNames();
@@ -205,6 +206,7 @@ export default function ServiceForm({ onAdd, selectedDate, existingServices }: P
       choferEsOperaciones: !!opsBadgeMap[form.chofer],
       custodioEsOperaciones: !!opsBadgeMap[form.custodio],
       tipoCenopOp,
+      tipoCustodia,
     };
     const collisions = findServiceCollisions(candidate, existingServices);
     if (collisions.length > 0) {
@@ -217,6 +219,7 @@ export default function ServiceForm({ onAdd, selectedDate, existingServices }: P
     setComisiones([]);
     setServiciosOp([]);
     setTipoCenopOp("ninguno");
+    setTipoCustodia(undefined);
     setStep(1);
     setOpen(false);
   };

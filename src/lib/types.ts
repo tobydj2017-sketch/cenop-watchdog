@@ -79,6 +79,8 @@ export interface ServiceEntry {
   choferEsOperaciones?: boolean;
   custodioEsOperaciones?: boolean;
   tipoCenopOp?: "ninguno" | "cenop_en_op" | "op_en_cenop";
+  // Clasificación manual de la custodia decidida por el administrador al cargarla.
+  tipoCustodia?: "larga" | "corta";
   // Minutos de llegada tarde (respecto a la cita) por persona. Se registra a día vencido.
   llegadaTardeChoferMin?: string;
   llegadaTardeCustodioMin?: string;
