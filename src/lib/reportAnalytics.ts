@@ -10,7 +10,8 @@ export type ReportId =
   | "clientes"
   | "moviles"
   | "combustible"
-  | "peajes";
+  | "peajes"
+  | "custodias-largas-cortas";
 
 export interface DownloadReport {
   id: ReportId;
@@ -68,6 +69,12 @@ function getComisionesDetail(service: ServiceEntry) {
       formatRangeDuration(item.horaInicio || item.hora, item.horaFin),
     ].join(" · ")).join(" | ")
     : "—";
+}
+
+export function getTipoCustodiaLabel(service: Pick<ServiceEntry, "tipoCustodia">) {
+  if (service.tipoCustodia === "larga") return "Larga";
+  if (service.tipoCustodia === "corta") return "Corta";
+  return "Sin clasificar";
 }
 
 function roleByName() {
@@ -183,7 +190,7 @@ export function buildDownloadReports(services: ServiceEntry[], fuelEntries: Fuel
         "Orden de Carga Cliente", "N° Remito", "Continúa Orden N°", "Observaciones",
         "Horas Productivas", "Horas Improductivas 1", "Horas Improductivas 2",
         "Horas Improductivas", "Horas Totales", "KM Salida", "KM Llegada", "KM Recorridos",
-        "Tipo Servicio Cruzado", "Servicios Cruzados", "Comisiones Productivas", "Peajes", "Detalle Peajes",
+        "Tipo Custodia", "Tipo Servicio Cruzado", "Servicios Cruzados", "Comisiones Productivas", "Peajes", "Detalle Peajes",
       ],
       rows: services.map((service) => [
         formatDate(service.fecha),
@@ -218,6 +225,7 @@ export function buildDownloadReports(services: ServiceEntry[], fuelEntries: Fuel
         service.kmSalida || "—",
         service.kmLlegada || "—",
         service.kmRecorridos || "—",
+        getTipoCustodiaLabel(service),
         service.tipoCenopOp === "cenop_en_op" ? "CENOP en Operaciones" : service.tipoCenopOp === "op_en_cenop" ? "Operaciones en CENOP" : "Ninguno",
         getCrossedServicesDetail(service),
         getComisionesDetail(service),
@@ -291,6 +299,28 @@ export function buildDownloadReports(services: ServiceEntry[], fuelEntries: Fuel
       columns: ["Fecha", "Solicitud", "Cliente", "Tipo", "Monto"],
       rows: services.flatMap((service) => (service.peajes || []).map((peaje) => [formatDate(service.fecha), service.solicitud, normalizeClientName(service.cliente), getPeajeType(peaje), money(peaje.monto || 0)])),
       chartData: services.flatMap((service) => (service.peajes || []).map((peaje) => ({ name: getPeajeType(peaje) || `Solicitud ${service.solicitud}`, value: peaje.monto || 0, label: money(peaje.monto || 0) }))),
+    },
+    {
+      id: "custodias-largas-cortas",
+      title: "Custodias Largas y Cortas",
+      description: "Clasificación decidida por el administrador al cargar cada custodia.",
+      metricLabel: "Horas totales",
+      totalLabel: "Servicios",
+      totalValue: serviciosUnicos.toString(),
+      columns: ["Fecha", "Solicitud", "Tipo Custodia", "Cliente", "Destino", "Chofer", "Custodio", "Móvil", "KM Recorridos", "Hs Total"],
+      rows: services.map((service) => {
+        const hours = getAdjustedHours(service);
+        return [
+          formatDate(service.fecha), service.solicitud, getTipoCustodiaLabel(service),
+          normalizeClientName(service.cliente), service.destino || "—", service.chofer || "—",
+          service.custodio || "—", service.movil || "—", service.kmRecorridos || "—",
+          formatHoursMinutes(hours.prod + hours.improd),
+        ];
+      }),
+      chartData: summarizeByName(services.map((service) => {
+        const hours = getAdjustedHours(service);
+        return { name: getTipoCustodiaLabel(service), minutes: hours.prod + hours.improd };
+      })),
     },
   ];
 }

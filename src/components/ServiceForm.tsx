@@ -63,6 +63,7 @@ export default function ServiceForm({ onAdd, selectedDate, existingServices }: P
   const [comisiones, setComisiones] = useState<ComisionEntry[]>([]);
   const [serviciosOp, setServiciosOp] = useState<ServicioOperacionesEntry[]>([]);
   const [tipoCenopOp, setTipoCenopOp] = useState<"ninguno" | "cenop_en_op" | "op_en_cenop">("ninguno");
+  const [tipoCustodia, setTipoCustodia] = useState<"larga" | "corta" | undefined>(undefined);
 
   const allPersonalEntries = getPersonal();
   const allPersonal = getActivePersonalNames();
@@ -205,6 +206,7 @@ export default function ServiceForm({ onAdd, selectedDate, existingServices }: P
       choferEsOperaciones: !!opsBadgeMap[form.chofer],
       custodioEsOperaciones: !!opsBadgeMap[form.custodio],
       tipoCenopOp,
+      tipoCustodia,
     };
     const collisions = findServiceCollisions(candidate, existingServices);
     if (collisions.length > 0) {
@@ -217,6 +219,7 @@ export default function ServiceForm({ onAdd, selectedDate, existingServices }: P
     setComisiones([]);
     setServiciosOp([]);
     setTipoCenopOp("ninguno");
+    setTipoCustodia(undefined);
     setStep(1);
     setOpen(false);
   };
@@ -346,6 +349,25 @@ export default function ServiceForm({ onAdd, selectedDate, existingServices }: P
           {renderField({ label: "Solicitud de Custodia", field: "horaSolicitud", type: "time" })}
           {renderSelectField({ label: "Cliente", field: "cliente", options: clientesList })}
           {renderField({ label: "Lugar de Salida", field: "lugarSalida", placeholder: "Ej: Villa Celina" })}
+          <div className="md:col-span-2 space-y-1.5">
+            <Label className="text-sm font-bold text-background">Tipo de Custodia</Label>
+            <div className="flex flex-wrap gap-4 rounded-md border border-input bg-background p-3">
+              {([
+                { value: "larga", label: "Custodia larga" },
+                { value: "corta", label: "Custodia corta" },
+              ] as const).map((opt) => (
+                <label key={opt.value} className="flex items-center gap-2 text-sm font-semibold text-foreground cursor-pointer">
+                  <input
+                    type="checkbox"
+                    className="h-4 w-4 accent-primary"
+                    checked={tipoCustodia === opt.value}
+                    onChange={(e) => setTipoCustodia(e.target.checked ? opt.value : undefined)}
+                  />
+                  {opt.label}
+                </label>
+              ))}
+            </div>
+          </div>
         </div>
       )}
 

@@ -31,6 +31,7 @@ export default function DashboardReportes({ services, fuelEntries }: Props) {
   const [movil, setMovil] = useState("todos");
   const [tipoCruzado, setTipoCruzado] = useState("todos");
   const [conPeajes, setConPeajes] = useState("todos"); // todos | si | no
+  const [tipoCustodia, setTipoCustodia] = useState("todos"); // todos | larga | corta | sin
   const [selectedId, setSelectedId] = useState<string | undefined>(undefined);
 
   // Opciones dinámicas
@@ -58,9 +59,10 @@ export default function DashboardReportes({ services, fuelEntries }: Props) {
       if (tipoCruzado !== "todos" && (s.tipoCenopOp || "ninguno") !== tipoCruzado) return false;
       if (conPeajes === "si" && !(s.peajes?.length)) return false;
       if (conPeajes === "no" && (s.peajes?.length || 0) > 0) return false;
+      if (tipoCustodia !== "todos" && (s.tipoCustodia || "sin") !== tipoCustodia) return false;
       return true;
     });
-  }, [services, fechaDesde, fechaHasta, cliente, personal, movil, tipoCruzado, conPeajes]);
+  }, [services, fechaDesde, fechaHasta, cliente, personal, movil, tipoCruzado, conPeajes, tipoCustodia]);
 
   const filteredFuel = useMemo(() => {
     return fuelEntries.filter((f) => {
@@ -81,9 +83,10 @@ export default function DashboardReportes({ services, fuelEntries }: Props) {
   const clearFilters = () => {
     setFechaDesde(""); setFechaHasta(""); setCliente("todos");
     setPersonal("todos"); setMovil("todos"); setTipoCruzado("todos"); setConPeajes("todos");
+    setTipoCustodia("todos");
   };
 
-  const hasFilters = fechaDesde || fechaHasta || cliente !== "todos" || personal !== "todos" || movil !== "todos" || tipoCruzado !== "todos" || conPeajes !== "todos";
+  const hasFilters = fechaDesde || fechaHasta || cliente !== "todos" || personal !== "todos" || movil !== "todos" || tipoCruzado !== "todos" || conPeajes !== "todos" || tipoCustodia !== "todos";
 
   if (!selectedReport) return null;
 
@@ -101,7 +104,7 @@ export default function DashboardReportes({ services, fuelEntries }: Props) {
             </Button>
           )}
         </div>
-        <div className="grid grid-cols-2 md:grid-cols-4 xl:grid-cols-7 gap-3">
+        <div className="grid grid-cols-2 md:grid-cols-4 xl:grid-cols-8 gap-3">
           <div className="space-y-1">
             <Label className="text-xs text-muted-foreground">Desde</Label>
             <Input type="date" value={fechaDesde} onChange={(e) => setFechaDesde(e.target.value)} className="h-9 text-sm" />
@@ -146,6 +149,18 @@ export default function DashboardReportes({ services, fuelEntries }: Props) {
               <SelectTrigger className="h-9 text-sm"><SelectValue /></SelectTrigger>
               <SelectContent>
                 {Object.entries(TIPO_LABELS).map(([k, v]) => <SelectItem key={k} value={k}>{v}</SelectItem>)}
+              </SelectContent>
+            </Select>
+          </div>
+          <div className="space-y-1">
+            <Label className="text-xs text-muted-foreground">Tipo Custodia</Label>
+            <Select value={tipoCustodia} onValueChange={setTipoCustodia}>
+              <SelectTrigger className="h-9 text-sm"><SelectValue /></SelectTrigger>
+              <SelectContent>
+                <SelectItem value="todos">Todas</SelectItem>
+                <SelectItem value="larga">Largas</SelectItem>
+                <SelectItem value="corta">Cortas</SelectItem>
+                <SelectItem value="sin">Sin clasificar</SelectItem>
               </SelectContent>
             </Select>
           </div>
