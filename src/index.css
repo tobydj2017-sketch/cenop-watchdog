@@ -155,6 +155,21 @@
   will-change: transform;
 }
 
+/* Fondo: desplazamiento horizontal acelerado por GPU */
+@keyframes map-pan {
+  from { transform: translate3d(0, 0, 0); }
+  to   { transform: translate3d(-33.3333%, 0, 0); }
+}
+
+.animate-map-pan {
+  animation: map-pan 240s linear infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .animate-map-pan,
+  .animate-ken-burns { animation: none; }
+}
+
 
 /* Recharts tooltip: contraste garantizado */
 .recharts-default-tooltip {
