@@ -349,6 +349,25 @@ export default function ServiceForm({ onAdd, selectedDate, existingServices }: P
           {renderField({ label: "Solicitud de Custodia", field: "horaSolicitud", type: "time" })}
           {renderSelectField({ label: "Cliente", field: "cliente", options: clientesList })}
           {renderField({ label: "Lugar de Salida", field: "lugarSalida", placeholder: "Ej: Villa Celina" })}
+          <div className="md:col-span-2 space-y-1.5">
+            <Label className="text-sm font-bold text-background">Tipo de Custodia</Label>
+            <div className="flex flex-wrap gap-4 rounded-md border border-input bg-background p-3">
+              {([
+                { value: "larga", label: "Custodia larga" },
+                { value: "corta", label: "Custodia corta" },
+              ] as const).map((opt) => (
+                <label key={opt.value} className="flex items-center gap-2 text-sm font-semibold text-foreground cursor-pointer">
+                  <input
+                    type="checkbox"
+                    className="h-4 w-4 accent-primary"
+                    checked={tipoCustodia === opt.value}
+                    onChange={(e) => setTipoCustodia(e.target.checked ? opt.value : undefined)}
+                  />
+                  {opt.label}
+                </label>
+              ))}
+            </div>
+          </div>
         </div>
       )}
 
