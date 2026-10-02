@@ -28,7 +28,7 @@ export default function FuelTable({ entries, onDelete, onUpdate, allEntries }: P
           <table className="w-full text-sm">
             <thead>
               <tr className="border-b border-border">
-                {["Móvil", "Chofer", "Km", "Litros", "Monto", "$/L", "Lugar", "Remito", "Ticket", ""].map((h) => (
+                {["Fecha", "Hora", "Móvil", "Chofer", "Km", "Litros", "Monto", "$/L", "Lugar", "Remito", "Ticket", ""].map((h) => (
                   <th key={h} className="px-3 py-2.5 text-left text-xs text-muted-foreground uppercase tracking-wider font-semibold">
                     {h}
                   </th>
@@ -40,6 +40,8 @@ export default function FuelTable({ entries, onDelete, onUpdate, allEntries }: P
                 const precioLitro = f.litros > 0 ? (f.monto / f.litros).toFixed(2) : "—";
                 return (
                 <tr key={f.id} className="border-b border-border/50 hover:bg-secondary/30 transition-colors">
+                  <td className="px-3 py-2.5 font-mono text-xs whitespace-nowrap">{f.fecha ? f.fecha.split("-").reverse().join("/") : "—"}</td>
+                  <td className="px-3 py-2.5 font-mono text-xs">{f.hora || "—"}</td>
                   <td className="px-3 py-2.5 font-mono text-xs">{f.movil}</td>
                   <td className="px-3 py-2.5">{f.chofer}</td>
                   <td className="px-3 py-2.5 font-mono text-xs">{f.kilometraje || "—"}</td>
