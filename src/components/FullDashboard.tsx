@@ -2,13 +2,14 @@ import { useState, useMemo } from "react";
 import { ServiceEntry, FuelEntry, getAdjustedHours, getServiceKey, normalizeClientName, getCenopEnOperacionesMinutes } from "@/lib/types";
 import { formatHoursMinutes } from "@/lib/formatTime";
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, PieChart, Pie, Cell, Legend } from "recharts";
-import { Users, Truck, Building2, CalendarDays, ArrowLeft, TrendingUp, LayoutDashboard, Clock, Download } from "lucide-react";
+import { Users, Truck, Building2, CalendarDays, ArrowLeft, TrendingUp, LayoutDashboard, Clock, Download, BarChart3 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import DashboardFilters from "@/components/DashboardFilters";
 import DashboardResumen from "@/components/dashboard/DashboardResumen";
 import DashboardDiario from "@/components/dashboard/DashboardDiario";
 import DashboardRendimiento from "@/components/dashboard/DashboardRendimiento";
 import DashboardJornada from "@/components/dashboard/DashboardJornada";
+import DashboardPicosCustodias from "@/components/dashboard/DashboardPicosCustodias";
 import { DataTable } from "@/components/dashboard/DataTable";
 import DrillDownDialog, { DrillDownEntity } from "@/components/dashboard/DrillDownDialog";
 import { exportResumenPDF, exportPersonalPDF, exportMovilesPDF, exportClientesPDF } from "@/lib/pdfExport";
@@ -26,7 +27,7 @@ const COLORS = [
   "hsl(100, 50%, 45%)",
 ];
 
-type Tab = "resumen" | "diario" | "rendimiento" | "jornada" | "personal" | "moviles" | "clientes";
+type Tab = "resumen" | "picos" | "diario" | "rendimiento" | "jornada" | "personal" | "moviles" | "clientes";
 
 export default function FullDashboard({ services, fuelEntries, onBack }: Props) {
   const [tab, setTab] = useState<Tab>("resumen");
@@ -103,6 +104,7 @@ export default function FullDashboard({ services, fuelEntries, onBack }: Props) 
 
   const tabs: { id: Tab; label: string; icon: typeof Users }[] = [
     { id: "resumen", label: "Resumen", icon: LayoutDashboard },
+    { id: "picos", label: "Picos de Custodias", icon: BarChart3 },
     { id: "diario", label: "Día a Día", icon: CalendarDays },
     { id: "rendimiento", label: "Rendimiento", icon: TrendingUp },
     { id: "jornada", label: "Jornada", icon: Clock },
@@ -170,6 +172,10 @@ export default function FullDashboard({ services, fuelEntries, onBack }: Props) 
 
       {tab === "diario" && (
         <DashboardDiario services={filteredServices} fuelEntries={filteredFuel} />
+      )}
+
+      {tab === "picos" && (
+        <DashboardPicosCustodias services={filteredServices} />
       )}
 
       {tab === "rendimiento" && (

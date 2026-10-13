@@ -5,6 +5,7 @@ import { cleanTime, formatHoursMinutes } from "./formatTime";
 import { getPersonal, PersonalEntry, ROLE_LABELS } from "./personalStore";
 import { getClients, ClientEntry } from "./clientStore";
 import { DownloadReport } from "./reportAnalytics";
+import { custodyCountForFilter, CustodyPeakDay, CustodyShiftFilter } from "./custodyPeaks";
 
 const BRAND = "CENOP — AM Seguridad";
 const PRIMARY_COLOR: [number, number, number] = [30, 30, 30];
@@ -458,6 +459,64 @@ export async function exportResumenPDF(
 
   addFooter(doc);
   doc.save(`CENOP_Resumen_${new Date().toISOString().slice(0, 10)}.pdf`);
+}
+
+// ========== PICOS DE CUSTODIAS ==========
+export async function exportCustodyPeaksPDF(days: CustodyPeakDay[], shift: CustodyShiftFilter) {
+  const doc = new jsPDF();
+  const logoDataUrl = await loadImageAsDataUrl(AM_LOGO_PATH);
+  const shiftLabel = shift === "dia" ? "Día (06:00 a 17:59)" : shift === "noche" ? "Noche (18:00 a 05:59)" : "Todos los turnos";
+  const total = days.reduce((sum, day) => sum + custodyCountForFilter(day, shift), 0);
+  const peak = days[0];
+
+  addHeader(doc, "Días con Mayor Cantidad de Custodias", `${shiftLabel} · ${days.length} días con actividad`, logoDataUrl);
+
+  autoTable(doc, {
+    startY: 58,
+    head: [["Indicador", "Valor"]],
+    body: [
+      ["Turno seleccionado", shiftLabel],
+      ["Total de custodias", total.toString()],
+      ["Día de mayor actividad", peak?.fechaLabel || "—"],
+      ["Máximo en un día", peak ? custodyCountForFilter(peak, shift).toString() : "0"],
+      ["Promedio por día", days.length ? (total / days.length).toLocaleString("es-AR", { maximumFractionDigits: 1 }) : "0"],
+    ],
+    ...tableStyle(),
+    columnStyles: { 0: { fontStyle: "bold" } },
+  });
+
+  let y = (doc as jsPDF & { lastAutoTable: { finalY: number } }).lastAutoTable.finalY + 10;
+  y = drawBarChart(
+    doc,
+    "Top 12 días",
+    days.slice(0, 12).map((day) => ({
+      name: day.fechaLabel,
+      value: custodyCountForFilter(day, shift),
+      label: custodyCountForFilter(day, shift).toString(),
+    })),
+    y,
+    12,
+  );
+
+  y = ensureSpace(doc, y, 80);
+  addSectionTitle(doc, "Ranking Completo", 14, y);
+  autoTable(doc, {
+    startY: y + 4,
+    head: [["#", "Fecha", "Día semana", "Turno día", "Turno noche", "Sin horario", "Total"]],
+    body: days.map((day, index) => [
+      index + 1,
+      day.fechaLabel,
+      day.diaSemana,
+      day.dia,
+      day.noche,
+      day.sinHorario,
+      day.total,
+    ]),
+    ...tableStyle(),
+  });
+
+  addFooter(doc);
+  doc.save(`CENOP_Picos_Custodias_${shift}_${new Date().toISOString().slice(0, 10)}.pdf`);
 }
 
 // ========== GESTIÓN PERSONAL ==========
