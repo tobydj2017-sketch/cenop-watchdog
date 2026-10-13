@@ -1,6 +1,8 @@
 // Cliente para Azure Blob Storage usando SAS Token.
 // La SAS URL apunta al contenedor `appcenop` y permite leer/escribir blobs.
 
+import { getRuntimeDataset, setRuntimeDataset } from "./runtimeDataCache";
+
 const SAS_URL = import.meta.env.VITE_AZURE_BLOB_SAS_URL as string | undefined;
 
 export function isAzureConfigured(): boolean {
@@ -258,6 +260,30 @@ export const LOCAL_KEYS = {
   moviles: "cenop_moviles",
 } as const;
 
+function readCachedDataset<T>(localKey: string): T[] {
+  const runtime = getRuntimeDataset<T>(localKey);
+  if (runtime) return runtime;
+  try {
+    const parsed = JSON.parse(localStorage.getItem(localKey) || "[]");
+    return Array.isArray(parsed) ? parsed : [];
+  } catch {
+    return [];
+  }
+}
+
+function cacheDataset<T>(localKey: string, data: T[]): void {
+  setRuntimeDataset(localKey, data);
+  try {
+    localStorage.setItem(localKey, JSON.stringify(data));
+  } catch (err) {
+    const isQuotaError = err instanceof DOMException && (
+      err.name === "QuotaExceededError" || err.name === "NS_ERROR_DOM_QUOTA_REACHED"
+    );
+    if (!isQuotaError) throw err;
+    console.warn(`[Azure] ${localKey}: el historial excede el caché local; se mantiene disponible en memoria.`);
+  }
+}
+
 export async function bootstrapFromAzure(): Promise<void> {
   if (!isAzureConfigured()) return;
 
@@ -278,9 +304,7 @@ export async function bootstrapFromAzure(): Promise<void> {
     ...mergeable.map(async ([blob, localKey]) => {
       const tombstones = await syncTombstones(blob);
       const remote = (await downloadJson<any[]>(blob)) ?? [];
-      const localRaw = localStorage.getItem(localKey);
-      let local: any[] = [];
-      try { local = localRaw ? JSON.parse(localRaw) : []; } catch { local = []; }
+      const local = readCachedDataset<any>(localKey);
       const byId = new Map<string, any>();
       // En bootstrap: local primero, luego remoto pisa → la nube es la verdad
       // para ids compartidos. Los locales nuevos (id no existente en remoto)
@@ -288,7 +312,7 @@ export async function bootstrapFromAzure(): Promise<void> {
       for (const item of local) if (item && item.id && !tombstones.has(item.id)) byId.set(item.id, item);
       for (const item of remote) if (item && item.id && !tombstones.has(item.id)) byId.set(item.id, item);
       const merged = Array.from(byId.values());
-      localStorage.setItem(localKey, JSON.stringify(merged));
+      cacheDataset(localKey, merged);
       // Si hay locales no presentes en remoto, o tombstones a aplicar, sincronizar
       if (merged.length !== remote.length || remote.some((r) => r?.id && tombstones.has(r.id))) {
         void uploadJson(blob, merged);
@@ -296,11 +320,7 @@ export async function bootstrapFromAzure(): Promise<void> {
     }),
     ...overwrite.map(async ([blob, localKey]) => {
       const remote = await downloadJson<any[]>(blob);
-      let local: any[] = [];
-      try {
-        const parsed = JSON.parse(localStorage.getItem(localKey) || "[]");
-        if (Array.isArray(parsed)) local = parsed;
-      } catch { local = []; }
+      const local = readCachedDataset<any>(localKey);
 
       if (Array.isArray(remote)) {
         // Catálogos: fusión por id. Lo remoto manda en ids compartidos y se
@@ -309,7 +329,7 @@ export async function bootstrapFromAzure(): Promise<void> {
         for (const item of local) if (item?.id) byId.set(item.id, item);
         for (const item of remote) if (item?.id) byId.set(item.id, item);
         const merged = Array.from(byId.values());
-        localStorage.setItem(localKey, JSON.stringify(merged));
+        cacheDataset(localKey, merged);
         if (merged.length !== remote.length) void uploadJson(blob, merged);
       } else if (remote === null && local.length > 0) {
         void uploadJson(blob, local);
@@ -347,12 +367,7 @@ export async function refreshFromAzure(): Promise<boolean> {
         const remote = await downloadJson<any[]>(blob);
         if (!Array.isArray(remote)) return;
         const tombstones = new Set(getLocalTombstones(blob));
-        let local: any[] = [];
-        try {
-          const raw = localStorage.getItem(localKey);
-          const parsed = raw ? JSON.parse(raw) : [];
-          if (Array.isArray(parsed)) local = parsed;
-        } catch { local = []; }
+        const local = readCachedDataset<any>(localKey);
 
         const byId = new Map<string, any>();
         for (const item of local) if (item?.id && !tombstones.has(item.id)) byId.set(item.id, item);
@@ -360,7 +375,7 @@ export async function refreshFromAzure(): Promise<boolean> {
         const merged = Array.from(byId.values());
         const next = JSON.stringify(merged);
         if (next !== JSON.stringify(local)) {
-          localStorage.setItem(localKey, next);
+          cacheDataset(localKey, merged);
           changed = true;
         }
       }),

@@ -1,5 +1,6 @@
 import { ServiceEntry, FuelEntry, isCountableServiceEntry, computeServiceHours } from "./types";
 import { BLOB_KEYS, queueUploadMerged, uploadJson, addTombstone } from "./azureBlob";
+import { getRuntimeDataset, setRuntimeDataset } from "./runtimeDataCache";
 
 // La purga única ya se ejecutó en su momento. Este stub queda para no
 // romper imports existentes, pero NO debe borrar nada: hacerlo por navegador
@@ -67,8 +68,35 @@ function readLocal<T>(key: string): T[] {
 // contenido crudo no cambie, devolvemos el mismo resultado ya calculado.
 let servicesCacheRaw: string | null = null;
 let servicesCacheValue: ServiceEntry[] = [];
+let servicesCacheRuntime: ServiceEntry[] | null = null;
+
+function currentServiceEntries(): ServiceEntry[] {
+  return getRuntimeDataset<ServiceEntry>(SERVICES_KEY) ?? readLocal<ServiceEntry>(SERVICES_KEY);
+}
+
+function cacheServices(entries: ServiceEntry[]) {
+  setRuntimeDataset(SERVICES_KEY, entries);
+  try {
+    localStorage.setItem(SERVICES_KEY, JSON.stringify(entries));
+  } catch (err) {
+    const isQuotaError = err instanceof DOMException && (
+      err.name === "QuotaExceededError" || err.name === "NS_ERROR_DOM_QUOTA_REACHED"
+    );
+    if (!isQuotaError) throw err;
+    console.warn("[Servicios] El historial excede el caché local; se mantiene disponible en memoria.");
+  }
+}
 
 export function getServices(): ServiceEntry[] {
+  const runtime = getRuntimeDataset<ServiceEntry>(SERVICES_KEY);
+  if (runtime) {
+    if (runtime === servicesCacheRuntime) return servicesCacheValue;
+    const filtered = runtime.filter(isCountableServiceEntry).filter((s) => !isLegacy(s.fecha));
+    servicesCacheRuntime = runtime;
+    servicesCacheRaw = null;
+    servicesCacheValue = renumberDeterministic(recomputeHours(filtered));
+    return servicesCacheValue;
+  }
   const data = localStorage.getItem(SERVICES_KEY);
   if (data === servicesCacheRaw) return servicesCacheValue;
   const parsed: ServiceEntry[] = data ? JSON.parse(data) : [];
@@ -82,17 +110,17 @@ export function saveServices(entries: ServiceEntry[]) {
   const clean = renumberDeterministic(
     recomputeHours(entries.filter(isCountableServiceEntry).filter((s) => !isLegacy(s.fecha)))
   );
-  localStorage.setItem(SERVICES_KEY, JSON.stringify(clean));
+  cacheServices(clean);
   // Merge con remoto antes de subir para no pisar cargas de otros navegadores.
   queueUploadMerged<ServiceEntry>(
     BLOB_KEYS.services,
-    () => JSON.parse(localStorage.getItem(SERVICES_KEY) || "[]"),
+    currentServiceEntries,
     (merged) => {
-      const withLocal = mergeKeepingLocal(merged, readLocal<ServiceEntry>(SERVICES_KEY));
+      const withLocal = mergeKeepingLocal(merged, currentServiceEntries());
       const finalList = renumberDeterministic(
         recomputeHours(withLocal.filter(isCountableServiceEntry).filter((s) => !isLegacy(s.fecha)))
       );
-      localStorage.setItem(SERVICES_KEY, JSON.stringify(finalList));
+      cacheServices(finalList);
       window.dispatchEvent(new Event("cenop:services-synced"));
     },
   );
