@@ -284,6 +284,36 @@ function cacheDataset<T>(localKey: string, data: T[]): void {
   }
 }
 
+function datasetIdentity(localKey: string, item: any): string {
+  if (localKey === LOCAL_KEYS.personal) return `nombre:${String(item?.nombre || "").trim().toLocaleUpperCase("es-AR")}`;
+  if (localKey === LOCAL_KEYS.clientes) return `nombre:${String(item?.nombre || "").trim().toLocaleUpperCase("es-AR")}`;
+  if (localKey === LOCAL_KEYS.moviles) return `patente:${String(item?.patente || "").trim().toUpperCase()}`;
+  return `id:${String(item?.id || "")}`;
+}
+
+function mergeDatasetItem(localKey: string, previous: any, next: any): any {
+  if (!previous) return next;
+  if (localKey === LOCAL_KEYS.personal) {
+    return {
+      ...previous,
+      ...next,
+      roles: Array.from(new Set([...(previous.roles || []), ...(next.roles || [])])),
+      telefono: next.telefono || previous.telefono || "",
+    };
+  }
+  return { ...previous, ...next };
+}
+
+function mergeDatasetByIdentity(localKey: string, local: any[], remote: any[]): any[] {
+  const merged = new Map<string, any>();
+  for (const item of [...local, ...remote]) {
+    const identity = datasetIdentity(localKey, item);
+    if (identity.endsWith(":")) continue;
+    merged.set(identity, mergeDatasetItem(localKey, merged.get(identity), item));
+  }
+  return Array.from(merged.values());
+}
+
 export async function bootstrapFromAzure(): Promise<void> {
   if (!isAzureConfigured()) return;
 
@@ -323,12 +353,9 @@ export async function bootstrapFromAzure(): Promise<void> {
       const local = readCachedDataset<any>(localKey);
 
       if (Array.isArray(remote)) {
-        // Catálogos: fusión por id. Lo remoto manda en ids compartidos y se
-        // conservan las altas locales todavía no subidas.
-        const byId = new Map<string, any>();
-        for (const item of local) if (item?.id) byId.set(item.id, item);
-        for (const item of remote) if (item?.id) byId.set(item.id, item);
-        const merged = Array.from(byId.values());
+        // Catálogos: nombre/patente es la identidad real. Así una sesión nueva
+        // no vuelve a crear el mismo registro con otro id y hacer crecer Azure.
+        const merged = mergeDatasetByIdentity(localKey, local, remote);
         cacheDataset(localKey, merged);
         if (merged.length !== remote.length) void uploadJson(blob, merged);
       } else if (remote === null && local.length > 0) {
@@ -369,10 +396,9 @@ export async function refreshFromAzure(): Promise<boolean> {
         const tombstones = new Set(getLocalTombstones(blob));
         const local = readCachedDataset<any>(localKey);
 
-        const byId = new Map<string, any>();
-        for (const item of local) if (item?.id && !tombstones.has(item.id)) byId.set(item.id, item);
-        for (const item of remote) if (item?.id && !tombstones.has(item.id)) byId.set(item.id, item);
-        const merged = Array.from(byId.values());
+        const cleanLocal = local.filter((item) => item?.id && !tombstones.has(item.id));
+        const cleanRemote = remote.filter((item) => item?.id && !tombstones.has(item.id));
+        const merged = mergeDatasetByIdentity(localKey, cleanLocal, cleanRemote);
         const next = JSON.stringify(merged);
         if (next !== JSON.stringify(local)) {
           cacheDataset(localKey, merged);
