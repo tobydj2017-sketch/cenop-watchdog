@@ -6,10 +6,12 @@ import { ServiceEntry } from "@/lib/types";
 import {
   buildCustodyPeakDays,
   custodyCountForFilter,
+  CustodyPeakDay,
   CustodyShiftFilter,
   rankCustodyPeakDays,
 } from "@/lib/custodyPeaks";
 import { exportCustodyPeaksPDF } from "@/lib/pdfExport";
+import CustodyDayDetail from "@/components/dashboard/CustodyDayDetail";
 
 interface Props {
   services: ServiceEntry[];
@@ -23,6 +25,7 @@ const FILTERS: { id: CustodyShiftFilter; label: string; icon: typeof BarChart3 }
 
 export default function DashboardPicosCustodias({ services }: Props) {
   const [shift, setShift] = useState<CustodyShiftFilter>("todos");
+  const [selectedDay, setSelectedDay] = useState<CustodyPeakDay | null>(null);
   const days = useMemo(() => buildCustodyPeakDays(services), [services]);
   const ranked = useMemo(() => rankCustodyPeakDays(days, shift), [days, shift]);
   const chartData = ranked.slice(0, 15).map((day) => ({
@@ -33,6 +36,12 @@ export default function DashboardPicosCustodias({ services }: Props) {
   const total = ranked.reduce((sum, day) => sum + custodyCountForFilter(day, shift), 0);
   const peak = ranked[0];
   const average = ranked.length ? total / ranked.length : 0;
+
+  const openDayFromChart = (data: unknown) => {
+    const candidate = data as { payload?: CustodyPeakDay; fecha?: string };
+    const day = candidate.payload || candidate;
+    if (day.fecha) setSelectedDay(ranked.find((item) => item.fecha === day.fecha) || null);
+  };
 
   return (
     <div className="space-y-4">
@@ -97,15 +106,17 @@ export default function DashboardPicosCustodias({ services }: Props) {
                 <Legend />
                 {shift === "todos" ? (
                   <>
-                    <Bar dataKey="dia" name="Día" fill="hsl(38, 92%, 50%)" stackId="custodias" />
-                    <Bar dataKey="noche" name="Noche" fill="hsl(210, 75%, 55%)" stackId="custodias" />
-                    <Bar dataKey="sinHorario" name="Sin horario" fill="hsl(var(--muted-foreground))" stackId="custodias" />
+                    <Bar dataKey="dia" name="Día" fill="hsl(38, 92%, 50%)" stackId="custodias" cursor="pointer" onClick={openDayFromChart} />
+                    <Bar dataKey="noche" name="Noche" fill="hsl(210, 75%, 55%)" stackId="custodias" cursor="pointer" onClick={openDayFromChart} />
+                    <Bar dataKey="sinHorario" name="Sin horario" fill="hsl(var(--muted-foreground))" stackId="custodias" cursor="pointer" onClick={openDayFromChart} />
                   </>
                 ) : (
                   <Bar
                     dataKey="seleccionadas"
                     name={shift === "dia" ? "Custodias de día" : "Custodias de noche"}
                     fill={shift === "dia" ? "hsl(38, 92%, 50%)" : "hsl(210, 75%, 55%)"}
+                    cursor="pointer"
+                    onClick={openDayFromChart}
                   />
                 )}
               </BarChart>
@@ -134,7 +145,12 @@ export default function DashboardPicosCustodias({ services }: Props) {
               </thead>
               <tbody>
                 {ranked.map((day, index) => (
-                  <tr key={day.fecha} className="border-t border-border/60">
+                  <tr
+                    key={day.fecha}
+                    className="cursor-pointer border-t border-border/60 transition-colors hover:bg-accent/40"
+                    onClick={() => setSelectedDay(day)}
+                    title="Ver custodias del día"
+                  >
                     <td className="px-3 py-2 font-mono text-xs text-muted-foreground">{index + 1}</td>
                     <td className="px-3 py-2">
                       <div className="font-medium">{day.fechaLabel}</div>
@@ -150,6 +166,15 @@ export default function DashboardPicosCustodias({ services }: Props) {
           </div>
         </div>
       </div>
+
+      {selectedDay && (
+        <CustodyDayDetail
+          day={selectedDay}
+          shift={shift}
+          services={services}
+          onClose={() => setSelectedDay(null)}
+        />
+      )}
     </div>
   );
 }

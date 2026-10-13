@@ -40,7 +40,6 @@ import MovilesUnified from "@/components/MovilesUnified";
 import MovilesHub from "@/components/MovilesHub";
 import PlanillaDia from "@/components/PlanillaDia";
 
-import amLogoAsset from "@/assets/am-logo.gif.asset.json";
 import amCustodiasDoorAsset from "@/assets/am-custodias-door-400.png.asset.json";
 import amGuardPhoneAsset from "@/assets/am-guard-phone.png.asset.json";
 import amControlRoomAsset from "@/assets/am-control-room.png.asset.json";
@@ -68,6 +67,8 @@ const ALL_NAV_ITEMS = [
   { key: "reportes", label: "Reportes", icon: FileText, perm: "viewReportes" as const },
   { key: "usuarios", label: "Usuarios", icon: ShieldCheck, perm: "manageUsers" as const },
 ] as const;
+
+const AM_LOGO_PATH = "/AM.png";
 
 
 function AppSidebar({
@@ -118,7 +119,7 @@ function AppSidebar({
             aria-label="Ver logo AM Seguridad"
           >
             <img
-              src={amLogoAsset.url}
+              src={AM_LOGO_PATH}
               alt="AM Seguridad"
               className="h-full w-full object-contain"
             />
@@ -178,7 +179,7 @@ function AppSidebar({
         <DialogContent className="fixed inset-0 z-[100] flex h-screen w-screen max-w-none translate-x-0 translate-y-0 flex-col items-center justify-center gap-6 border-0 bg-black/95 p-6 shadow-none data-[state=open]:zoom-in-0 data-[state=open]:slide-in-from-bottom-0 sm:rounded-none">
           <DialogTitle className="sr-only">Logo AM Seguridad</DialogTitle>
           <img
-            src={amLogoAsset.url}
+            src={AM_LOGO_PATH}
             alt="AM Seguridad"
             className="max-h-[80vh] max-w-[90vw] object-contain drop-shadow-[0_0_40px_rgba(255,255,255,0.25)]"
           />

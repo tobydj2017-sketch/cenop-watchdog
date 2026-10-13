@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { buildCustodyPeakDays, classifyCustodyShift, rankCustodyPeakDays } from "@/lib/custodyPeaks";
+import { buildCustodyPeakDays, classifyCustodyShift, getCustodyServiceGroups, rankCustodyPeakDays } from "@/lib/custodyPeaks";
 import { ServiceEntry } from "@/lib/types";
 
 function service(overrides: Partial<ServiceEntry>): ServiceEntry {
@@ -39,5 +39,23 @@ describe("picos de custodias", () => {
     ];
     const ranked = rankCustodyPeakDays(buildCustodyPeakDays(rows), "noche");
     expect(ranked.map((day) => [day.fecha, day.noche])).toEqual([["2026-10-02", 2], ["2026-10-01", 1]]);
+  });
+
+  it("abre el detalle del día sin duplicar servicios y respeta el turno", () => {
+    const rows = [
+      service({ id: "a", solicitud: 7, chofer: "CHOFER", iniciaServicio: "08:00" }),
+      service({ id: "b", solicitud: 7, custodio: "CUSTODIO", iniciaServicio: "08:00" }),
+      service({ id: "c", solicitud: 8, iniciaServicio: "22:00" }),
+      service({ id: "d", solicitud: 9, fecha: "2026-10-02", iniciaServicio: "09:00" }),
+    ];
+
+    const all = getCustodyServiceGroups(rows, "2026-10-01", "todos");
+    const day = getCustodyServiceGroups(rows, "2026-10-01", "dia");
+    const night = getCustodyServiceGroups(rows, "2026-10-01", "noche");
+
+    expect(all).toHaveLength(2);
+    expect(day).toHaveLength(1);
+    expect(day[0].entries).toHaveLength(2);
+    expect(night.map((group) => group.primary.solicitud)).toEqual([8]);
   });
 });

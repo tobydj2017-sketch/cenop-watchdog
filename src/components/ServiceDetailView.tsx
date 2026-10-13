@@ -14,6 +14,22 @@ export default function ServiceDetailView({ services, onClose, onEdit }: Props) 
   const s = services[0];
   if (!s) return null;
 
+  const firstText = (field: keyof ServiceEntry) => {
+    for (const entry of services) {
+      const value = entry[field];
+      if (typeof value === "string" && value.trim()) return value;
+    }
+    return "";
+  };
+  const observations = [...new Set(services.map((entry) => entry.observaciones?.trim()).filter(Boolean))];
+  const peajes = [...new Map(services.flatMap((entry) => entry.peajes || []).map((item) => [item.id, item])).values()];
+  const comisiones = [...new Map(services.flatMap((entry) => entry.comisiones || []).map((item) => [item.id, item])).values()];
+  const serviciosOperaciones = [...new Map(services.flatMap((entry) => entry.serviciosOperaciones || []).map((item) => [item.id, item])).values()];
+  const tipoCustodia = services.find((entry) => entry.tipoCustodia)?.tipoCustodia;
+  const tipoCenopOp = services.find((entry) => entry.tipoCenopOp && entry.tipoCenopOp !== "ninguno")?.tipoCenopOp;
+  const llegadaTardeChofer = firstText("llegadaTardeChoferMin");
+  const llegadaTardeCustodio = firstText("llegadaTardeCustodioMin");
+
   const solicitud = s.solicitud;
 
   const timelineSteps = [
@@ -27,8 +43,8 @@ export default function ServiceDetailView({ services, onClose, onEdit }: Props) 
   ].filter((step) => step.value);
 
   return (
-    <div className="fixed inset-0 z-50 bg-background/80 backdrop-blur-sm flex items-start justify-center pt-8 pb-8 overflow-y-auto">
-      <div className="w-full max-w-3xl mx-4 glass-card p-6 space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-300">
+    <div className="fixed inset-0 z-[70] bg-background/80 backdrop-blur-sm flex items-start justify-center pt-8 pb-8 overflow-y-auto">
+      <div className="w-full max-w-4xl mx-4 glass-card p-6 space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-300">
         {/* Header */}
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-3">
@@ -58,6 +74,20 @@ export default function ServiceDetailView({ services, onClose, onEdit }: Props) 
           </div>
 
         </div>
+
+        {(tipoCustodia || tipoCenopOp || llegadaTardeChofer || llegadaTardeCustodio) && (
+          <div className="rounded-lg border border-border p-4 space-y-3">
+            <h3 className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">
+              Información Operativa
+            </h3>
+            <div className="grid grid-cols-2 gap-3 md:grid-cols-4">
+              <Info label="Tipo de custodia" value={tipoCustodia === "larga" ? "Larga" : tipoCustodia === "corta" ? "Corta" : "—"} />
+              <Info label="Cruce CENOP / OP" value={tipoCenopOp === "cenop_en_op" ? "CENOP en Operaciones" : tipoCenopOp === "op_en_cenop" ? "Operaciones en CENOP" : "Ninguno"} />
+              <Info label="Demora chofer" value={llegadaTardeChofer ? `${llegadaTardeChofer} min` : "—"} />
+              <Info label="Demora custodio" value={llegadaTardeCustodio ? `${llegadaTardeCustodio} min` : "—"} />
+            </div>
+          </div>
+        )}
 
         {/* Info Cards */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -210,39 +240,99 @@ export default function ServiceDetailView({ services, onClose, onEdit }: Props) 
         </div>
 
         {/* Documentación */}
-        {(s.ordenCarga || s.remito || s.continuaOrden || s.observaciones) && (
+        {(firstText("ordenCarga") || firstText("remito") || firstText("continuaOrden") || observations.length > 0) && (
           <div className="rounded-lg border border-border p-4 space-y-2">
             <h3 className="text-xs font-semibold text-muted-foreground uppercase tracking-wider flex items-center gap-1.5">
               <FileText className="w-3.5 h-3.5" /> Documentación y Observaciones
             </h3>
             <div className="grid grid-cols-2 md:grid-cols-3 gap-2 text-sm">
-              {s.ordenCarga && (
+              {firstText("ordenCarga") && (
                 <div>
                   <span className="text-xs text-muted-foreground">Orden de Carga Cliente</span>
-                  <p className="font-mono">{s.ordenCarga}</p>
+                  <p className="font-mono">{firstText("ordenCarga")}</p>
                 </div>
               )}
-              {s.remito && (
+              {firstText("remito") && (
                 <div>
                   <span className="text-xs text-muted-foreground">N° Remito</span>
-                  <p className="font-mono">{s.remito}</p>
+                  <p className="font-mono">{firstText("remito")}</p>
                 </div>
               )}
-              {s.continuaOrden && (
+              {firstText("continuaOrden") && (
                 <div>
                   <span className="text-xs text-muted-foreground">Continúa Orden N°</span>
-                  <p className="font-mono">{s.continuaOrden}</p>
+                  <p className="font-mono">{firstText("continuaOrden")}</p>
                 </div>
               )}
             </div>
-            {s.observaciones && (
-              <div className="mt-2 pt-2 border-t border-border/50">
+            {observations.map((observation, index) => (
+              <div key={`${observation}-${index}`} className="mt-2 pt-2 border-t border-border/50">
                 <span className="text-xs text-muted-foreground">Observaciones</span>
-                <p className="text-sm">{s.observaciones}</p>
+                <p className="text-sm whitespace-pre-wrap">{observation}</p>
               </div>
+            ))}
+          </div>
+        )}
+
+        {(peajes.length > 0 || comisiones.length > 0 || serviciosOperaciones.length > 0) && (
+          <div className="rounded-lg border border-border p-4 space-y-4">
+            <h3 className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">
+              Gastos y Tareas Adicionales
+            </h3>
+            {peajes.length > 0 && (
+              <DetailList
+                title="Peajes"
+                rows={peajes.map((item) => [
+                  item.conCamion === true ? "Con camión" : item.conCamion === false ? "Sin camión" : item.ubicacion || "Peaje",
+                  `$${Number(item.monto || 0).toLocaleString("es-AR")}`,
+                ])}
+              />
+            )}
+            {comisiones.length > 0 && (
+              <DetailList
+                title="Comisiones"
+                rows={comisiones.map((item) => [
+                  item.descripcion || "Sin descripción",
+                  [item.persona, item.horaInicio && item.horaFin ? `${cleanTime(item.horaInicio)} a ${cleanTime(item.horaFin)}` : cleanTime(item.hora || "")].filter(Boolean).join(" · ") || "—",
+                ])}
+              />
+            )}
+            {serviciosOperaciones.length > 0 && (
+              <DetailList
+                title="Servicios de Operaciones"
+                rows={serviciosOperaciones.map((item) => [
+                  `${item.cliente || "Sin cliente"} · ${item.descripcion || "Sin descripción"}`,
+                  [item.persona, item.horaInicio && item.horaFin ? `${cleanTime(item.horaInicio)} a ${cleanTime(item.horaFin)}` : cleanTime(item.hora || "")].filter(Boolean).join(" · ") || "—",
+                ])}
+              />
             )}
           </div>
         )}
+      </div>
+    </div>
+  );
+}
+
+function Info({ label, value }: { label: string; value: string }) {
+  return (
+    <div className="rounded-md bg-secondary/30 p-3">
+      <div className="text-[10px] uppercase tracking-wider text-muted-foreground">{label}</div>
+      <div className="mt-1 text-sm font-semibold">{value}</div>
+    </div>
+  );
+}
+
+function DetailList({ title, rows }: { title: string; rows: [string, string][] }) {
+  return (
+    <div>
+      <div className="mb-2 text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">{title}</div>
+      <div className="divide-y divide-border overflow-hidden rounded-md border border-border">
+        {rows.map(([description, detail], index) => (
+          <div key={`${description}-${index}`} className="grid gap-1 bg-secondary/15 px-3 py-2 text-sm sm:grid-cols-[1fr_auto] sm:gap-4">
+            <span>{description}</span>
+            <span className="text-muted-foreground sm:text-right">{detail}</span>
+          </div>
+        ))}
       </div>
     </div>
   );

@@ -5,7 +5,7 @@ import { cleanTime, formatHoursMinutes } from "./formatTime";
 import { getPersonal, PersonalEntry, ROLE_LABELS } from "./personalStore";
 import { getClients, ClientEntry } from "./clientStore";
 import { DownloadReport } from "./reportAnalytics";
-import { custodyCountForFilter, CustodyPeakDay, CustodyShiftFilter } from "./custodyPeaks";
+import { custodyCountForFilter, CustodyPeakDay, CustodyServiceGroup, CustodyShiftFilter } from "./custodyPeaks";
 
 const BRAND = "CENOP — AM Seguridad";
 const PRIMARY_COLOR: [number, number, number] = [30, 30, 30];
@@ -517,6 +517,72 @@ export async function exportCustodyPeaksPDF(days: CustodyPeakDay[], shift: Custo
 
   addFooter(doc);
   doc.save(`CENOP_Picos_Custodias_${shift}_${new Date().toISOString().slice(0, 10)}.pdf`);
+}
+
+export async function exportCustodyDayDetailsPDF(
+  groups: CustodyServiceGroup[],
+  day: CustodyPeakDay,
+  shift: CustodyShiftFilter,
+) {
+  const doc = new jsPDF({ orientation: "landscape", format: "a4", unit: "mm" });
+  const logoDataUrl = await loadImageAsDataUrl(AM_LOGO_PATH);
+  const shiftLabel = shift === "dia" ? "Turno día" : shift === "noche" ? "Turno noche" : "Todos los turnos";
+  addHeader(doc, `Detalle de Custodias — ${day.fechaLabel}`, `${shiftLabel} · ${groups.length} custodias`, logoDataUrl);
+
+  const first = (group: CustodyServiceGroup, field: keyof ServiceEntry) => {
+    for (const entry of group.entries) {
+      const value = entry[field];
+      if (typeof value === "string" && value.trim()) return value;
+    }
+    return "";
+  };
+  const people = (group: CustodyServiceGroup, field: "chofer" | "custodio") =>
+    [...new Set(group.entries.map((entry) => entry[field]).filter(Boolean))].join(", ") || "—";
+
+  autoTable(doc, {
+    startY: 58,
+    head: [["N°", "Turno", "Solicitud", "Cliente", "Salida", "Destino", "Chofer", "Custodio", "Móvil", "Inicio", "Fin", "Observaciones"]],
+    body: groups.map((group) => {
+      const service = group.primary;
+      const start = first(group, "iniciaServicio") || first(group, "salidaCenop") || first(group, "horaSolicitud");
+      return [
+        service.solicitud || "—",
+        group.shift === "dia" ? "Día" : group.shift === "noche" ? "Noche" : "Sin hora",
+        cleanTime(service.horaSolicitud) || "—",
+        service.cliente || "CENOP",
+        service.lugarSalida || "CENOP",
+        service.destino || "—",
+        people(group, "chofer"),
+        people(group, "custodio"),
+        service.movil || "—",
+        cleanTime(start) || "—",
+        cleanTime(first(group, "finalizaServicio")) || "—",
+        first(group, "observaciones") || "—",
+      ];
+    }),
+    margin: { left: 8, right: 8 },
+    headStyles: { fillColor: AM_GREEN, textColor: [255, 255, 255], fontStyle: "bold", fontSize: 7, cellPadding: 1.5 },
+    bodyStyles: { fontSize: 6.8, cellPadding: 1.5, valign: "middle" },
+    alternateRowStyles: { fillColor: [248, 250, 248] },
+    styles: { lineColor: [210, 210, 210], lineWidth: 0.2, overflow: "linebreak" },
+    columnStyles: {
+      0: { cellWidth: 9, halign: "center", fontStyle: "bold" },
+      1: { cellWidth: 13 },
+      2: { cellWidth: 14, halign: "center" },
+      3: { cellWidth: 22 },
+      4: { cellWidth: 23 },
+      5: { cellWidth: 23 },
+      6: { cellWidth: 29 },
+      7: { cellWidth: 29 },
+      8: { cellWidth: 16 },
+      9: { cellWidth: 13, halign: "center" },
+      10: { cellWidth: 13, halign: "center" },
+      11: { cellWidth: 52 },
+    },
+  });
+
+  addFooter(doc);
+  doc.save(`CENOP_Custodias_${day.fecha}_${shift}.pdf`);
 }
 
 // ========== GESTIÓN PERSONAL ==========

@@ -13,6 +13,13 @@ export interface CustodyPeakDay {
   total: number;
 }
 
+export interface CustodyServiceGroup {
+  key: string;
+  entries: ServiceEntry[];
+  primary: ServiceEntry;
+  shift: CustodyShift;
+}
+
 const DAY_START_MINUTES = 6 * 60;
 const NIGHT_START_MINUTES = 18 * 60;
 const TIME_FIELDS: (keyof ServiceEntry)[] = [
@@ -98,4 +105,27 @@ export function rankCustodyPeakDays(days: CustodyPeakDay[], filter: CustodyShift
     .filter((day) => custodyCountForFilter(day, filter) > 0)
     .slice()
     .sort((a, b) => custodyCountForFilter(b, filter) - custodyCountForFilter(a, filter) || b.fecha.localeCompare(a.fecha));
+}
+
+export function getCustodyServiceGroups(
+  services: ServiceEntry[],
+  fecha: string,
+  filter: CustodyShiftFilter,
+): CustodyServiceGroup[] {
+  const grouped = new Map<string, ServiceEntry[]>();
+  services.forEach((service) => {
+    if (service.fecha !== fecha || !isCountableServiceEntry(service)) return;
+    const key = getServiceKey(service);
+    const entries = grouped.get(key) || [];
+    entries.push(service);
+    grouped.set(key, entries);
+  });
+
+  return [...grouped.entries()]
+    .map(([key, entries]) => ({ key, entries, primary: entries[0], shift: classifyCustodyShift(entries) }))
+    .filter((group) => filter === "todos" || group.shift === filter)
+    .sort((a, b) =>
+      (a.primary.horaSolicitud || "99:99").localeCompare(b.primary.horaSolicitud || "99:99") ||
+      (a.primary.solicitud || 0) - (b.primary.solicitud || 0)
+    );
 }
